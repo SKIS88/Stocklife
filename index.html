@@ -36,7 +36,10 @@ body{
     linear-gradient(160deg,#6d0710 0%,#43060c 45%,#2a0509 100%);
   background-attachment:fixed;
 }
-.wrap{max-width:960px;margin:0 auto;padding:20px 15px 70px}
+.wrap{max-width:960px;margin:0 auto;padding:52px 15px 70px}
+/* 新光證券「電視台標」:吊牌式固定在畫面正上方中間,全程都在 */
+#skybug{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:999;white-space:nowrap;background:linear-gradient(175deg,#f1222e,#b8000b);color:#fff;font-size:13px;font-weight:800;letter-spacing:3px;padding:9px 26px 10px;border-radius:0 0 15px 15px;box-shadow:0 6px 18px rgba(180,0,10,.32),inset 0 -1px 0 rgba(255,255,255,.2);pointer-events:none}
+#skybug small{font-size:10px;font-weight:700;letter-spacing:2px;opacity:.85;margin-left:6px}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";font-family:"SF Mono",ui-monospace,"Roboto Mono",monospace}
 
@@ -54,7 +57,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .brandbar{display:flex;align-items:center;gap:13px;margin:6px 4px 20px}
 .logo{display:flex;align-items:center;gap:11px}
 .logo .mark{width:44px;height:44px;flex:0 0 auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
-.logo .txt .cn{font-size:20px;font-weight:800;letter-spacing:3px;line-height:1}
+.logo .txt .cn{font-size:21px;font-weight:900;letter-spacing:5px;line-height:1}
 .logo .txt .en{font-size:9.5px;letter-spacing:2.5px;color:var(--ink3);margin-top:3px;font-weight:600}
 .brandbar .prod{margin-left:auto;text-align:right}
 .brandbar .prod .t1{font-size:16px;font-weight:800;letter-spacing:2px}
@@ -65,6 +68,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .hero .kicker{font-size:11px;letter-spacing:6px;color:var(--sk-red3);font-weight:700;margin-bottom:8px}
 .hero .big{font-size:28px;font-weight:900;letter-spacing:1px;line-height:1.25}
 .hero .subttl{font-size:12.5px;letter-spacing:3px;color:var(--sk-red3);font-weight:700;margin-top:6px}
+.hero .madeby{font-size:10.5px;letter-spacing:4px;color:var(--ink3);font-weight:700;margin-top:7px}
 .hero .big .g{color:var(--gold)} .hero .big .r{color:var(--sk-red3)}
 .hero .tagline{color:var(--ink2);font-size:13px;margin-top:8px;line-height:1.5;max-width:600px;margin-left:auto;margin-right:auto}
 .ticker{display:none}   /* 跑馬燈收起,讓角色選項一進來就看得到 */
@@ -83,9 +87,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .btn-mini:hover{border-color:var(--sk-red3);color:#fff}
 
 .section-title{font-size:12px;color:var(--ink2);letter-spacing:4px;margin:8px 6px 14px;font-weight:700}
-.gamebrand{display:flex;align-items:center;gap:9px;margin:2px 4px 12px}
-.gamebrand svg{width:26px;height:26px;flex:0 0 auto;filter:drop-shadow(0 3px 8px rgba(227,6,19,.4))}
-.gamebrand .gb-t{font-size:12.5px;font-weight:800;letter-spacing:2px;color:var(--sk-red3)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .pc{text-align:left;padding:18px;transition:.2s;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;cursor:pointer}
 .pc::after{content:"";position:absolute;inset:0;border-radius:22px;background:linear-gradient(160deg,rgba(255,90,77,.12),transparent 60%);opacity:0;transition:.2s;pointer-events:none}
@@ -141,14 +142,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .beat-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .beat-head .yr{font-size:11px;color:var(--ink2);border:1px solid var(--glassborder);border-radius:99px;padding:4px 11px;letter-spacing:1px;background:var(--glass2)}
 .beat-head .tt{font-size:18px;font-weight:800;letter-spacing:.5px}
-.beat-head .chap{font-size:10px;color:var(--sk-red3);letter-spacing:2px;font-weight:700}
-.story{font-size:15px;color:#fff0f0;line-height:1.9;white-space:pre-wrap}
-.result{margin:15px 0 2px;padding:14px 16px;border-radius:14px;border-left:3px solid var(--sk-red3);background:rgba(255,90,77,.1);font-size:14px;color:#ffe6e6;animation:fade .4s}
+.beat-head .chap{font-size:10.5px;color:var(--sk-red3);letter-spacing:3px;font-weight:800}
+.story{font-size:15.5px;color:#fff0f0;line-height:2;letter-spacing:.3px;white-space:pre-wrap}
+.result{margin:15px 0 2px;padding:15px 17px;border-radius:14px;border-left:3px solid var(--sk-red3);background:rgba(255,90,77,.1);font-size:14.5px;line-height:1.85;color:#ffe6e6;animation:fade .4s}
 .result.good{border-color:var(--up);background:rgba(56,211,159,.1)}
 .result.bad{border-color:var(--down);background:rgba(255,107,122,.12)}
 .result .deltas{margin-top:8px;display:flex;gap:13px;flex-wrap:wrap;font-size:12px}
 .choices{display:flex;flex-direction:column;gap:11px;margin-top:20px}
-.choice{text-align:left;padding:15px 17px;border-radius:15px;border:1px solid var(--glassborder);background:linear-gradient(160deg,var(--glass),var(--glass2));transition:.16s;position:relative;backdrop-filter:blur(6px)}
+.choice{text-align:left;padding:16px 18px;border-radius:16px;border:1px solid var(--glassborder);background:linear-gradient(160deg,var(--glass),var(--glass2));transition:.16s;position:relative;backdrop-filter:blur(6px)}
 .choice:hover{border-color:var(--sk-red3);transform:translateX(4px);background:rgba(255,90,77,.12)}
 .choice .cl{font-size:14.5px;font-weight:700}
 .choice .ch{font-size:12px;color:var(--ink3);margin-top:4px}
@@ -198,7 +199,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   .grid{grid-template-columns:1fr}
   .final{grid-template-columns:1fr 1fr}
   /* 首頁精簡:一進來就看到角色選項,不用下滑 */
-  .wrap{padding:12px 14px 60px}
+  .wrap{padding:48px 14px 60px}
   #start .hero{padding:16px 18px 14px;margin-bottom:12px}
   #start .hero .kicker{font-size:10px;letter-spacing:4px;margin-bottom:6px}
   #start .hero .big{font-size:24px;line-height:1.2}
@@ -447,20 +448,8 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
 </style>
 </head>
 <body>
+<div id="skybug">新光證券<small>製作</small></div>
 <div class="wrap">
-
-  <!-- brand bar with Shin Kong logo -->
-  <div class="brandbar">
-    <div class="logo">
-      <svg class="mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="新光證券">
-        <defs><linearGradient id="skg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4338"/><stop offset="1" stop-color="#c1000c"/></linearGradient></defs>
-        <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#skg)"/>
-        <text x="24" y="33" text-anchor="middle" font-size="27" font-weight="900" fill="#fff" font-family="'Noto Sans TC',sans-serif">新</text>
-      </svg>
-      <div class="txt"><div class="cn">新光證券</div><div class="en">SHIN KONG SECURITIES</div></div>
-    </div>
-    <div class="prod"><div class="t1">股神養成計畫</div><div class="t2">新光證券 製作</div></div>
-  </div>
 
   <!-- START -->
   <div id="start">
@@ -492,10 +481,6 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
 
   <!-- GAME -->
   <div id="game">
-    <div class="gamebrand">
-      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="新光證券"><defs><linearGradient id="skg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4338"/><stop offset="1" stop-color="#c1000c"/></linearGradient></defs><rect x="2" y="2" width="44" height="44" rx="13" fill="url(#skg2)"/><text x="24" y="33" text-anchor="middle" font-size="27" font-weight="900" fill="#fff" font-family="'Noto Sans TC',sans-serif">新</text></svg>
-      <span class="gb-t">新光證券 · 股神養成計畫</span>
-    </div>
     <div class="glass hud">
       <div class="row1">
         <div class="who"><span class="em" id="hEm">🙂</span><div><div class="nm" id="hNm">—</div><div class="tg" id="hTg">—</div></div></div>
@@ -564,7 +549,7 @@ const net=s=>s.cash+s.stock-s.debt;
 
 /* 技能系統(5 種,每種 5 級) */
 const SKILLS=[
- {id:'insight',ic:'🔭',n:'眼光',max:10,d:'投資成功率每級 +4%'},
+ {id:'insight',ic:'🔭',n:'眼光',max:10,d:'投資成功率每級 +3%'},
  {id:'finiq',ic:'📈',n:'財商',max:10,d:'投資獲利每級 +15%'},
  {id:'disc',ic:'🛡️',n:'紀律',max:10,d:'投資虧損每級 −12%'},
  {id:'mindful',ic:'🧘',n:'心法',max:10,d:'負面事件的心態耗損每級 −15%'},
@@ -573,11 +558,11 @@ const SKILLS=[
 const lvl=id=>(S&&S.skills&&S.skills[id])||0;
 /* 下注倍數三級距:用「成功率%」決定成敗(技能可提高成功率),倍數越大投入越多、報酬越高 */
 const BET_TIERS=[
- {mult:1,cls:'t1',label:'保守',sub:'投入本金 ×1',baseWin:0.72,winMult:0.55,lossMult:0.45,mgood:3,mbad:5},
- {mult:3,cls:'t2',label:'積極',sub:'投入本金 ×3',baseWin:0.50,winMult:1.5,lossMult:1.1,mgood:5,mbad:9},
- {mult:5,cls:'t3',label:'梭哈',sub:'投入本金 ×5',baseWin:0.33,winMult:3.2,lossMult:2.0,mgood:7,mbad:15}
+ {mult:1,cls:'t1',label:'保守',sub:'投入本金 ×1',baseWin:0.58,winMult:0.55,lossMult:0.55,mgood:3,mbad:5},
+ {mult:3,cls:'t2',label:'積極',sub:'投入本金 ×3',baseWin:0.38,winMult:1.5,lossMult:1.3,mgood:5,mbad:9},
+ {mult:5,cls:'t3',label:'梭哈',sub:'投入本金 ×5',baseWin:0.24,winMult:3.2,lossMult:2.2,mgood:7,mbad:15}
 ];
-function betWinP(t){return Math.min(0.95,Math.max(0.05,t.baseWin+0.04*lvl('insight')));}
+function betWinP(t){return Math.min(0.92,Math.max(0.05,t.baseWin+0.03*lvl('insight')));}
 const DICEFACE=['','⚀','⚁','⚂','⚃','⚄','⚅'];
 /* 財富自由臨界值:統一設為「起始可投資本金 × 6」,讓各角色翻身難度一致 */
 const RETIRE_AT={richkid:150000000,whitecollar:28000000,freshgrad:11000000,techbro:90000000,founder:72000000};
@@ -606,18 +591,18 @@ const YEAR_FLAVORS=[
 ];
 /* 一般年份的隨機生活事件(可無限延伸)。U = 一年收入,作為金額的縮放單位。 */
 const GEN_LIFE=[
- (U)=>({ic:'🎰',t:'賭局的誘惑',x:'牌桌、地下期指、朋友揪的一場大的——賭注不小,贏了痛快,輸了心痛。',c:[
+ (U)=>{const B=Math.max(U,Math.round(net(S)*0.18));return{ic:'🎰',t:'賭局的誘惑',x:'牌桌、地下期指、朋友揪的一場大的——賭注跟著你的身家水漲船高,贏了痛快,輸了剝皮。',c:[
    {l:'豪氣賭一把',d:{},set:{gambler:true},roll:[
-     {w:4,d:{cash:U*1.4,mind:-4,fame:3},log:'手氣爆棚,你贏了一筆,眾人簇擁,飄飄然。',mood:'good'},
-     {w:6,d:{cash:-U*1.1,mind:-12},log:'莊家的水太深,你一夜輸掉大半年的積蓄。',mood:'bad'}]},
-   {l:'看清就是賭博,轉身離開',d:{mind:6,fame:-2},log:'你按住了衝動,掃了朋友的興,卻守住了荷包。'}]}),
+     {w:4,d:{cash:B*1.2,mind:-4,fame:3},log:'手氣爆棚,你贏了一大筆,眾人簇擁,飄飄然。',mood:'good'},
+     {w:6,d:{cash:-B*1.15,mind:-12},log:'莊家的水太深,你一夜輸掉一大塊身家。',mood:'bad'}]},
+   {l:'看清就是賭博,轉身離開',d:{mind:6,fame:-2},log:'你按住了衝動,掃了朋友的興,卻守住了荷包。'}]};},
  (U)=>({ic:'✈️',t:'出國散心的念頭',x:'忙到快窒息,你動了出國走走的念頭——豪華一點,還是省一點?',c:[
    {l:'來一趟豪華旅行',d:{cash:-U*0.7,mind:12,rel:8,fame:3},log:'你砸錢玩了一趟大的,身心充飽電,回來荷包扁了一圈。',mood:'good'},
    {l:'國內小旅行就好',d:{cash:-U*0.15,mind:5},log:'你選了輕巧的小旅行,錢花得少,也算換了口氣。'}]}),
- (U)=>({ic:'🚗',t:'想換台好車',x:'看上一台不便宜的車,面子與里子在心裡拉扯。',c:[
-   {l:'犒賞自己,直接入手',d:{cash:-U*0.9,mind:10,fame:6},log:'新車入手,開起來意氣風發,代價是一大筆錢。',mood:'good'},
-   {l:'舊車還能開,先不換',d:{mind:2,fame:-3},log:'你務實地繼續開舊車,存下了錢,只是同儕間顯得樸素。'}]}),
- (U)=>({ic:'💼',t:'副業投資的機會',x:'有人拉你合資一門生意,要投一筆本錢,回報看得到也看得到風險。',c:[
+ (U)=>{const P=Math.max(U*0.9,2000000);return{ic:'🚗',t:'想換台好車',x:'看上一台不便宜的車,開價兩百多萬,面子與里子在心裡拉扯。',c:[
+   {l:'犒賞自己,直接入手',d:{cash:-P,mind:10,fame:6},log:'新車入手,開起來意氣風發,代價是一大筆錢。',mood:'good'},
+   {l:'舊車還能開,先不換',d:{mind:2,fame:-3},log:'你務實地繼續開舊車,存下了錢,只是同儕間顯得樸素。'}]};},
+ (U)=>({ic:'💼',t:'副業投資的機會',req:s=>s.cash>=U*0.5,x:'有人拉你合資一門生意,要投一筆本錢,回報看得到也看得到風險。',c:[
    {l:'投一筆下去經營',d:{cash:-U*0.5},set:{entrepreneur:true},roll:[
      {w:5,d:{cash:U*1.6,fame:6,mind:3},log:'生意做起來了,這筆投資翻了好幾倍。',mood:'good'},
      {w:5,d:{cash:-U*0.3,mind:-6},log:'市場不如預期,投進去的錢大半打了水漂。',mood:'bad'}]},
@@ -625,7 +610,7 @@ const GEN_LIFE=[
  (U)=>({ic:'🏥',t:'家人重病',x:'家人病倒,龐大的醫療費壓下來,考驗你的荷包與孝心。',c:[
    {l:'不惜代價,全力醫治',d:{cash:-U*1.0,rel:12,mind:-4},log:'你砸下重金全力救治,錢花掉了,親情卻更緊了。',mood:'good'},
    {l:'在能力範圍內盡力',d:{cash:-U*0.3,rel:-4,mind:2},log:'你量力而為、問心無愧,但親戚間仍有些微詞。'}]}),
- (U)=>({ic:'🤝',t:'朋友周轉借錢',x:'交情不錯的朋友開口借一大筆錢周轉,借了怕收不回,不借傷感情。',c:[
+ (U)=>({ic:'🤝',t:'朋友周轉借錢',req:s=>s.cash>=U*0.6,x:'交情不錯的朋友開口借一大筆錢周轉,借了怕收不回,不借傷感情。',c:[
    {l:'慷慨借出',d:{cash:-U*0.6,rel:8},log:'你二話不說幫了忙,這份義氣朋友記在心裡。',mood:'good'},
    {l:'婉拒,先顧好自己',d:{rel:-8,mind:2},log:'你守住了現金流,交情卻蒙上一層陰影。'}]}),
  (U)=>({ic:'🎓',t:'砸錢投資自己',x:'一堂高階課程/證照學費不便宜,但能拓展競爭力與人脈。',c:[
@@ -746,16 +731,19 @@ function setBar(id,v){v=clamp(v);document.getElementById('b'+id).style.width=v+'
 /* 操盤戰力:純能力值(技能 + 心態/關係/名聲),跟錢無關——錢是結果,戰力是實力。30~99 */
 function calcOVR(){let t=0;SKILLS.forEach(s=>t+=lvl(s.id));const q=stateQuality();return Math.round(30+(t/(SKILLS.length*10))*55+q*14);}
 /* 人生階段:看資本額佔「財富自由門檻」的比例(散戶→…→股市傳奇) */
-const PHASES=['韭菜散戶','小資操盤手','中實戶','準大戶','財富自由','股市傳奇'];
-const PHASE_THR=[0,0.1,0.3,0.6,1.0,2.0];
+/* 股市角色級距:採市場現實的「絕對金額」定義,不分角色一體適用
+   韭菜散戶 <100萬 → 小資操盤手 100萬+ → 中實戶 3,000萬+ → 大戶 1億+ → 超級大戶 3億+ → 股市傳奇 10億+ */
+const PHASES=['韭菜散戶','小資操盤手','中實戶','大戶','超級大戶','股市傳奇'];
+const PHASE_AMT=[0,1000000,30000000,100000000,300000000,1000000000];
 function renderPhase(){
-  const T=RETIRE_AT[CURID]||Infinity;const nn=net(S);const r=(isFinite(T)&&T>0)?nn/T:0;
-  let i=0;for(let k=0;k<PHASE_THR.length;k++){if(r>=PHASE_THR[k])i=k;}
+  const nn=net(S);
+  const THR=PHASE_AMT;
+  let i=0;for(let k=0;k<THR.length;k++){if(nn>=THR[k])i=k;}
   const pn=document.getElementById('hPhase');if(pn)pn.textContent=PHASES[i];
   const nx=document.getElementById('hPhaseNext');
-  if(nx){if(i<PHASES.length-1){const need=Math.max(0,Math.round(PHASE_THR[i+1]*T)-nn);nx.textContent=`距「${PHASES[i+1]}」還差 ${fmt(need)}`;}else nx.textContent='已達頂點 · 股神級';}
+  if(nx){if(i<PHASES.length-1){const need=Math.max(0,Math.round(THR[i+1])-nn);nx.textContent=`距「${PHASES[i+1]}」還差 ${fmt(need)}`;}else nx.textContent='已達頂點 · 股神級';}
   const segEl=document.getElementById('hPhaseSegs');
-  if(segEl){let html='';for(let k=0;k<PHASES.length;k++){let w=0;if(k<i)w=100;else if(k===i){const lo=PHASE_THR[k],hi=(k<PHASES.length-1?PHASE_THR[k+1]:PHASE_THR[k]*2);w=Math.max(8,Math.min(100,(r-lo)/((hi-lo)||1)*100));}html+=`<span class="phseg"><i style="width:${w}%"></i></span>`;}segEl.innerHTML=html;}
+  if(segEl){let html='';for(let k=0;k<PHASES.length;k++){let w=0;if(k<i)w=100;else if(k===i){const lo=THR[k],hi=(k<PHASES.length-1?THR[k+1]:THR[k]*2);w=Math.max(8,Math.min(100,(nn-lo)/((hi-lo)||1)*100));}html+=`<span class="phseg"><i style="width:${w}%"></i></span>`;}segEl.innerHTML=html;}
 }
 /* 年紀逐年遞增動畫(一歲一歲跳) */
 let ageTimer=null;
@@ -841,22 +829,25 @@ function gate(){
   const nn=net(S),thr=RETIRE_AT[CURID]||Infinity;
   if(nn>=thr){
     if(!S.retireLatch){renderRetire();return true;}     // 到門檻→問要不要退休
-    if(RNG()<0.30){renderMisfortune();return true;}     // 續玩→有機率遇到意外
+    if(RNG()<0.38){renderMisfortune();return true;}     // 續玩→有機率遇到意外
   }
   return false;
 }
 /* 跨到新的一年:年齡剛好 +1、結算收入,然後決定這一年的「大事」;沒有大事就是平凡的一年(幾件日常) */
 function openNewYear(){
   S.age++;S.year++;
+  /* 歲月消磨:心態/關係/名聲每年自然下滑,站得越高越難維持(得靠選擇與事件補回來) */
+  const wear=v=>clamp(v-(v>85?3:v>65?2:1));
+  S.mind=wear(S.mind);S.rel=wear(S.rel);S.fame=clamp(S.fame-(S.fame>85?2:1));
   if(CUR.income){const yi=yearlyIncome();S.cash+=yi.inc;if(S.cash<0){S.debt=(S.debt||0)-S.cash;S.cash=0;}
     S.lastIncome={inc:yi.inc,label:yi.label,situ:yi.situ,hadLoss:yi.inc<0};
     S.log.push({yr:S.year,txt: yi.inc>=0?`${S.age} 歲・${yi.situ},進帳 ${fmt(yi.inc)}`:`${S.age} 歲・${yi.situ},虧損 ${fmt(-yi.inc)}`});
   }else S.lastIncome=null;
   /* 持股複利:抱著的股票每年會隨市場滾動(多數年份成長,偶爾回檔)——這就是複利的力量 */
   if(S.stock>0){
-    const rr=RNG();let ret;   // 每年市場報酬:平均約 +4%,多數溫和;但偶爾(約4%機率)會遇到股災重挫
-    if(rr<0.04)ret=-0.28-RNG()*0.17;   // 股災:−28%~−45%,難得但很痛
-    else if(rr<0.16)ret=-0.08;else if(rr<0.38)ret=0.03;else if(rr<0.70)ret=0.07;else if(rr<0.90)ret=0.11;else ret=0.16;
+    const rr=RNG();let ret;   // 每年市場報酬:平均約 +2%,波動更大;約7%機率遇到股災重挫
+    if(rr<0.07)ret=-0.30-RNG()*0.20;   // 股災:−30%~−50%,不算罕見而且很痛
+    else if(rr<0.22)ret=-0.10;else if(rr<0.45)ret=0.03;else if(rr<0.72)ret=0.07;else if(rr<0.90)ret=0.12;else ret=0.17;
     const crash=ret<=-0.22;
     const gain=Math.round(S.stock*ret);S.stock=Math.max(0,S.stock+gain);
     S.lastStock={gain,ret,crash};
@@ -874,7 +865,11 @@ function openNewYear(){
 function arriveScripted(id){
   const sc=CUR.scenes[id];
   if(!sc){renderGenLife(pickDaily());return;}
-  if(sc.kind==='bet'){renderTrainStep(id);return;}   // 投資篇章→進場前先給修煉
+  if(sc.kind==='bet'){
+    // 修煉(骰子)固定「3 年才一次」:若距上次修煉不到 3 年,這次投資就直接進場、不再修煉
+    if(S.lastBetAge!==undefined && (S.age-S.lastBetAge)<3){S.scene=id;renderScene();return;}
+    renderTrainStep(id);return;   // 投資篇章→進場前先給修煉
+  }
   S.scene=id;renderScene();
 }
 /* 挑一個「最近沒出現過」的日常事件,避免短時間內重複同一件事 */
@@ -1064,7 +1059,10 @@ function resolveBet(sc,i){
   const t=BET_TIERS[i],stake=betRisk(sc,t),winP=betWinP(t);
   const win=RNG()<winP;
   let profit=0,loss=0;
-  if(win){profit=Math.round(stake*t.winMult*(1+0.15*lvl('finiq')));S.cash+=profit;S.mind=clamp(S.mind+t.mgood);if(t.mult>=3)S.fame=clamp(S.fame+3);}
+  if(win){profit=Math.round(stake*t.winMult*(1+0.15*lvl('finiq')));
+    const fromCash=Math.min(Math.max(0,S.cash),stake);   // 買進:本金從現金轉進持股
+    S.cash-=fromCash;S.stock=(S.stock||0)+fromCash+profit; // 賺到的部位抱著,之後每年跟著市場滾複利
+    S.mind=clamp(S.mind+t.mgood);if(t.mult>=3)S.fame=clamp(S.fame+3);}
   else{loss=Math.round(stake*t.lossMult*Math.max(0.1,1-0.12*lvl('disc')));let rem=loss;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;S.mind=clamp(S.mind-t.mbad*Math.max(0.1,1-0.15*lvl('mindful')));}
   if(t.mult>=5)S.flags.aggressive=true;
   S.log.push({yr:S.year,txt:`投資 ×${t.mult}(成功率${Math.round(winP*100)}%)${win?' 獲利':' 虧損'}`});
@@ -1073,7 +1071,7 @@ function resolveBet(sc,i){
   const stage=document.getElementById('stage');stage.querySelector('.betwrap').style.display='none';
   const div=document.createElement('div');div.className='result '+(win?'good':'bad');
   div.innerHTML=`<div style="text-align:center;font-size:30px;margin-bottom:4px">${win?'📈':'📉'}</div>
-    ${win?`<b>${t.label}(×${t.mult})</b>,成功率 ${Math.round(winP*100)}% —— <b style="color:var(--up)">投資成功!</b>獲利 <b>+${fmt(profit)}</b>。`:`<b>${t.label}(×${t.mult})</b>,成功率 ${Math.round(winP*100)}% —— <b style="color:var(--down)">這次沒看準</b>,虧損 <b>−${fmt(loss)}</b>。`}`;
+    ${win?`<b>${t.label}(×${t.mult})</b>,成功率 ${Math.round(winP*100)}% —— <b style="color:var(--up)">投資成功!</b>獲利 <b>+${fmt(profit)}</b>,連同本金轉入<b>持股</b>,之後每年跟著市場滾複利。`:`<b>${t.label}(×${t.mult})</b>,成功率 ${Math.round(winP*100)}% —— <b style="color:var(--down)">這次沒看準</b>,虧損 <b>−${fmt(loss)}</b>。`}`;
   stage.appendChild(div);
   const nb=document.createElement('button');nb.className='nextbtn';
   if(S.bankrupt){nb.textContent='💀 破產結算 →';nb.onclick=()=>resolveEnding();}
@@ -1237,75 +1235,92 @@ function fb(t,cb){const ta=document.createElement('textarea');ta.value=t;ta.styl
 /* ---------- 結局圖(canvas) ---------- */
 function wrapText(ctx,text,maxW){const NOSTART='。,、;:!?)）】」』.…%─—～';const lines=[];let line='';for(const ch of text){if(ch==='\n'){lines.push(line);line='';continue;}const t=line+ch;if(ctx.measureText(t).width>maxW&&line&&NOSTART.indexOf(ch)<0){lines.push(line);line=ch;}else line=t;}if(line)lines.push(line);return lines;}
 function roundRect(x,rx,ry,w,h,r){x.beginPath();x.moveTo(rx+r,ry);x.arcTo(rx+w,ry,rx+w,ry+h,r);x.arcTo(rx+w,ry+h,rx,ry+h,r);x.arcTo(rx,ry+h,rx,ry,r);x.arcTo(rx,ry,rx+w,ry,r);x.closePath();}
+function drawSkillsRow(x,skills,cx,y,TC){
+  const nameF='700 33px '+TC,numF='800 33px '+TC,gap=28;
+  let total=0;const segs=skills.map(s=>{x.font=nameF;const nw=x.measureText(s.n+' ').width;x.font=numF;const vw=x.measureText(String(s.lv)).width;total+=nw+vw;return{s,nw,vw};});
+  total+=gap*(skills.length-1);
+  let px=cx-total/2;const prev=x.textAlign;x.textAlign='left';
+  segs.forEach(seg=>{
+    x.fillStyle='#ffe0da';x.font=nameF;x.fillText(seg.s.n+' ',px,y);px+=seg.nw;
+    x.fillStyle=(seg.s.lv>0?'#F6C453':'#9a7d7d');x.font=numF;x.fillText(String(seg.s.lv),px,y);px+=seg.vw+gap;
+  });
+  x.textAlign=prev;
+}
 function drawResultImage(){
+  /* ===== 極簡高級結算圖:深色底 + 金色點綴,只留重點 ===== */
   const W=1080,d=LAST_END,E=d.E,cx=W/2,TC='"Noto Sans TC",sans-serif';
   const EMO='"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif';
   const stripLead=s=>s.replace(/^[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}⭐❤️︎‍\s]+/u,'');
   const meas=document.createElement('canvas').getContext('2d');
-  /* --- 敘述(他的一生)換行量測,emoji 去頭避免超出邊界 --- */
-  meas.font='400 34px '+TC;
-  const paras=E.para.split('\n').map(s=>stripLead(s.trim())).filter(Boolean);
-  const nLines=[];paras.forEach((p,i)=>{wrapText(meas,p,W-280).forEach(l=>nLines.push(l));if(i<paras.length-1)nLines.push('');});
-  /* --- 結論標題:字大、必要時換行 --- */
-  const titleFont=(E.title.length<=6?92:E.title.length<=8?78:66);
+  /* 三行總結:以「完整句子」為單位,湊滿最多 3 行就收 */
+  meas.font='400 33px '+TC;
+  const flat=E.para.split('\n').map(s=>stripLead(s.trim())).filter(Boolean).join(' ');
+  const sents=flat.split(/(?<=[。!?!?])/).map(s=>s.trim()).filter(Boolean);
+  let picked='';
+  for(const s of sents){const t=picked?picked+' '+s:s;if(wrapText(meas,t,W-300).length>3)break;picked=t;}
+  if(!picked)picked=sents[0]||flat;   // 第一句就超過 3 行的極端情況,硬切
+  let sum=wrapText(meas,picked,W-300);
+  if(sum.length>3){sum=sum.slice(0,3);sum[2]=sum[2].replace(/[,。;、:]+$/,'')+'……';}
+  /* 結論標題 */
+  const titleFont=(E.title.length<=6?100:E.title.length<=8?84:66);
   meas.font='900 '+titleFont+'px '+TC;
-  const titleLines=wrapText(meas,E.title,W-150);
-  const titleLH=Math.round(titleFont*1.16);
+  const titleLines=wrapText(meas,E.title,W-170);
+  const titleLH=Math.round(titleFont*1.14);
   const skills=d.skills||SKILLS.map(s=>({n:s.n,lv:lvl(s.id)}));
-  const skTxt=skills.map(s=>`${s.n} ${s.lv}`).join('   ');
-  /* ---- 版面座標(由上往下累加) ---- */
-  let y=88;
-  const pillY=y; y+=76;                       // 品牌藥丸
-  const brandSubY=y+8; y+=48;                 // 新光證券 製作
-  y+=6;
-  const cEmojiY=y+58; y+=90;                  // 角色小 emoji
-  const cNameY=y+6; y+=50;                    // 名字
-  const cRoleY=y+2; y+=54;                    // 年齡 · 身分
-  y+=20;
-  // ===== 大結論區 =====
-  const eEmojiY=y+118; y+=156;                // 結局大 emoji
-  const titleY0=y+titleFont;                  // 標題第一行基線
-  y+=titleLines.length*titleLH+8;
-  const rankY=y+40; y+=70;
-  y+=26;
-  // ===== 他的一生 文字 =====
-  const paraY=y+6; y+=nLines.length*54+30;
-  // ===== 成績卡 =====
-  const cardY=y; const cardH=384; y+=cardH+50;
-  const footY=y+40; y+=120;
-  const H=Math.round(y);
+  const skTxt='操盤戰力 '+d.ovr+'    '+skills.map(s=>`${s.n} ${s.lv}`).join('  ');
+  /* ---- 版面(由上往下) ---- */
+  let y=210;
+  const nameY=y; y+=52;
+  const roleY=y; y+=96;
+  const emojiY=y+96; y+=140;
+  const titleY0=y+titleFont; y+=titleLines.length*titleLH+18;
+  const rankY=y+30; y+=92;
+  const lblY=y+22; y+=62;
+  const amtY=y+96; y+=128;
+  const skY=y+24; y+=88;
+  const hrY=y; y+=64;
+  const sumY0=y+30; y+=sum.length*54+64;
+  const footY=y+26;
+  const H=Math.round(footY+80);
   const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
-  // 背景
-  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#6d0710');g.addColorStop(.5,'#43060c');g.addColorStop(1,'#2a0509');x.fillStyle=g;x.fillRect(0,0,W,H);
-  const rg=x.createRadialGradient(W*0.8,90,0,W*0.8,90,760);rg.addColorStop(0,'rgba(255,90,77,.32)');rg.addColorStop(1,'rgba(255,90,77,0)');x.fillStyle=rg;x.fillRect(0,0,W,H);
-  x.fillStyle='rgba(255,255,255,.05)';x.strokeStyle='rgba(255,255,255,.16)';x.lineWidth=2;roundRect(x,44,44,W-88,H-88,34);x.fill();x.stroke();
+  /* 背景:跟遊戲版面一致的亮粉暖色,頂部一抹淡紅光暈 */
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fdeeee');g.addColorStop(.5,'#fbe7e5');g.addColorStop(1,'#f7dcda');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const rg=x.createRadialGradient(cx,-160,0,cx,-160,900);rg.addColorStop(0,'rgba(227,6,19,.07)');rg.addColorStop(1,'rgba(227,6,19,0)');x.fillStyle=rg;x.fillRect(0,0,W,H);
+  /* 白卡+細金邊框 */
+  x.fillStyle='rgba(255,255,255,.72)';roundRect(x,52,52,W-104,H-104,26);x.fill();
+  x.strokeStyle='rgba(184,134,11,.4)';x.lineWidth=2;roundRect(x,52,52,W-104,H-104,26);x.stroke();
+  x.strokeStyle='rgba(184,134,11,.14)';x.lineWidth=1;roundRect(x,64,64,W-128,H-128,20);x.stroke();
   x.textAlign='center';x.textBaseline='alphabetic';
-  // 品牌 logo(白底藥丸,紅字 新光證券)
-  const pw=300,ph=72;x.fillStyle='#ffffff';roundRect(x,cx-pw/2,pillY,pw,ph,36);x.fill();
-  x.fillStyle='#E30613';x.font='900 40px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='5px';x.fillText('新光證券',cx+2,pillY+50);x.restore();
-  x.fillStyle='#ffcdc4';x.font='700 24px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='3px';x.fillText('股神養成計畫 · 新光證券 製作',cx,brandSubY+18);x.restore();
-  // 角色 + 最終年齡
-  x.font='72px '+EMO;x.fillText(CUR.emoji,cx,cEmojiY);
-  x.fillStyle='#fff5f5';x.font='800 44px '+TC;x.fillText(PNAME||CUR.name,cx,cNameY);
-  x.fillStyle='#FF8a80';x.font='600 28px '+TC;x.fillText(`${d.age} 歲 · ${roleOf(CUR)}`,cx,cRoleY);
-  // ===== 大結論 =====
-  x.font='120px '+EMO;x.fillText(E.emoji,cx,eEmojiY);
-  x.fillStyle='#fff';x.font='900 '+titleFont+'px '+TC;let tly=titleY0;titleLines.forEach(l=>{x.fillText(l,cx,tly);tly+=titleLH;});
-  x.fillStyle='#F6C453';x.font='700 40px '+TC;x.fillText(d.rankTxt,cx,rankY);
-  // ===== 他的一生(敘述) =====
-  x.fillStyle='#ffe6e6';x.font='400 34px '+TC;let ty=paraY;nLines.forEach(l=>{if(l)x.fillText(l,cx,ty);ty+=54;});
-  // ===== 成績卡 =====
-  x.fillStyle='rgba(0,0,0,.32)';x.strokeStyle='rgba(255,255,255,.14)';x.lineWidth=1.5;roundRect(x,80,cardY,W-160,cardH,24);x.fill();x.stroke();
-  let cyy=cardY+58;
-  x.fillStyle='#c99a9a';x.font='600 26px '+TC;x.fillText('最終資本額',cx,cyy);cyy+=70;
-  x.fillStyle=d.nn>=0?'#F6C453':'#ff6b7a';x.font='900 74px '+TC;x.fillText(fmt(d.nn),cx,cyy);cyy+=54;
-  x.fillStyle='#ffcf8a';x.font='700 30px '+TC;x.fillText(`⚡ 操盤戰力 ${d.ovr}`,cx,cyy);cyy+=48;
-  x.fillStyle='#e6c7c7';x.font='500 26px '+TC;x.fillText(skTxt,cx,cyy);cyy+=48;
-  x.fillStyle='#f0d3d3';x.font='500 26px '+TC;x.fillText(`🧠 心態 ${d.mind}   ❤️ 關係 ${d.rel}   🎭 名聲 ${d.fame}`,cx,cyy);cyy+=44;
-  x.fillStyle='#e6c7c7';x.font='500 26px '+TC;x.fillText(`🏠 ${E.fam.k}`,cx,cyy);
-  // 頁尾
-  x.fillStyle='#ffd9d0';x.font='800 30px '+TC;x.fillText('新光證券 · 股神養成計畫',cx,footY);
-  x.fillStyle='#e0b8b8';x.font='500 23px '+TC;x.fillText('新光證券 製作 · 命運種子 '+SEED,cx,footY+40);
+  /* 新光證券 logo:右上角,紅底金線的小徽章 */
+  (function(){
+    const lw=196,lh=56,lx=W-88-lw,ly=88;
+    const lg=x.createLinearGradient(lx,ly,lx,ly+lh);lg.addColorStop(0,'#f1222e');lg.addColorStop(1,'#b8000b');
+    x.fillStyle=lg;roundRect(x,lx,ly,lw,lh,12);x.fill();
+    x.strokeStyle='rgba(246,196,83,.55)';x.lineWidth=1.5;roundRect(x,lx+3.5,ly+3.5,lw-7,lh-7,9);x.stroke();
+    x.fillStyle='#fff';x.font='800 27px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='4px';x.fillText('新光證券',lx+lw/2+2,ly+38);x.restore();
+  })();
+  /* 左上:小字計畫名 */
+  x.textAlign='left';x.fillStyle='rgba(227,6,19,.65)';x.font='800 24px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='6px';x.fillText('股神養成計畫',92,124);x.restore();x.textAlign='center';
+  /* 名字 + 年齡身分 */
+  x.fillStyle='#2b0d10';x.font='800 46px '+TC;x.fillText(PNAME||CUR.name,cx,nameY);
+  x.fillStyle='rgba(214,61,76,.75)';x.font='500 27px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='3px';x.fillText(`${d.age} 歲 · ${roleOf(CUR)}`,cx,roleY);x.restore();
+  /* 結局 emoji + 大標題 + 星等 */
+  x.font='104px '+EMO;x.fillText(E.emoji,cx,emojiY);
+  x.fillStyle='#2b0d10';x.font='900 '+titleFont+'px '+TC;let tly=titleY0;titleLines.forEach(l=>{x.fillText(l,cx,tly);tly+=titleLH;});
+  x.fillStyle='#b8860b';x.font='600 34px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='4px';x.fillText(d.rankTxt.replace(/\s+/g,' '),cx,rankY);x.restore();
+  /* 資產:主角級大數字 */
+  x.fillStyle='rgba(160,110,60,.65)';x.font='600 26px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='8px';x.fillText('最 終 資 本 額',cx,lblY);x.restore();
+  const amtGrad=x.createLinearGradient(0,amtY-100,0,amtY);
+  if(d.nn>=0){amtGrad.addColorStop(0,'#d99a0b');amtGrad.addColorStop(1,'#a06a00');}else{amtGrad.addColorStop(0,'#e8515f');amtGrad.addColorStop(1,'#c22836');}
+  x.fillStyle=amtGrad;x.font='900 124px '+TC;x.fillText(fmt(d.nn),cx,amtY);
+  /* 戰力 + 技能,一行棕金小字 */
+  x.fillStyle='rgba(140,95,60,.8)';x.font='500 27px '+TC;x.fillText(skTxt,cx,skY);
+  /* 金色細分隔線 */
+  const hw=120;x.strokeStyle='rgba(184,134,11,.5)';x.lineWidth=2;x.beginPath();x.moveTo(cx-hw,hrY);x.lineTo(cx+hw,hrY);x.stroke();
+  /* 三行總結 */
+  x.fillStyle='rgba(70,35,38,.88)';x.font='400 33px '+TC;let sy=sumY0;sum.forEach(l=>{x.fillText(l,cx,sy);sy+=54;});
+  /* 頁尾:只留計畫名與種子 */
+  x.fillStyle='rgba(150,105,110,.55)';x.font='500 22px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='3px';x.fillText('股神養成計畫 · 命運種子 '+SEED,cx,footY);x.restore();
   return cv;
 }
 function downloadResultImage(){try{const cv=drawResultImage();const pn=PNAME||CUR.name;const name='股海人生_'+pn+'_'+LAST_END.E.title+'.jpg';cv.toBlob(blob=>{if(navigator.canShare){try{const file=new File([blob],name,{type:'image/jpeg'});if(navigator.canShare({files:[file]})){navigator.share({files:[file],title:'股海人生',text:pn+'|'+LAST_END.E.title}).catch(()=>saveBlob(blob,name));return;}}catch(e){}}saveBlob(blob,name);},'image/jpeg',0.85);toast('結局圖已產生');}catch(e){toast('產圖失敗:'+e.message);}}
@@ -1364,14 +1379,14 @@ A({
     {l:'小賭怡情,玩一玩就收',d:{cash:-1000000},log:'你陪朋友玩了幾把,輸贏都不大。',roll:[
       {w:5,log:'你守住了分寸,小輸小贏,拍拍屁股走人。',d:{cash:600000,mind:2},mood:'good',go:'crash'},
       {w:5,log:'贏錢的快感讓你越坐越久,你開始覺得——這比投資爽多了。',d:{cash:400000,mind:-4},set:{gambler:true},mood:'bad',go:'gamble_deep'}]},
-    {l:'豪賭一場,富二代怕過誰',d:{cash:-4000000},set:{gambler:true},log:'你把賭注越推越高,腎上腺素飆到頂點。',roll:[
-      {w:4,log:'你賭贏了一把大的,眾人簇擁,你飄飄然。',d:{cash:6000000,mind:-6,fame:6},mood:'good',go:'gamble_deep'},
-      {w:6,log:'莊家的水太深,你一夜輸掉一間房的錢。',d:{cash:-5000000,mind:-16},mood:'bad',go:'gamble_deep'}]}]},
+    {l:'豪賭一場,富二代怕過誰',d:{cash:-8000000},set:{gambler:true},log:'你把賭注越推越高,腎上腺素飆到頂點。',roll:[
+      {w:4,log:'你賭贏了一把大的,眾人簇擁,你飄飄然。',d:{cash:11000000,mind:-6,fame:6},mood:'good',go:'gamble_deep'},
+      {w:6,log:'莊家的水太深,你一夜輸掉兩間房的錢。',d:{cash:-14000000,mind:-16},mood:'bad',go:'gamble_deep'}]}]},
   gamble_deep:{chap:'第六章 · 深淵',age:38,t:'戒不掉的癮',x:'賭博的刺激像鉤子勾住了你。牌桌、期貨、線上百家樂……你開始用投資的錢去填賭桌的洞,又用賭桌的僥倖去賭市場。',c:[
     {l:'驚覺不對,痛下決心戒賭求助',d:{mind:10,rel:6,cash:-1000000},log:'你向家人坦白、尋求協助,狠狠把自己拉出泥沼。承認有病,是痊癒的開始。',mood:'good',go:'crash'},
-    {l:'再賭一把翻本,這次一定行',d:{cash:-3000000,debt:3000000},f:['revenge'],log:'你借錢想一次翻本,把理智輸在了僥倖上。',roll:[
-      {w:3,log:'你僥倖回本,嚇出一身冷汗,發誓收手。',d:{cash:5000000,mind:2},mood:'good',go:'crash'},
-      {w:7,log:'賭債像滾雪球,你把大半身家和尊嚴一起輸進了牌桌。',d:{cash:-6000000,debt:4000000,mind:-18,rel:-12},mood:'bad',go:'crash'}]}]},
+    {l:'再賭一把翻本,這次一定行',d:{cash:-6000000,debt:5000000},f:['revenge'],log:'你借錢想一次翻本,把理智輸在了僥倖上。',roll:[
+      {w:3,log:'你僥倖回本,嚇出一身冷汗,發誓收手。',d:{cash:9000000,mind:2},mood:'good',go:'crash'},
+      {w:7,log:'賭債像滾雪球,你把大半身家和尊嚴一起輸進了牌桌。',d:{cash:-16000000,debt:10000000,mind:-20,rel:-12},mood:'bad',go:'crash'}]}]},
   crash:{kind:'bet',chap:'第七章 · 股災',age:40,t:'退潮的時候',base:7500000,go:'fork',x:'一場全球性的股災襲來,你才發現資產裡有多少是「泡沫」。眾人恐慌逃命時,你要保守應對,還是逆勢重壓抄底?'},
   final:{chap:'終章 · 清算',age:46,t:'守成者的答卷',x:'人到中年,那筆父親給的兩千萬,如今在你手上變成了什麼樣子?這份人生的答卷,只有你自己能打分。',c:[
     {l:'把家業與正確的觀念傳承下去',d:{mind:8,rel:10,fame:6},set:{philanthropist:true},log:'你成立家族基金會,回饋社會,也把「守成比創業更難」的心法傳給下一代。',mood:'good'},
