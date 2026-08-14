@@ -1422,13 +1422,16 @@ function drawResultImage(){
   x.strokeStyle='rgba(184,134,11,.4)';x.lineWidth=2;roundRect(x,52,52,W-104,H-104,26);x.stroke();
   x.strokeStyle='rgba(184,134,11,.14)';x.lineWidth=1;roundRect(x,64,64,W-128,H-128,20);x.stroke();
   x.textAlign='center';x.textBaseline='alphabetic';
-  /* 新光證券 logo:右上角,紅底金線的小徽章 */
+  /* 新光證券官方 LOGO:右上角(直接取用天空標裡內嵌的原圖) */
   (function(){
-    const lw=196,lh=56,lx=W-88-lw,ly=88;
-    const lg=x.createLinearGradient(lx,ly,lx,ly+lh);lg.addColorStop(0,'#f1222e');lg.addColorStop(1,'#b8000b');
-    x.fillStyle=lg;roundRect(x,lx,ly,lw,lh,12);x.fill();
-    x.strokeStyle='rgba(246,196,83,.55)';x.lineWidth=1.5;roundRect(x,lx+3.5,ly+3.5,lw-7,lh-7,9);x.stroke();
-    x.fillStyle='#fff';x.font='800 27px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='4px';x.fillText('新光證券',lx+lw/2+2,ly+38);x.restore();
+    const li=document.querySelector('#skybug .sb-logo');
+    if(li&&li.complete&&li.naturalWidth){
+      const lw=250,lh=Math.round(lw*li.naturalHeight/li.naturalWidth),lx=W-84-lw,ly=84;
+      x.save();roundRect(x,lx,ly,lw,lh,12);x.clip();x.drawImage(li,lx,ly,lw,lh);x.restore();
+    }else{
+      x.fillStyle='#E60012';const lw=196,lh=56,lx=W-88-lw,ly=88;roundRect(x,lx,ly,lw,lh,12);x.fill();
+      x.fillStyle='#fff';x.font='800 27px '+TC;x.fillText('新光證券',lx+lw/2,ly+38);
+    }
   })();
   /* 左上:小字計畫名 */
   x.textAlign='left';x.fillStyle='rgba(227,6,19,.65)';x.font='800 24px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='6px';x.fillText('股神養成計畫',92,124);x.restore();x.textAlign='center';
