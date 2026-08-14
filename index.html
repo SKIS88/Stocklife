@@ -985,6 +985,15 @@ function pickDaily(){
   const avoid=new Set(S.recentDaily);
   let pool=elig.filter(i=>!avoid.has(i));
   if(!pool.length)pool=elig.length?elig.slice():GEN_LIFE.map((_,i)=>i);
+  /* 開局前幾年優先抽「話題事件」:先讓玩家遇到好玩、想截圖的事,正經沉重的留給中後期 */
+  const VIRAL=new Set(['寶可夢卡包的誘惑','盲盒隱藏款之亂','迷因幣的暴富神話','雞排店老闆的明牌','年夜飯上的明牌大會','命理老師的財位','「老師」的來電','對發票的奇蹟','阿公留下的老箱子','同學會的攀比大戰','天王演唱會搶票','中華隊奪冠之夜','AI 選股神器','直播間的剁手夜','毛小孩的緣分','燒錢的新嗜好']);
+  const early=(S.age-((CUR.start&&CUR.start.age)||S.age))<=4;
+  if(early){
+    const vp=pool.filter(i=>VIRAL.has(GEN_LIFE[i](U).t));
+    const firstDaily=!(S.dailyCount>0);
+    if(vp.length&&(firstDaily||RNG()<0.7))pool=vp;   // 第一件日常保證話題向,之後前期 70% 偏話題
+  }
+  S.dailyCount=(S.dailyCount||0)+1;
   const idx=pool[Math.floor(RNG()*pool.length)];
   S.recentDaily.push(idx);
   const keep=Math.min(9,GEN_LIFE.length-1);   // 記住最近 9 件,這段時間內不重覆
