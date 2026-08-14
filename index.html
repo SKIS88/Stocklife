@@ -79,8 +79,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .seedbar label{font-size:12px;color:var(--ink3)}
 .seedbar input{background:rgba(0,0,0,.25);border:1px solid var(--glassborder);color:var(--ink);padding:9px 13px;border-radius:12px;font-size:16px;width:180px;font-family:inherit}
 .seedbar input:focus{outline:none;border-color:var(--sk-red3)}
-.dicebar{margin-top:12px}
-.dicebar label{font-weight:800;color:var(--sk-red3)}
+.dicebar{margin-top:12px;flex-wrap:nowrap}
+.dicebar input{width:132px;min-width:0;flex:0 1 auto}
+.dicebar label{font-weight:800;color:var(--sk-red3);white-space:nowrap}
+.dicebar .btn-mini{white-space:nowrap}
 .dicehint{font-size:11.5px;line-height:1.7;color:var(--ink3);margin:9px 4px 2px;text-align:center}
 .dicehint b{color:var(--sk-red);font-weight:800}
 .btn-mini{font-size:12px;color:var(--ink2);border:1px solid var(--glassborder);padding:9px 13px;border-radius:12px;transition:.15s;background:var(--glass2)}
@@ -308,10 +310,10 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .skl .info .d{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
 .skl .prog{font-size:11px;color:var(--ink3);margin-top:5px}
 .skl .prog b{color:var(--gold)}
-.skl .lv{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
-.skl .lv i{width:14px;height:5px;border-radius:99px;background:rgba(255,255,255,.14)}
+.skl .lv{display:flex;flex-wrap:nowrap;gap:3px;margin-top:5px;justify-content:center}
+.skl .lv i{flex:0 1 14px;min-width:5px;height:5px;border-radius:99px;background:rgba(255,255,255,.14)}
 .skl .lv i.on{background:var(--gold)}
-.skl .up{flex:0 0 auto;width:62px;height:62px;border-radius:16px;background:linear-gradient(160deg,var(--sk-red),var(--sk-red2));color:#fff;font-size:30px;font-weight:900;display:grid;place-items:center;transition:.15s;touch-action:manipulation;box-shadow:0 4px 12px rgba(227,6,19,.32);-webkit-user-select:none;user-select:none}
+.skl .up{flex:0 0 auto;width:62px;height:62px;border-radius:16px;background:linear-gradient(160deg,var(--sk-red),var(--sk-red2));color:#fff;font-size:26px;font-weight:900;display:grid;place-items:center;white-space:nowrap;line-height:1;transition:.15s;touch-action:manipulation;box-shadow:0 4px 12px rgba(227,6,19,.32);-webkit-user-select:none;user-select:none}
 .skl .up:active{transform:scale(.92)}
 .skl .up:disabled{opacity:.35;filter:grayscale(.7);box-shadow:none}
 .skl .up.max{background:rgba(255,255,255,.1);font-size:13px;font-weight:700}
@@ -456,7 +458,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
     <div class="glass hero">
       <div class="big"><span class="g">股神</span>養成計畫</div>
       <div class="subttl">股海人生 · StockLife</div>
-      <div class="tagline">買股票、拚身家——看你能不能從小散戶,一路把自己<span style="color:var(--sk-red);font-weight:700">養成股市大神</span>。</div>
+      <div class="tagline">買股票、拚身家,從小散戶<span style="color:var(--sk-red);font-weight:700">養成股市大神</span>。</div>
       <div class="ticker"><span>大盤 <b>▲</b></span><span>台積電 <b>▲2.1%</b></span><span>AI股 <b>▲8.3%</b></span><span>你的心臟 <span class="dn">▼</span></span></div>
       <div class="combo" id="comboLine">— 超過 1,000 種結局組合,沒有人的人生會一樣 —</div>
       <div class="seedbar">
@@ -468,7 +470,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
         <input id="seedInput" spellcheck="false">
         <button class="btn-mini" id="seedRand">🎲 重骰</button>
       </div>
-      <div class="dicehint">這顆<b>命運骰子</b>決定了你這一生的<b>一切</b>——天生的資質、遇上的機運、股災來襲的時機,全由它而定。<br>手氣不順就<b>重骰</b>換一個;把編號傳給朋友,就能一起挑戰同一段命運、比比看誰更強。</div>
+      <div class="dicehint">這顆<b>命運骰子</b>決定你一生的<b>一切</b>——資質、機運、股災時機。<br>手氣不順就<b>重骰</b>;把編號傳給朋友,一起挑戰同一段命運。</div>
     </div>
 
     <div class="section-title">選擇你的出身</div>
@@ -759,7 +761,9 @@ function animateAge(fromA,fromY,toA,toY){
   },200);
 }
 
-function applyDelta(d){if(!d)return;for(const k in d){let v=d[k];if(k==='mind'&&v<0)v*=Math.max(0.1,1-0.15*lvl('mindful'));if(k==='rel'&&v>0)v*=(1+0.2*lvl('network'));if(k==='mind'||k==='rel'||k==='fame')S[k]=clamp(S[k]+v);else S[k]=(S[k]||0)+v;}if(S.cash<0){S.debt=(S.debt||0)-S.cash;S.cash=0;}}
+function applyDelta(d){if(!d)return;for(const k in d){let v=d[k];if(k==='mind'&&v<0)v*=Math.max(0.1,1-0.15*lvl('mindful'));if(k==='rel'&&v>0)v*=(1+0.2*lvl('network'));if(k==='mind'||k==='rel'||k==='fame')S[k]=clamp(S[k]+v);else S[k]=(S[k]||0)+v;}
+  if(S.stock<0){S.cash+=S.stock;S.stock=0;}   // 持股最多賠到歸零,超出的部分從現金扣(不足再轉負債)
+  if(S.cash<0){S.debt=(S.debt||0)-S.cash;S.cash=0;}}
 function applySet(set){if(!set)return;for(const k in set){const v=set[k];if(typeof v==='string'&&v[0]==='+')S.flags[k]=(S.flags[k]||0)+(+v.slice(1));else S.flags[k]=v;}}
 function deltaText(d){const map={cash:'現金',stock:'持股',debt:'負債',mind:'心態',rel:'關係',fame:'名聲'};const money=['cash','stock','debt'];const parts=[];for(const k in d){if(!d[k])continue;const up=d[k]>0;const val=money.includes(k)?fmt(Math.abs(d[k])):Math.abs(d[k]);const good=(k==='debt')?!up:up;parts.push(`<span style="color:${good?'var(--up)':'var(--down)'}">${map[k]} ${up?'+':'−'}${val}</span>`);}return parts.join('  ');}
 
@@ -1029,7 +1033,7 @@ function chooseOption(ch){
   nb.onclick=()=>{if(keep)stepKeep();else continueTo(nextId);};
   stage.appendChild(nb);
 }
-function renderLog(){if(!S.log.length)return;document.getElementById('logBox').style.display='block';document.getElementById('logList').innerHTML=S.log.slice(-6).map(e=>`<div class="li"><span class="yr mono">${e.yr}</span>${e.txt}</div>`).join('');}
+function renderLog(){if(!S.log.length)return;document.getElementById('logBox').style.display='block';document.getElementById('logList').innerHTML=S.log.map(e=>`<div class="li"><span class="yr mono">${e.yr}</span>${e.txt}</div>`).join('');}
 
 /* ---------- 倍數下注事件 ---------- */
 function betRisk(sc,t){const base=sc.base||CUR.betBase||100000;const avail=Math.max(0,S.cash)+Math.max(0,S.stock);return Math.max(0,Math.min(base*t.mult,Math.floor(avail)));}
@@ -1093,10 +1097,10 @@ function rollDie(){
 function rollForSP(){
   if(S._rolledThisTrain)return;S._rolledThisTrain=true;S.diceRolls=(S.diceRolls||0)+1;
   const vals=[];for(let k=0;k<TRAIN_DICE;k++)vals.push(rollDie());
-  const sum=vals.reduce((a,b)=>a+b,0);const gain=sum;S.sp+=gain;
+  const sum=vals.reduce((a,b)=>a+b,0);const gain=Math.ceil(sum/2);S.sp+=gain;   // 點數減半:技能要慢慢養,點滿是奢望
   const q=stateQuality();const qtxt=q>=0.62?'狀態極佳,手氣加持':(q>=0.45?'狀態平穩':'狀態低迷,拖累了手氣');
   document.getElementById('diceRow').innerHTML=vals.map(v=>`<div class="dice sm num roll ${v>=5?'g':(v<=2?'b':'')}">${v}</div>`).join('');
-  document.getElementById('diceRes').innerHTML=`骰出 <b>${vals.join(' + ')}</b> = <b>${sum}</b> 點(${qtxt})→ 獲得 <b style="color:var(--gold)">${gain}</b> 技能點!`;
+  document.getElementById('diceRes').innerHTML=`骰出 <b>${vals.join(' + ')}</b> = <b>${sum}</b>(${qtxt})→ 化為 <b style="color:var(--gold)">${gain}</b> 技能點!`;
   const rb=document.getElementById('rollBtn');if(rb){rb.disabled=true;rb.textContent='✓ 這次修煉已完成';}
   renderHUD();renderSkillList();
 }
@@ -1187,8 +1191,14 @@ function resolveEnding(){
   document.getElementById('logBox').style.display='none';
   const stage=document.getElementById('stage');
   stage.innerHTML=`<div class="ending">
-    <div class="elogo">${LOGO_SVG}</div>
-    <div class="em">${E.emoji}</div>
+    <div class="resultimg"><img id="resultImg" alt="你的結局圖"><div class="rihint">👆 這就是你的人生結算圖——長按可直接儲存,傳到 LINE、IG 跟朋友炫耀(或取暖)</div></div>
+    <div class="endbtns">
+      <button class="eb-main" id="imgBtn">📷 下載結算圖,分享給朋友</button>
+    </div>
+    <div class="endbtns" style="margin-top:10px">
+      <button class="eb-share" id="shareBtn">🔗 複製分享連結,揪人挑戰同一段命運</button>
+    </div>
+    <div class="em" style="margin-top:26px">${E.emoji}</div>
     <div class="ti">${E.title}</div>
     <div class="rank">${rankTxt}</div>
     <div class="combo2">${statusLine}</div>
@@ -1200,12 +1210,7 @@ function resolveEnding(){
       <div class="fc"><div class="k">🏠 人生軌道</div><div class="v" style="font-size:15px">${E.fam.k}</div></div>
       <div class="fc"><div class="k">🎭 名聲</div><div class="v mono">${Math.round(S.fame)}</div></div>
     </div>
-    <div class="resultimg"><img id="resultImg" alt="你的結局圖"><div class="rihint">👆 長按圖片即可直接儲存,或按下方按鈕下載／分享</div></div>
-    <div class="endbtns">
-      <button class="eb-share" id="imgBtn">📷 下載結局圖</button>
-      <button class="eb-share" id="shareBtn">🔗 複製分享連結</button>
-    </div>
-    <div class="endbtns" style="margin-top:10px">
+    <div class="endbtns" style="margin-top:16px">
       <button class="eb-main" id="againBtn">🔄 再走一次</button>
       <button class="eb-alt" id="otherBtn">換一個出身</button>
     </div>
@@ -1229,7 +1234,8 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheets);
 /* ---------- 分享 ---------- */
 function toast(m){const t=document.getElementById('toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400);}
 function shareURL(){return location.origin+location.pathname+'?char='+encodeURIComponent(CURID)+'&seed='+encodeURIComponent(SEED)+(PNAME?'&name='+encodeURIComponent(PNAME):'');}
-function copyShareLink(){const u=shareURL();const done=()=>toast('分享連結已複製!貼給朋友走同一條命運');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done).catch(()=>fb(u,done));else fb(u,done);}
+function copyShareLink(){const u=shareURL();const done=()=>toast('分享連結已複製!貼給朋友走同一條命運');const copy=()=>{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done).catch(()=>fb(u,done));else fb(u,done);};
+  if(navigator.share){navigator.share({title:'股神養成計畫',text:'我在股海走完了一生,來挑戰跟我同一段命運,看你能不能贏過我!',url:u}).catch(copy);}else copy();}
 function fb(t,cb){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');cb&&cb();}catch(e){toast('複製失敗,請手動複製網址');}document.body.removeChild(ta);}
 
 /* ---------- 結局圖(canvas) ---------- */
