@@ -184,12 +184,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .resultimg img{width:100%;height:auto;display:block;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25);border:1px solid var(--glassborder)}
 .resultimg .rihint{font-size:12px;color:var(--ink3);margin-top:8px;text-align:center}
 .endbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.endbtns button{padding:13px 22px;border-radius:13px;font-weight:800;font-size:14px}
+.endbtns button{padding:13px 18px;border-radius:13px;font-weight:800;font-size:13.5px;max-width:100%}
 .eb-main{background:linear-gradient(90deg,var(--sk-red2),var(--sk-red3));color:#fff;box-shadow:0 8px 20px rgba(227,6,19,.35)}
-.eb-share{border:1px solid var(--glassborder);color:#fff;background:var(--glass)}
-.eb-share:hover{border-color:var(--gold);color:#fff}
+.eb-share{border:1px solid var(--glassborder);color:var(--ink);background:rgba(255,255,255,.62);white-space:nowrap}
+.eb-share:hover{border-color:var(--gold);color:var(--ink)}
 .eb-alt{border:1px solid var(--glassborder);color:var(--ink2)}
-.eb-alt:hover{border-color:var(--sk-red3);color:#fff}
+.eb-alt:hover{border-color:var(--sk-red3);color:var(--sk-red)}
 .toast{margin:16px auto 0;max-width:440px;font-size:13px;color:var(--gold);border:1px solid rgba(246,196,83,.4);background:rgba(246,196,83,.1);border-radius:12px;max-height:0;overflow:hidden;opacity:0;transition:.3s}
 .toast.show{max-height:70px;opacity:1;padding:11px 14px}
 
@@ -615,9 +615,18 @@ const GEN_LIFE=[
  (U)=>({ic:'🤝',t:'朋友周轉借錢',req:s=>s.cash>=U*0.6,x:'交情不錯的朋友開口借一大筆錢周轉,借了怕收不回,不借傷感情。',c:[
    {l:'慷慨借出',d:{cash:-U*0.6,rel:8},log:'你二話不說幫了忙,這份義氣朋友記在心裡。',mood:'good'},
    {l:'婉拒,先顧好自己',d:{rel:-8,mind:2},log:'你守住了現金流,交情卻蒙上一層陰影。'}]}),
- (U)=>({ic:'🎓',t:'砸錢投資自己',x:'一堂高階課程/證照學費不便宜,但能拓展競爭力與人脈。',c:[
+ (U)=>({ic:'🎓',t:'砸錢投資自己',req:s=>s.age<=40,x:'一堂高階課程/證照學費不便宜,但能拓展競爭力與人脈。',c:[
    {l:'報名高階進修',d:{cash:-U*0.5,fame:8,mind:3},log:'你花大錢進修,眼界與人脈都拓寬了。',mood:'good'},
    {l:'靠自己摸索就好',d:{mind:2,fame:-3},log:'你省下學費靠自學,慢一點,但踏實。'}]}),
+ (U)=>({ic:'🩺',t:'健檢報告亮紅字',req:s=>s.age>=45,x:'多年的操勞反映在健檢報告上,幾個紅字提醒你:身體不是無限的本錢。',c:[
+   {l:'花錢好好調養,把健康買回來',d:{cash:-U*0.4,mind:8},log:'你請了假、看了醫生、調了作息,身體慢慢回到正軌。健康果然是最好的投資。',mood:'good'},
+   {l:'先拚再說,身體撐得住',d:{mind:-8},set:{overwork:'+1'},log:'你把報告塞進抽屜繼續拚。夜深人靜時,隱隱的疲憊讓你有點心虛。',mood:'bad'}]}),
+ (U)=>({ic:'🤝',t:'後輩來請益',req:s=>s.age>=48&&s.fame>=25,x:'幾個年輕人慕名而來,想聽你聊聊這些年在股海的心得。帶人要花時間,但經驗傳承也是一種成就。',c:[
+   {l:'傾囊相授,當個好前輩',d:{rel:8,fame:8,mind:5},log:'你把踩過的坑毫無保留地分享,後輩眼中的敬佩,讓你想起當年的自己。',mood:'good'},
+   {l:'客套幾句,心法留給自己',d:{fame:-4,mind:2},log:'你點到為止。江湖一點訣,說破不值錢。'}]}),
+ (U)=>({ic:'🌅',t:'想慢下來的念頭',req:s=>s.age>=52,x:'同齡的朋友有人退休、有人病倒。你開始想:是不是該把日子過得慢一點?',c:[
+   {l:'請個長假,帶家人去旅行',d:{cash:-U*0.5,mind:10,rel:10},log:'你放下盤勢,陪家人看了很多風景。回來後,你看市場的眼神都溫柔了些。',mood:'good'},
+   {l:'盤還是要盯,習慣改不掉',d:{mind:-4,rel:-4},log:'你嘴上說慢,手還是每天打開看盤軟體。家人搖搖頭,見怪不怪。'}]}),
  (U)=>({ic:'💎',t:'精品的心動',x:'一件保值的精品/名錶讓你心動,入手是享受也是一筆大錢。',c:[
    {l:'入手,犒賞也保值',d:{cash:-U*0.6,fame:8,mind:4},log:'你把它收進櫃裡,面子與心情都滿足,錢包則瘦了。',mood:'good'},
    {l:'忍住,不跟風',d:{mind:2,fame:-2},log:'你壓下慾望,把錢留著,只是少了點虛榮的滿足。'}]}),
@@ -634,7 +643,63 @@ const GEN_LIFE=[
    {l:'量力栽培就好',d:{cash:-U*0.2,rel:3,mind:-2},log:'你量力而為,心裡總覺得能再多給一點。'}]}),
  (U)=>({ic:'🎉',t:'人情場面',x:'親友的婚喪喜慶接連而來,紅白包與場面都是一筆不小的開銷。',c:[
    {l:'場面做足,禮數周到',d:{cash:-U*0.4,rel:8,fame:4},log:'你把人情做得漂亮,關係與名聲都加了分,錢也花了不少。',mood:'good'},
-   {l:'低調隨意,量力而為',d:{cash:-U*0.05,rel:-3,mind:2},log:'你把人情壓到最低,省了錢,卻也被說小氣。'}]})
+   {l:'低調隨意,量力而為',d:{cash:-U*0.05,rel:-3,mind:2},log:'你把人情壓到最低,省了錢,卻也被說小氣。'}]}),
+ (U)=>({ic:'🧧',t:'年夜飯上的明牌大會',x:'過年圍爐,親戚一聽你有在玩股票,輪番逼問「有沒有明牌」。二姨丈還當場掏出手機要你看他的對帳單。',c:[
+   {l:'隨口報一支敷衍過去',d:{fame:4},roll:[
+     {w:4,d:{rel:8,fame:6},log:'沒想到那支真的漲了,親戚逢人就說你是股神,過年紅包都變厚了。',mood:'good'},
+     {w:6,d:{rel:-8,fame:-6,mind:-4},log:'那支隔月就跌,二姨丈套在山頂,現在家族群組都在敲你。',mood:'bad'}]},
+   {l:'打死不報,勸大家別亂聽明牌',d:{rel:-2,mind:4},log:'你苦口婆心講了半小時風險,親戚覺得你藏私,但你問心無愧。'}]}),
+ (U)=>({ic:'📱',t:'「老師」的來電',x:'陌生號碼傳來訊息:「加入VIP群,老師帶你飛,保證獲利30%!」還附上幾張獲利截圖。',c:[
+   {l:'半信半疑,小額試試水溫',d:{cash:-U*0.3},roll:[
+     {w:2,d:{cash:U*0.1,mind:-4},log:'前兩週真的有小賺,正想加碼時群組突然解散——你及時收手,只被騙走一小筆。',mood:'bad'},
+     {w:8,d:{mind:-10,fame:-4},log:'「老師」失聯,APP登不進去,錢拿不回來。你成了詐騙案的其中一個號碼。',mood:'bad'}]},
+   {l:'截圖檢舉,順手封鎖',d:{mind:5,fame:3},log:'你把訊息轉給165反詐騙,還提醒了家族群組。投資只信自己的功課。',mood:'good'}]}),
+ (U)=>({ic:'🔮',t:'命理老師的財位',x:'朋友強力推薦一位「很準」的命理老師,說他連飆股都算得出來。改運要收費,老師還會順便報「財位」。',c:[
+   {l:'花錢改運兼求明牌',d:{cash:-U*0.25},roll:[
+     {w:5,d:{mind:8},log:'老師說你「財庫有破要補」。補完你心情莫名踏實,至於明牌——你理智地沒有跟。',mood:'good'},
+     {w:5,d:{cash:-U*0.3,mind:-6},log:'你跟了老師報的「財位股」,結果財位變套房。玄學終究賭不贏基本面。',mood:'bad'}]},
+   {l:'謝謝再聯絡,命運自己操盤',d:{mind:3},log:'你笑著婉拒。你的財位,在你的紀律裡。'}]}),
+ (U)=>({ic:'🏍️',t:'燒錢的新嗜好',x:'朋友揪你入坑——重機、高爾夫、露營、公路車……每一樣都很快樂,每一樣都很燒錢。',c:[
+   {l:'入坑!人生要及時行樂',d:{cash:-U*0.6,mind:10,rel:6},log:'你砸錢入了坑,週末多了期待,錢包多了破洞。快樂是真的,貴也是真的。',mood:'good'},
+   {l:'免費的散步最健康',d:{mind:3},log:'你維持簡單的運動習慣,省下的錢繼續留在市場裡替你工作。'}]}),
+ (U)=>({ic:'📺',t:'財經節目的邀約',req:s=>s.fame>=40,x:'你在圈子裡小有名氣,一個財經節目邀你上節目聊「小資理財」。上電視有曝光,說錯話也會被放大。',c:[
+   {l:'上!讓更多人認識你',d:{fame:12},roll:[
+     {w:6,d:{rel:4,mind:5},log:'你談吐得體、觀點清晰,片段被剪成短影音小小爆紅,連老同學都傳訊息來。',mood:'good'},
+     {w:4,d:{fame:-8,mind:-8},log:'你一句玩笑被斷章取義上了新聞,留言區戰成一片。紅是紅了,但不是你要的紅法。',mood:'bad'}]},
+   {l:'低調婉拒,悶聲發財',d:{mind:3,fame:-2},log:'你婉拒了邀約。真正的高手,不需要鎂光燈。'}]}),
+ (U)=>({ic:'📦',t:'直播間的剁手夜',x:'深夜滑到直播,主播喊著「最後三組!」你的手指在「結帳」上方徘徊。',c:[
+   {l:'買爆!壓力需要出口',d:{cash:-U*0.2,mind:6},log:'包裹一箱箱到貨,快樂短暫但真實。有幾樣東西,你到現在還沒拆。',mood:'good'},
+   {l:'關掉手機,錢包保衛戰',d:{mind:2},log:'你默默關掉直播。隔天醒來,慶幸昨晚的自己懸崖勒馬。'}]}),
+ (U)=>({ic:'🐕',t:'毛小孩的緣分',req:s=>!(s.flags&&s.flags.pet),x:'加班回家的路上,一隻小狗跟著你走了三條街,眼神像在說「就是你了」。',c:[
+   {l:'帶回家,多個家人',d:{cash:-U*0.15,mind:10,rel:5},set:{pet:true},log:'從此你的世界多了一條搖著尾巴的牽掛。飼料、醫藥都是開銷,但牠值得。',mood:'good'},
+   {l:'送到收容所,幫牠找好人家',d:{mind:2},log:'你替牠找了個歸宿。偶爾想起那個眼神,還是會有點捨不得。'}]}),
+ (U)=>({ic:'🎪',t:'同學會的攀比大戰',x:'久違的同學會,有人聊年薪、有人曬對帳單。輪到你時,全桌安靜下來等你開口。',c:[
+   {l:'霸氣買單,順便曬一下績效',d:{cash:-U*0.3,fame:8,mind:4,rel:-3},log:'你包了全場,老同學敬酒敬個不停。爽是很爽,只是隔天群組裡多了幾個借錢的。',mood:'good'},
+   {l:'笑而不語,深藏功與名',d:{mind:5},log:'你只說「還過得去」。散場時,真正懂你的老友拍拍你的肩:「悶聲發財吼。」'}]}),
+ (U)=>({ic:'🗄️',t:'阿公留下的老箱子',req:s=>!(s.flags&&s.flags.heirloom),x:'整理老家時,你翻出阿公塵封多年的鐵箱,裡面有一疊泛黃的股票憑證。全家人圍過來,大氣不敢喘。',c:[
+   {l:'顫抖著手拿去查詢',d:{},set:{heirloom:true},roll:[
+     {w:4,d:{stock:U*2.5,mind:10,rel:6},log:'天啊——是放了幾十年、配股配息滾出一大筆的績優股!阿公在天上都在笑。全家族都轟動了。',mood:'good'},
+     {w:6,d:{mind:-3,rel:5},log:'查了才知道,那間公司早就下市,股票成了名副其實的壁紙。全家笑成一團,把它裱框留念——阿公的浪漫,無價。',mood:'bad'}]},
+   {l:'收好留作紀念,不去查',d:{mind:4,rel:3},log:'你把箱子擦乾淨收好。有些東西的價值,不需要市場來定義。'}]}),
+ (U)=>({ic:'🧾',t:'對發票的奇蹟',req:s=>!(s.flags&&s.flags.lotto),x:'超商咖啡的發票隨手一對——等等,這串號碼怎麼有點眼熟?你揉了揉眼睛再看一次。',c:[
+   {l:'再對一次!',d:{},set:{lotto:true},roll:[
+     {w:2,d:{cash:2000000,mind:12,fame:5},log:'特別獎!兩百萬!!你在超商當場尖叫,店員比你還激動。這杯咖啡,是你人生最劃算的一筆投資。',mood:'good'},
+     {w:8,d:{cash:200,mind:3},log:'中了兩百塊。你笑著去換了兩杯咖啡,發限動昭告天下:「本月投報率最高的操作。」',mood:'good'}]},
+   {l:'一定是看錯了,丟進袋子',d:{},log:'你把發票塞回袋子。人生有些奇蹟,就這樣擦肩而過也未可知。'}]}),
+ (U)=>({ic:'🍗',t:'雞排店老闆的明牌',x:'買雞排時,老闆邊炸邊跟隔壁客人聊股票,連菜市場阿姨都在討論同一支飆股。你想起那句老話:擦鞋童都在談股票時……',c:[
+   {l:'警覺過熱,悄悄減碼',d:{mind:6,fame:2},log:'你嗅到市場過熱的味道,默默把部位降下來。幾週後回頭看,這片雞排救了你一筆錢。',mood:'good'},
+   {l:'跟著全民行情衝一波',d:{},roll:[
+     {w:3,d:{cash:U*0.5,mind:3},log:'行情比想像中撐得久,你小賺一段出場。運氣好,但你知道這不是實力。',mood:'good'},
+     {w:7,d:{cash:-U*0.7,mind:-8},log:'你進場沒多久行情就反轉——雞排指標再度應驗。你邊吃雞排邊看對帳單,五味雜陳。',mood:'bad'}]}]}),
+ (U)=>({ic:'💬',t:'前任的深夜訊息',req:s=>s.flags&&s.flags.married,x:'深夜手機一亮:「最近好嗎?看到新聞想起你。」是前任。游標在輸入框閃了很久。',c:[
+   {l:'拿給另一半一起看,笑著已讀',d:{rel:12,mind:5},log:'你把手機遞給另一半,兩人研究了半天要不要回貼圖。最後決定:已讀,就是最好的回覆。這段婚姻,穩得很。',mood:'good'},
+   {l:'禮貌回覆兩句,就此打住',d:{rel:-4,mind:2},log:'你客氣地寒暄兩句便收起手機。沒什麼波瀾,只是另一半知道後,眼神多了一秒的停頓。'}]}),
+ (U)=>({ic:'🎮',t:'孩子的電競夢',req:s=>s.flags&&s.flags.kids,x:'孩子鼓起勇氣說:「我不想補習了,我想練電競。」餐桌瞬間安靜,另一半看向你。全家的未來走向,繫於你這一句話。',c:[
+   {l:'支持夢想,但約法三章',d:{cash:-U*0.3,rel:12,mind:5},log:'你陪孩子研究了戰隊、青訓和學業備案,訂下目標與期限。孩子紅著眼眶說謝謝。不管結果如何,他會記得你站在他那邊。',mood:'good'},
+   {l:'先把書讀完再說',d:{rel:-8,mind:-3},log:'你搬出了所有大人的道理。孩子沒再提過這件事,只是房門關上的聲音,比以前重了一點。'}]}),
+ (U)=>({ic:'💼',t:'獵頭的天價挖角',req:s=>s.age<=45&&(CURID==='whitecollar'||CURID==='techbro'||CURID==='freshgrad'),x:'獵頭捎來一個薪水多五成的職位——但要搬到外地、砍掉重練。安穩與野心,在你心裡拔河。',c:[
+   {l:'跳!人生要衝一次',d:{cash:U*0.5,mind:-4,fame:8},set:{jobhop:true},log:'你收拾行囊接受挑戰。新環境水土不服是真的,帳戶變厚也是真的。',mood:'good'},
+   {l:'留下來,穩穩地走',d:{mind:4,rel:4},log:'你婉拒了offer,把時間留給家人和自己的節奏。錢少賺一點,日子踏實很多。'}]})
 ];
 /* 一般年份偶爾出現的「投資機會」標題(用『判斷/眼光』而非賭博的語氣) */
 const GEN_BET_TITLES=[
@@ -776,6 +841,7 @@ function incomeBanner(){
       ?`<div class="incbanner">💰 <b>${li.situ||'這一年'}</b> — 靠${li.label}進帳 <b>${fmt(li.inc)}</b></div>`
       :`<div class="incbanner neg">📉 <b>${li.situ||'景氣低迷'}</b> — 本業虧損 <b>${fmt(-li.inc)}</b></div>`;
   }
+  if(S.lastRent){h+=`<div class="incbanner">🏠 <b>包租公</b> — 房客準時匯款,租金收入 <b>+${fmt(S.lastRent)}</b></div>`;}
   if(S.lastStock){const g=S.lastStock.gain,pct=Math.round(S.lastStock.ret*100);
     h+= S.lastStock.crash
       ?`<div class="incbanner neg">💥 <b>股災來襲!</b>持股重挫 <b>${fmt(-g)}</b>(${pct}%)</div>`
@@ -847,6 +913,11 @@ function openNewYear(){
     S.lastIncome={inc:yi.inc,label:yi.label,situ:yi.situ,hadLoss:yi.inc<0};
     S.log.push({yr:S.year,txt: yi.inc>=0?`${S.age} 歲・${yi.situ},進帳 ${fmt(yi.inc)}`:`${S.age} 歲・${yi.situ},虧損 ${fmt(-yi.inc)}`});
   }else S.lastIncome=null;
+  /* 包租公租金:名下第 2 間起的房產,每年穩定收租(第 1 間自住) */
+  const hs=(S.flags&&S.flags.houses)||0;
+  if(hs>=2){const rent=(hs-1)*(CUR.rentUnit||300000);S.cash+=rent;S.lastRent=rent;
+    S.log.push({yr:S.year,txt:`🏠 包租公租金入帳 ${fmt(rent)}`});}
+  else S.lastRent=null;
   /* 持股複利:抱著的股票每年會隨市場滾動(多數年份成長,偶爾回檔)——這就是複利的力量 */
   if(S.stock>0){
     const rr=RNG();let ret;   // 每年市場報酬:平均約 +2%,波動更大;約7%機率遇到股災重挫
@@ -1196,7 +1267,7 @@ function resolveEnding(){
       <button class="eb-main" id="imgBtn">📷 下載結算圖,分享給朋友</button>
     </div>
     <div class="endbtns" style="margin-top:10px">
-      <button class="eb-share" id="shareBtn">🔗 複製分享連結,揪人挑戰同一段命運</button>
+      <button class="eb-share" id="shareBtn">🔗 分享連結,揪人挑戰同一段命運</button>
     </div>
     <div class="em" style="margin-top:26px">${E.emoji}</div>
     <div class="ti">${E.title}</div>
@@ -1357,7 +1428,7 @@ A({
  id:'richkid',name:'陳世昀',emoji:'💠',tag:'24歲 · 富二代',
  desc:'含著金湯匙出生,大學剛畢業,家裡就撥了一筆錢讓你「練習理財」。你不缺第一桶金,缺的是——會不會把它守住,還是揮霍、賭光。',
  flaw:'揮霍成性、以為錢很好賺,容易被酒肉朋友拉去賭',
- betBase:2400000,income:600000,incomeLabel:'爸爸給的生活費與家裡資助',mid:['love','house','borrow'],
+ betBase:2400000,income:600000,rentUnit:500000,incomeLabel:'爸爸給的生活費與家裡資助',mid:['love','house','borrow'],
  start:{year:2026,age:24,cash:20000000,stock:0,debt:0,mind:60,rel:62,fame:22},
  first:'start',
  scenes:{
@@ -1492,7 +1563,7 @@ A({
  id:'techbro',name:'周家豪',emoji:'👨‍💻',tag:'34歲 · 科技新貴',
  desc:'竹科 IC 設計工程師,年薪加分紅逼近三百萬,手上還有一大把公司配股。高薪、高波動、高工時——你的人生,和自家股價一起劇烈跳動。',
  flaw:'單押自家股、過度自信,把身家和公司綁在一起',
- betBase:1300000,income:2800000,incomeLabel:'科技業的年薪與分紅',mid:['love','house','borrow'],
+ betBase:1300000,income:2800000,rentUnit:300000,incomeLabel:'科技業的年薪與分紅',mid:['love','house','borrow'],
  start:{year:2026,age:34,cash:1500000,stock:4000000,debt:0,mind:60,rel:60,fame:18},
  first:'start',
  scenes:{
@@ -1536,7 +1607,7 @@ A({
  id:'founder',name:'王大明',emoji:'🏭',tag:'38歲 · 創業小老闆',
  desc:'白手創立一家小型製造廠的老闆,手握一筆營運資金,也揹著營運風險。你習慣了「拿錢滾錢、以債擴張」的膽識,想把這套生意人的直覺搬到股市——但商海與股海,不完全是同一套規則。',
  flaw:'把做生意的膽識與槓桿硬搬到股市,容易過度擴張',
- betBase:1100000,income:1500000,incomeLabel:'工廠本業的營運獲利',mid:['love','house','borrow'],
+ betBase:1100000,income:1500000,rentUnit:350000,incomeLabel:'工廠本業的營運獲利',mid:['love','house','borrow'],
  start:{year:2026,age:38,cash:5000000,stock:0,debt:0,mind:60,rel:62,fame:20},
  first:'start',
  scenes:{
