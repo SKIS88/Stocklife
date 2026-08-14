@@ -737,7 +737,14 @@ const GEN_BET_TITLES=[
  {t:'市場的一次修正',x:'大盤回檔,好公司也跟著被錯殺。危機還是轉機,取決於你的眼光。'},
  {t:'題材發酵中',x:'一個新趨勢正被市場追捧,你研究過後,決定要參與多少。'},
  {t:'難得的低估',x:'你追蹤許久的標的終於跌到你認為合理的價位,機會不等人。'},
- {t:'趨勢成形',x:'長線的趨勢逐漸清晰,你思考著要用多大的部位去參與。'}
+ {t:'趨勢成形',x:'長線的趨勢逐漸清晰,你思考著要用多大的部位去參與。'},
+ {t:'AI 熱潮再起',x:'AI 概念股又一波狂潮,龍頭帶著供應鏈全面噴出。你做完功課,盤算著要押多重。'},
+ {t:'財報開獎週',x:'重量級財報接連公布,市場屏息以待。你對其中一家很有把握——把握,值多少部位?'},
+ {t:'降息的風向',x:'央行放出降息風聲,資金蠢蠢欲動。歷史說行情將至,但歷史也常常遲到。'},
+ {t:'除權息旺季',x:'除權息旺季到了,高殖利率名單出爐。是搶進參與,還是等貼息撿便宜?你有自己的劇本。'},
+ {t:'法說會的弦外之音',x:'一場法說會上,經營層的語氣藏著玄機。你聽出了別人沒聽出的東西——敢不敢照自己的解讀下注?'},
+ {t:'地緣風波的錯殺',x:'一場地緣衝突讓市場恐慌,無辜的好股票也被砍到見骨。你檢查了基本面——它還好好的。'},
+ {t:'熱門新股掛牌',x:'一檔萬眾矚目的新股掛牌,首日就演出瘋狂行情。全市場都在追,你決定用多大的部位參與。'}
 ];
 /* 開局狀況:每局隨機一種,微調起始資金與狀態,讓每次開場都不太一樣。cashU = 幾年份的收入 */
 const OPENINGS=[
@@ -1007,7 +1014,7 @@ function makeGenBet(){
   let pool=[];for(let i=0;i<GEN_BET_TITLES.length;i++)if(!avoid.has(i))pool.push(i);
   if(!pool.length){for(let i=0;i<GEN_BET_TITLES.length;i++)pool.push(i);}
   const idx=pool[Math.floor(RNG()*pool.length)];
-  S.recentBet.push(idx);while(S.recentBet.length>Math.min(3,GEN_BET_TITLES.length-1))S.recentBet.shift();
+  S.recentBet.push(idx);while(S.recentBet.length>Math.min(7,GEN_BET_TITLES.length-1))S.recentBet.shift();
   const p=GEN_BET_TITLES[idx];
   const base=Math.max(CUR.betBase||100000,Math.round(net(S)*0.05));
   return {kind:'bet',gen:true,chap:'投資時刻',t:p.t,x:p.x,base};
