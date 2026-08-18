@@ -1279,10 +1279,10 @@ function famStatus(s){
   return{k:'孤身一人',t:'忙著追逐財富的你,回過神來,身邊已沒剩幾個親近的人。'};
 }
 function houseStatus(s){const h=s.flags.houses||0;if(h>=2)return'你名下有好幾間房產,光收租金就夠生活;';if(h===1)return'你買下了一間屬於自己的房子,再也不必看房東臉色;';return'你始終沒能擁有自己的房,租來的屋簷下總少了點踏實;';}
-function spiritStatus(s){if(s.flags.gambler&&s.mind<48)return'賭博的癮與市場的起伏,把你的心境磨得千瘡百孔。';if(s.mind>=66)return'難得的是,你始終守住了平和的心境,睡得安穩、笑得自在。';if(s.mind>=42)return'一路上的焦慮與患得患失,在你心裡留下了淡淡的疲憊。';return'長期的壓力壓得你身心俱疲,午夜夢迴時常喘不過氣。';}
+function spiritStatus(s){if(((+s.flags.gambler||0)>=3||s.flags.revenge)&&s.mind<48)return'賭博的癮與市場的起伏,把你的心境磨得千瘡百孔。';if(s.mind>=66)return'難得的是,你始終守住了平和的心境,睡得安穩、笑得自在。';if(s.mind>=42)return'一路上的焦慮與患得患失,在你心裡留下了淡淡的疲憊。';return'長期的壓力壓得你身心俱疲,午夜夢迴時常喘不過氣。';}
 function fameStatus(s){if(s.fame>=62)return'在投資圈裡,你已小有名氣,不少人把你當成榜樣。';if(s.fame>=34)return'在朋友之間,你漸漸成了那個「懂投資」的人。';return'';}
 function traitOf(s){const f=s.flags;const g=+f.gambler||0;
-  if(g>=2||f.revenge)return'賭徒';                                  // 一再進賭場才算賭徒
+  if(g>=3||f.revenge)return'賭徒';                                  // 進賭場 3 次以上才算賭徒
   if(f.philanthropist)return'慈善家';
   if(f.landlord||(f.houses||0)>=2)return'包租公';
   if(lvl('disc')>=5)return'紀律信徒';
@@ -1299,7 +1299,7 @@ function traitOf(s){const f=s.flags;const g=+f.gambler||0;
   return'投資人';}
 function moralOf(s,tier){
   const f=s.flags;
-  if(((+f.gambler||0)>=2||f.revenge)&&net(S)<0)return'一場又一場的賭局,終究沒能等到翻身的那一把——你把人生押上了牌桌,牌桌沒有還你。';
+  if(((+f.gambler||0)>=3||f.revenge)&&net(S)<0)return'一場又一場的賭局,終究沒能等到翻身的那一把——你把人生押上了牌桌,牌桌沒有還你。';
   if(tier.key==='頂級富豪'||tier.key==='富豪')return f.married&&s.rel>=58?'如今你考慮的不再是賺錢,而是如何把這份財富與人生的意義,好好傳下去。':'你贏得了金錢,卻在某個深夜發現,能一起分享的人並不多。財富與幸福,你只抓住了一半。';
   if(tier.min>=1000000)return'回頭看,你沒有走捷徑,而是靠一個個踏實的決定,把日子過成了自己想要的樣子。';
   if(tier.key==='平凡')return'沒有暴富,也沒有慘賠。平凡,或許正是股海裡最難、也最被低估的一種勝利。';
