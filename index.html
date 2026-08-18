@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>股神養成計畫 · 股海人生</title>
 <meta name="description" content="一款寫實的模擬股民遊戲。5 種出身、豐富人生支線,上千種結局組合。">
+
+<!-- ===== Google Analytics 4(評估 ID:G-MZT02EJVT7)===== -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MZT02EJVT7"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-MZT02EJVT7');
+/* 事件追蹤小工具:GA 沒設定好也不會出錯 */
+function track(name,params){try{if(typeof gtag==='function')gtag('event',name,params||{});}catch(e){}}
+</script>
+
 <style>
 :root{
   --sk-red:#E30613;      /* 新光紅 */
@@ -532,6 +544,8 @@ function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;let t=Math.imul
 let RNG=Math.random,SEED='';
 function setSeed(s){SEED=s;RNG=s?mulberry32(hashSeed(s)):Math.random;}
 /* 友善的命運編號(吉祥詞 + 數字,好記不亂碼) */
+/* 遊戲網址:會印在結算圖上,讓看到圖的人知道去哪玩(換網域只要改這一行) */
+const GAME_URL='skis88.github.io/Stocklife';
 const SEEDWORDS=['招財','旺旺','牛市','鴻運','發發','登峰','金牛','長紅','聚寶','翻身','股神','豐收','大發','錦鯉','旗開','紅盤','進寶','滿貫','開運','點金'];
 function genSeed(){return SEEDWORDS[Math.floor(Math.random()*SEEDWORDS.length)]+(Math.floor(1000+Math.random()*9000));}
 function pickWeighted(list){const tot=list.reduce((a,o)=>a+(o.w||1),0);let r=RNG()*tot;for(const o of list){r-=(o.w||1);if(r<=0)return o;}return list[list.length-1];}
@@ -794,6 +808,7 @@ function startGame(c){
   const nm=(document.getElementById('nameInput').value||'').trim();
   PNAME=nm||c.name;
   CUR=c;CURID=c.id;
+  track('game_start',{character:c.id,character_name:c.name});   // 📊 哪個出身最熱門
   S=JSON.parse(JSON.stringify(c.start));
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.retireOffered=false;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
@@ -1298,6 +1313,13 @@ function composeEnding(s){
 }
 function rankOf(nn,s){
   const wb=(s.mind+s.rel)/2;
+  /* 負資產先攔下來:星等一律見底,不會因為心態好就加星
+     (欠債近千萬談不上「清貧但知足」,更不可能是「家和萬事興」) */
+  if(nn<0){
+    if(nn>-1000000)return '★☆☆☆☆  傷筋動骨';
+    if(nn>-5000000)return wb>=62?'☆☆☆☆☆  賠掉了錢,還好沒賠掉人':'☆☆☆☆☆  元氣大傷';
+    return wb>=62?'☆☆☆☆☆  一無所有,只剩身邊的人':'☆☆☆☆☆  一敗塗地';
+  }
   if(nn>=200000000)return '★★★★★  頂級富豪';
   if(nn>=50000000&&wb>=55)return '★★★★★  人生勝利組';
   if(nn>=50000000)return '★★★★☆  富有但空洞';
@@ -1305,12 +1327,9 @@ function rankOf(nn,s){
   if(nn>=10000000)return '★★★★☆  有錢沒閒';
   if(nn>=1000000&&wb>=58)return '★★★☆☆  小康幸福';
   if(nn>=1000000)return '★★★☆☆  略有積蓄';
-  if(nn>=0&&wb>=60)return '★★★☆☆  平凡是福';
   if(wb>=72)return '★★★☆☆  家和萬事興';
-  if(nn>=0)return '★★☆☆☆  勉強打平';
-  if(nn>-3000000)return '★☆☆☆☆  傷筋動骨';
-  if(wb>=60)return '★★☆☆☆  清貧但知足';
-  return '☆☆☆☆☆  一敗塗地';
+  if(wb>=60)return '★★★☆☆  平凡是福';
+  return '★★☆☆☆  勉強打平';
 }
 
 const LOGO_SVG=`<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:22px;font-weight:900;letter-spacing:5px;color:#fff">新光證券</div><div style="font-size:11px;letter-spacing:3px;color:#ffd9d0;font-weight:700">股神養成計畫 · 新光證券 製作</div></div>`;
@@ -1351,10 +1370,12 @@ function resolveEnding(){
   </div>`;
   LAST_END={E,nn,rankTxt,mind:Math.round(S.mind),rel:Math.round(S.rel),fame:Math.round(S.fame),age:S.age,ovr:calcOVR(),skills:SKILLS.map(s=>({n:s.n,lv:lvl(s.id)}))};
   try{const cv=drawResultImage();const im=document.getElementById('resultImg');if(im)im.src=cv.toDataURL('image/jpeg',0.85);}catch(e){const w=document.querySelector('.resultimg');if(w)w.style.display='none';}
-  document.getElementById('againBtn').onclick=()=>startGame(CUR);
-  document.getElementById('otherBtn').onclick=quitToStart;
-  document.getElementById('imgBtn').onclick=downloadResultImage;
-  document.getElementById('shareBtn').onclick=copyShareLink;
+  /* 📊 完成率、玩到幾歲、結局好壞、結局稱號 */
+  track('game_finish',{character:CURID,ending:E.title,outcome:S.bankrupt?'破產':(S.retired?'退休':'終局'),final_age:S.age,net_wan:Math.round(nn/10000)});
+  document.getElementById('againBtn').onclick=()=>{track('play_again',{character:CURID});startGame(CUR);};
+  document.getElementById('otherBtn').onclick=()=>{track('change_character');quitToStart();};
+  document.getElementById('imgBtn').onclick=()=>{track('download_image',{character:CURID,ending:E.title});downloadResultImage();};
+  document.getElementById('shareBtn').onclick=()=>{track('share_link',{character:CURID});copyShareLink();};
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function quitToStart(){document.getElementById('game').style.display='none';document.getElementById('start').style.display='block';buildStart();window.scrollTo(0,0);}
@@ -1400,7 +1421,7 @@ function drawResultImage(){
   let sum=wrapText(meas,picked,W-300);
   if(sum.length>3){sum=sum.slice(0,3);sum[2]=sum[2].replace(/[,。;、:]+$/,'')+'……';}
   /* 結論標題 */
-  const titleFont=(E.title.length<=6?100:E.title.length<=8?84:66);
+  const titleFont=(E.title.length<=5?100:E.title.length<=7?86:E.title.length<=9?72:60);
   meas.font='900 '+titleFont+'px '+TC;
   const titleLines=wrapText(meas,E.title,W-170);
   const titleLH=Math.round(titleFont*1.14);
@@ -1414,12 +1435,13 @@ function drawResultImage(){
   const titleY0=y+titleFont; y+=titleLines.length*titleLH+18;
   const rankY=y+30; y+=92;
   const lblY=y+22; y+=62;
-  const amtY=y+96; y+=128;
-  const skY=y+24; y+=88;
+  const amtY=y+96; y+=152;
+  const phaseY=y+30; y+=78;          // 階段徽章:讓玩家知道自己到底算哪一級
+  const skY=y+20; y+=84;
   const hrY=y; y+=64;
   const sumY0=y+30; y+=sum.length*54+64;
   const footY=y+26;
-  const H=Math.round(footY+80);
+  const H=Math.round(footY+118);
   const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
   /* 背景:跟遊戲版面一致的亮粉暖色,頂部一抹淡紅光暈 */
   const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fdeeee');g.addColorStop(.5,'#fbe7e5');g.addColorStop(1,'#f7dcda');x.fillStyle=g;x.fillRect(0,0,W,H);
@@ -1454,14 +1476,30 @@ function drawResultImage(){
   const amtGrad=x.createLinearGradient(0,amtY-100,0,amtY);
   if(d.nn>=0){amtGrad.addColorStop(0,'#d99a0b');amtGrad.addColorStop(1,'#a06a00');}else{amtGrad.addColorStop(0,'#e8515f');amtGrad.addColorStop(1,'#c22836');}
   x.fillStyle=amtGrad;x.font='900 124px '+TC;x.fillText(fmt(d.nn),cx,amtY);
+  /* 階段徽章:標出「六階中的第幾階」,給玩家一個可炫耀的相對定位 */
+  (function(){
+    let pi=0;for(let k=0;k<PHASE_AMT.length;k++){if(d.nn>=PHASE_AMT[k])pi=k;}
+    const nm=PHASES[pi],sub='第 '+(pi+1)+' 階 / 共 '+PHASES.length+' 階';
+    x.font='800 30px '+TC;const nw=x.measureText(nm).width;
+    x.font='600 24px '+TC;const sw=x.measureText(sub).width;
+    const pw=nw+sw+74,ph=52,px0=cx-pw/2,py0=phaseY-36;
+    x.fillStyle=pi>=4?'rgba(246,196,83,.22)':'rgba(184,134,11,.10)';
+    x.strokeStyle=pi>=4?'rgba(184,134,11,.75)':'rgba(184,134,11,.38)';x.lineWidth=2;
+    roundRect(x,px0,py0,pw,ph,26);x.fill();x.stroke();
+    const prev=x.textAlign;x.textAlign='left';
+    x.fillStyle='#8a5a00';x.font='800 30px '+TC;x.fillText(nm,px0+26,phaseY);
+    x.fillStyle='rgba(140,95,60,.78)';x.font='600 24px '+TC;x.fillText(sub,px0+26+nw+22,phaseY-1);
+    x.textAlign=prev;
+  })();
   /* 戰力 + 技能,一行棕金小字 */
   x.fillStyle='rgba(140,95,60,.8)';x.font='500 27px '+TC;x.fillText(skTxt,cx,skY);
   /* 金色細分隔線 */
   const hw=120;x.strokeStyle='rgba(184,134,11,.5)';x.lineWidth=2;x.beginPath();x.moveTo(cx-hw,hrY);x.lineTo(cx+hw,hrY);x.stroke();
   /* 三行總結 */
   x.fillStyle='rgba(70,35,38,.88)';x.font='400 33px '+TC;let sy=sumY0;sum.forEach(l=>{x.fillText(l,cx,sy);sy+=54;});
-  /* 頁尾:只留計畫名與種子 */
-  x.fillStyle='rgba(150,105,110,.55)';x.font='500 22px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='3px';x.fillText('股神養成計畫 · 命運種子 '+SEED,cx,footY);x.restore();
+  /* 頁尾:網址(讓看到圖的人知道去哪玩)+ 計畫名與種子 */
+  x.fillStyle='rgba(227,6,19,.8)';x.font='800 27px '+TC;x.fillText('👉 '+GAME_URL,cx,footY+4);
+  x.fillStyle='rgba(150,105,110,.6)';x.font='500 21px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='2px';x.fillText('股神養成計畫 · 命運種子 '+SEED,cx,footY+42);x.restore();
   return cv;
 }
 function downloadResultImage(){try{const cv=drawResultImage();const pn=PNAME||CUR.name;const name='股海人生_'+pn+'_'+LAST_END.E.title+'.jpg';cv.toBlob(blob=>{if(navigator.canShare){try{const file=new File([blob],name,{type:'image/jpeg'});if(navigator.canShare({files:[file]})){navigator.share({files:[file],title:'股海人生',text:pn+'|'+LAST_END.E.title}).catch(()=>saveBlob(blob,name));return;}}catch(e){}}saveBlob(blob,name);},'image/jpeg',0.85);toast('結局圖已產生');}catch(e){toast('產圖失敗:'+e.message);}}
