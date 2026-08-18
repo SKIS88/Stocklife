@@ -1283,19 +1283,19 @@ function spiritStatus(s){if(s.flags.gambler&&s.mind<48)return'賭博的癮與市
 function fameStatus(s){if(s.fame>=62)return'在投資圈裡,你已小有名氣,不少人把你當成榜樣。';if(s.fame>=34)return'在朋友之間,你漸漸成了那個「懂投資」的人。';return'';}
 function traitOf(s){const f=s.flags;const g=+f.gambler||0;
   if(g>=2||f.revenge)return'賭徒';                                  // 一再進賭場才算賭徒
-  if(f.philanthropist)return'慷慨的人';
+  if(f.philanthropist)return'慈善家';
   if(f.landlord||(f.houses||0)>=2)return'包租公';
   if(lvl('disc')>=5)return'紀律信徒';
-  if(lvl('insight')>=6)return'獨具慧眼的人';
+  if(lvl('insight')>=6)return'洞察者';
   if(lvl('network')>=5)return'人脈王';
-  if(s.rel<=34)return'孤獨的人';
+  if(s.rel<=34)return'獨行者';
   if(f.allin&&g>=1)return'冒險家';
-  if(s.mind>=66&&s.rel>=60)return'顧家的人';
+  if(s.mind>=66&&s.rel>=60)return'家庭守護者';
   if(s.fame>=62)return'風雲人物';
-  if(f.entrepreneur)return'生意人';
-  if(f.jobhop)return'闖蕩的人';
-  if(s.mind>=72)return'從容的人';
-  if(f.disciplined)return'穩健派';
+  if(f.entrepreneur)return'實業家';
+  if(f.jobhop)return'開拓者';
+  if(s.mind>=72)return'修心者';
+  if(f.disciplined)return'守成者';
   return'投資人';}
 function moralOf(s,tier){
   const f=s.flags;
