@@ -1369,7 +1369,10 @@ function resolveEnding(){
     <div class="foot"><span class="by">${SEED?`命運種子 <span class="mono">${SEED}</span>`:''}</div>
   </div>`;
   LAST_END={E,nn,rankTxt,mind:Math.round(S.mind),rel:Math.round(S.rel),fame:Math.round(S.fame),age:S.age,ovr:calcOVR(),skills:SKILLS.map(s=>({n:s.n,lv:lvl(s.id)}))};
-  try{const cv=drawResultImage();const im=document.getElementById('resultImg');if(im)im.src=cv.toDataURL('image/jpeg',0.85);}catch(e){const w=document.querySelector('.resultimg');if(w)w.style.display='none';}
+  try{const cv=drawResultImage();const im=document.getElementById('resultImg');if(im){im.src=cv.toDataURL('image/jpeg',0.85);
+    /* 📊 長按 / 右鍵存圖:手機長按圖片會觸發 contextmenu,補上按鈕以外的存圖路徑 */
+    let lp=false;im.addEventListener('contextmenu',()=>{if(lp)return;lp=true;track('image_longpress',{character:CURID,ending:E.title});});
+  }}catch(e){const w=document.querySelector('.resultimg');if(w)w.style.display='none';}
   /* 📊 完成率、玩到幾歲、結局好壞、結局稱號 */
   track('game_finish',{character:CURID,ending:E.title,outcome:S.bankrupt?'破產':(S.retired?'退休':'終局'),final_age:S.age,net_wan:Math.round(nn/10000)});
   document.getElementById('againBtn').onclick=()=>{track('play_again',{character:CURID});startGame(CUR);};
@@ -1379,7 +1382,10 @@ function resolveEnding(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function quitToStart(){document.getElementById('game').style.display='none';document.getElementById('start').style.display='block';buildStart();window.scrollTo(0,0);}
-document.getElementById('quitBtn').onclick=()=>{if(confirm('確定放棄這一生,回去重選出身嗎?'))quitToStart();};
+document.getElementById('quitBtn').onclick=()=>{if(confirm('確定放棄這一生,回去重選出身嗎?')){
+  /* 📊 中途放棄:記錄放棄時的角色、年齡、資本額,才知道玩家都卡在哪一段 */
+  try{track('quit_game',{character:CURID,quit_age:S.age,years_played:S.age-((CUR.start&&CUR.start.age)||S.age),net_wan:Math.round(net(S)/10000)});}catch(e){}
+  quitToStart();}};
 document.getElementById('introStart').onclick=()=>{closeSheets();if(PENDING)startGame(PENDING);};
 document.getElementById('sheetBg').onclick=closeSheets;
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheets);
