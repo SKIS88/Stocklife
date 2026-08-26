@@ -1009,7 +1009,14 @@ function checkRuin(){
     if(S.flags){S.flags.houses=0;S.flags.landlord=false;}   // 房子沒了,包租公的稱號也該一起卸下
     S.lastRent=null;                                        // 也不能再顯示「房客準時匯款」的收租橫幅
     S.soldHouse=true;
-    S.log.push({yr:S.year,txt:`🏠 走投無路,只好賣掉名下房產變現 ${fmt(Math.max(0,gross-payoff))}`});
+    const cashIn=Math.max(0,gross-payoff);
+    S.log.push({yr:S.year,txt:`🏠 走投無路,只好賣掉名下房產變現 ${fmt(cashIn)}`});
+    /* 這一年稍早畫出來的收租橫幅要換掉,否則畫面會顯示「房客準時匯款」卻查無房產 */
+    try{const rb=document.getElementById('incRent');
+      const html=`<div class="incbanner neg" id="incRent">🏠 <b>賣房求生</b> — 現金與持股見底,名下房產已變現 <b>${fmt(cashIn)}</b>${payoff>0?`(償還房貸 ${fmt(payoff)})`:''}</div>`;
+      if(rb)rb.outerHTML=html;
+      else{const anchor=document.querySelector('#stage .incbanner');if(anchor)anchor.insertAdjacentHTML('afterend',html);}
+    }catch(e){}
     if(S.cash>0||S.stock>0)return;
   }
   S.bankrupt=true;
@@ -1026,7 +1033,7 @@ function incomeBanner(){
       ?`<div class="incbanner">💰 <b>${li.situ||'這一年'}</b> — 靠${li.label}進帳 <b>${fmt(li.inc)}</b></div>`
       :`<div class="incbanner neg">📉 <b>${li.situ||'景氣低迷'}</b> — 本業虧損 <b>${fmt(-li.inc)}</b></div>`;
   }
-  if(S.lastRent){h+=`<div class="incbanner">🏠 <b>包租公</b> — 房客準時匯款,租金收入 <b>+${fmt(S.lastRent)}</b></div>`;}
+  if(S.lastRent){h+=`<div class="incbanner" id="incRent">🏠 <b>包租公</b> — 房客準時匯款,租金收入 <b>+${fmt(S.lastRent)}</b></div>`;}
   if(S.lastStock){const g=S.lastStock.gain,pct=Math.round(S.lastStock.ret*100);
     h+= S.lastStock.crash
       ?`<div class="incbanner neg">💥 <b>股災來襲!</b>持股重挫 <b>${fmt(-g)}</b>(${pct}%)</div>`
