@@ -540,7 +540,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
       </div>
       <div class="wealth2">
         <div class="wnet"><span class="wk">資本額</span><span class="wv mono" id="wNet">—</span></div>
-        <div class="wmini">現金 <b class="mono" id="wCash">—</b> · 持股 <b class="mono" id="wStock">—</b> · 負債 <b class="mono neg" id="wDebt">—</b></div>
+        <div class="wmini">現金 <b class="mono" id="wCash">—</b> · 持股 <b class="mono" id="wStock">—</b><span id="wPropWrap" style="display:none"> · 房產 <b class="mono" id="wProp">—</b></span> · 負債 <b class="mono neg" id="wDebt">—</b></div>
       </div>
       <div class="phasebar">
         <div class="phz"><span class="phname" id="hPhase">—</span><span class="phnext" id="hPhaseNext"></span></div>
@@ -596,7 +596,7 @@ const fmt=n=>{
   return (neg?'-':'')+s;
 };
 const clamp=v=>Math.max(0,Math.min(100,v));
-const net=s=>s.cash+s.stock-s.debt;
+const net=s=>s.cash+s.stock+(s.prop||0)-s.debt;   /* 房產也是資產:市值計入身家,房貸算在 debt 裡 */
 
 /* 技能系統(5 種,每種 5 級) */
 const SKILLS=[
@@ -642,6 +642,26 @@ const YEAR_FLAVORS=[
 ];
 /* 一般年份的隨機生活事件(可無限延伸)。U = 一年收入,作為金額的縮放單位。 */
 const GEN_LIFE=[
+ /* --- 美股題材的生活事件(泛稱,不點名個股) --- */
+ (U)=>{const B=Math.min(U*0.3,400000);return{ic:'🌙',t:'時差裡的失眠',x:'為了盯美股,你連續幾週熬到凌晨。帳戶是漂亮了一點,鏡子裡的臉卻越來越差。',c:[
+   {l:'調整作息,設好條件單就去睡',d:{mind:10},log:'你設好條件單,把盤交給紀律、把夜還給自己。隔天醒來,世界沒有塌。',mood:'good'},
+   {l:'繼續熬,盤感不能斷',d:{mind:-10,rel:-5},roll:[
+     {w:4,d:{cash:B*1.6,fame:3},log:'那幾個熬出來的夜確實抓到一段行情,你贏了錢,也輸掉了氣色。',mood:'good'},
+     {w:6,d:{cash:-B*0.8,mind:-6},log:'熬到最後只換來一身疲憊和幾筆情緒單,反而虧得更多。',mood:'bad'}]}]};},
+ (U)=>{const M=Math.min(U*0.12,180000);return{ic:'📈',t:'定期定額的耐心',x:'有人勸你每月固定扣款買指數,不用看盤、不用選股。聽起來很無聊,無聊到你懷疑有沒有用。',c:[
+   {l:'開始扣款,交給時間',d:{cash:-M,stock:M,mind:6},set:{disciplined:true},log:'你設定了每月自動扣款。沒有快感,但也不再需要每天猜方向。',mood:'good'},
+   {l:'太慢了,還是自己挑標的',d:{mind:-2,fame:2},log:'你嫌它太慢,決定繼續自己選。快或慢,幾年後才會知道答案。'}]};},
+ (U)=>({ic:'💵',t:'換匯的時機',x:'你想加碼海外部位,但匯率正在相對高點。現在換,還是等它回來一點?',c:[
+   {l:'分批換匯,不猜點位',d:{mind:6},set:{disciplined:true},log:'你把換匯拆成好幾筆。事後看沒換在最低點,但也沒換在最高點。',mood:'good'},
+   {l:'等回檔再一次換完',d:{},roll:[
+     {w:4,d:{cash:Math.min(U*0.2,250000),mind:4},log:'你等到了,省下一筆匯差,得意了好幾天。',mood:'good'},
+     {w:6,d:{cash:-Math.min(U*0.18,220000),mind:-8},log:'它沒回來,你追高換了,還多付一筆。等待也是有成本的。',mood:'bad'}]}]}),
+ (U)=>({ic:'🌏',t:'兩個市場的拉扯',x:'台股熟悉、看得懂;海外市場陌生、卻是全世界資金在的地方。你的資金該怎麼分?',c:[
+   {l:'兩邊都放一些,分散風險',d:{mind:8},set:{disciplined:true},log:'你把部位分成兩塊。少了一夕暴富的機會,也少了一夕歸零的風險。',mood:'good'},
+   {l:'集中在最熟的市場就好',d:{mind:3,fame:-2},log:'你選擇待在看得懂的地方。能力圈之內,睡得比較安穩。'},
+   {l:'全押海外,那裡機會大',d:{},f:['allin'],roll:[
+     {w:5,d:{cash:Math.min(U*0.9,1200000),fame:6,mind:3},log:'海外那波行情走得又急又猛,你押對了方向。',mood:'good'},
+     {w:5,d:{cash:-Math.min(U*0.7,900000),mind:-10},log:'人生地不熟的市場給了你一課,學費不便宜。',mood:'bad'}]}]}),
  (U)=>{const B=Math.max(U,Math.round(net(S)*0.18));return{ic:'🎰',t:'賭局的誘惑',x:'牌桌、地下期指、朋友揪的一場大的——賭注跟著你的身家水漲船高,贏了痛快,輸了剝皮。',c:[
    {l:'豪氣賭一把',d:{},set:{gambler:'+1'},roll:[
      {w:4,d:{cash:B*1.2,mind:-4,fame:3},log:'手氣爆棚,你贏了一大筆,眾人簇擁,飄飄然。',mood:'good'},
@@ -781,6 +801,13 @@ const GEN_LIFE=[
 ];
 /* 一般年份偶爾出現的「投資機會」標題(用『判斷/眼光』而非賭博的語氣) */
 const GEN_BET_TITLES=[
+ /* --- 美股題材:全部用泛稱,不點名任何真實標的 --- */
+ {t:'深夜的財報電話',x:'美股龍頭盤後開財報,台灣時間半夜三點。你可以熬夜等第一手,也可以睡飽了明天再說——但部位要先決定。'},
+ {t:'聯準會的那句話',x:'主席的措辭只變了兩個字,全球資金一夜換邊站。你聽出了味道,問題是敢押多重。'},
+ {t:'匯率的兩面刃',x:'美股帳面漂亮,匯率卻反著走。賺了指數賠了匯差的故事,你聽過太多次——這次換你決定。'},
+ {t:'全世界最貴的市場',x:'所有人都說美股太貴了,然後它又創新高。貴,從來不是賣出的理由,但也不是買進的理由。'},
+ {t:'指數還是個股',x:'一邊是躺著不動的大盤指數,一邊是你研究很久的那家公司。同樣一筆錢,你要放哪邊?'},
+ {t:'那斯達克的回檔',x:'科技股連跌數日,群組裡開始有人喊「崩了」。你翻開自己的筆記——這是第幾次「崩了」?'},
  {t:'產業輪動的機會',x:'資金開始往某個族群移動,你嗅到一絲熟悉的味道。要不要順勢布局?'},
  {t:'市場的一次修正',x:'大盤回檔,好公司也跟著被錯殺。危機還是轉機,取決於你的眼光。'},
  {t:'題材發酵中',x:'一個新趨勢正被市場追捧,你研究過後,決定要參與多少。'},
@@ -883,6 +910,7 @@ function startGame(c){
   track('game_start',{character:c.id,character_name:c.name});   // 📊 哪個出身最熱門
   S=JSON.parse(JSON.stringify(c.start));
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
+  S.prop=0;S.mort=0;S.houseYr=null;
   S.retireOffered=false;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
@@ -911,6 +939,7 @@ function renderHUD(){
   document.getElementById('wCash').textContent=fmt(S.cash);
   document.getElementById('wStock').textContent=fmt(S.stock);
   document.getElementById('wDebt').textContent=S.debt>0?fmt(S.debt):'0';
+  const pw=document.getElementById('wPropWrap');if(pw){if(S.prop>0){pw.style.display='';document.getElementById('wProp').textContent=fmt(S.prop);}else pw.style.display='none';}
   const nn=net(S);const ne=document.getElementById('wNet');ne.textContent=fmt(nn);ne.style.color=nn>=0?'#b8860b':'#d63d4c';
   setBar('Mind',S.mind);setBar('Rel',S.rel);setBar('Fame',S.fame);
   const ov=document.getElementById('hOvr');if(ov)ov.textContent=calcOVR();
@@ -951,10 +980,26 @@ function animateAge(fromA,fromY,toA,toY){
 }
 
 function applyDelta(d){if(!d)return;for(const k in d){let v=d[k];if(k==='mind'&&v<0)v*=Math.max(0.1,1-0.15*lvl('mindful'));if(k==='rel'&&v>0)v*=(1+0.2*lvl('network'));if(k==='mind'||k==='rel'||k==='fame')S[k]=clamp(S[k]+v);else S[k]=(S[k]||0)+v;}
+  if(S.prop<0)S.prop=0; if(S.mort<0)S.mort=0;
   if(S.stock<0){S.cash+=S.stock;S.stock=0;}   // 持股最多賠到歸零,超出的部分從現金扣(不足再轉負債)
   if(S.cash<0){S.debt=(S.debt||0)-S.cash;S.cash=0;}}
+/* 現金與持股都見底時:名下還有房就先賣房求生,真的什麼都沒有才算破產 */
+function checkRuin(){
+  if(S.cash>0||S.stock>0)return;
+  if(S.prop>0){
+    const gross=S.prop, payoff=Math.min(S.mort||0,gross);
+    S.prop=0;S.mort=0;S.mortInit=0;
+    S.debt=Math.max(0,(S.debt||0)-payoff);
+    S.cash+=Math.max(0,gross-payoff);
+    if(S.flags)S.flags.houses=0;
+    S.soldHouse=true;
+    S.log.push({yr:S.year,txt:`🏠 走投無路,只好賣掉名下房產變現 ${fmt(Math.max(0,gross-payoff))}`});
+    if(S.cash>0||S.stock>0)return;
+  }
+  S.bankrupt=true;
+}
 function applySet(set){if(!set)return;for(const k in set){const v=set[k];if(typeof v==='string'&&v[0]==='+')S.flags[k]=(S.flags[k]||0)+(+v.slice(1));else S.flags[k]=v;}}
-function deltaText(d){const map={cash:'現金',stock:'持股',debt:'負債',mind:'心態',rel:'關係',fame:'名聲'};const money=['cash','stock','debt'];const parts=[];for(const k in d){if(!d[k])continue;const up=d[k]>0;const val=money.includes(k)?fmt(Math.abs(d[k])):Math.abs(d[k]);const good=(k==='debt')?!up:up;parts.push(`<span style="color:${good?'var(--up)':'var(--down)'}">${map[k]} ${up?'+':'−'}${val}</span>`);}return parts.join('  ');}
+function deltaText(d){const map={cash:'現金',stock:'持股',prop:'房產',debt:'負債',mind:'心態',rel:'關係',fame:'名聲'};const money=['cash','stock','prop','debt'];const parts=[];for(const k in d){if(!d[k]||!map[k])continue;const up=d[k]>0;const val=money.includes(k)?fmt(Math.abs(d[k])):Math.abs(d[k]);const good=(k==='debt')?!up:up;parts.push(`<span style="color:${good?'var(--up)':'var(--down)'}">${map[k]} ${up?'+':'−'}${val}</span>`);}return parts.join('  ');}
 
 /* ---------- 場景 ---------- */
 function sceneHead(sc){return `<div class="beat-head">${sc.chap?`<span class="chap">${sc.chap}</span>`:''}<span class="yr">${S.year} 年 · ${S.age}歲</span><span class="tt">${sc.t}</span></div>`;}
@@ -1042,6 +1087,26 @@ function openNewYear(){
   if(hs>=2){const rent=(hs-1)*(CUR.rentUnit||300000);S.cash+=rent;S.lastRent=rent;
     S.log.push({yr:S.year,txt:`🏠 包租公租金入帳 ${fmt(rent)}`});}
   else S.lastRent=null;
+  /* 房產:每年小幅增值(平均約 +2%,比股市低但不會腰斬),同時要付房貸利息與本金攤還 */
+  if(S.prop>0){
+    const pr=RNG();let pret;
+    if(pr<0.12)pret=-0.03; else if(pr<0.34)pret=0; else if(pr<0.70)pret=0.025; else if(pr<0.92)pret=0.05; else pret=0.09;
+    const pgain=Math.round(S.prop*pret);S.prop=Math.max(0,S.prop+pgain);
+    S.lastProp={gain:pgain,ret:pret};
+    S.log.push({yr:S.year,txt: pgain>=0?`🏠 房產增值 ${fmt(pgain)}`:`🏠 房價回檔 ${fmt(-pgain)}`});
+  }else S.lastProp=null;
+  /* 房貸:利息是實實在在的支出,本金攤還則是把現金換成淨值(約 20 年還完) */
+  if(S.mort>0){
+    const interest=Math.round(S.mort*0.02);
+    const principal=Math.min(S.mort,Math.round((S.mortInit||S.mort)/20));
+    const due=interest+principal;
+    const pay=Math.min(Math.max(0,S.cash),due);
+    S.cash-=pay;
+    const toPrin=Math.max(0,pay-interest);
+    S.mort-=toPrin;S.debt=Math.max(0,(S.debt||0)-toPrin);
+    S.lastMort=pay>0?{pay,interest:Math.min(interest,pay)}:null;
+    if(pay>0)S.log.push({yr:S.year,txt:`🏦 房貸繳款 ${fmt(pay)}(其中利息 ${fmt(Math.min(interest,pay))})`});
+  }else S.lastMort=null;
   /* 持股複利:抱著的股票每年會隨市場滾動(多數年份成長,偶爾回檔)——這就是複利的力量 */
   if(S.stock>0){
     const rr=RNG();let ret;   // 每年市場報酬:平均約 +2%,波動更大;約7%機率遇到股災重挫
@@ -1187,7 +1252,7 @@ function renderMisfortune(){
   let rem=dmg;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;
   if(mf.mind)S.mind=clamp(S.mind+mf.mind);if(mf.rel)S.rel=clamp(S.rel+mf.rel);if(mf.fame)S.fame=clamp(S.fame+mf.fame);
   S.log.push({yr:S.year,txt:`意外:${mf.t},損失 ${fmt(dmg)}`});
-  if(S.cash<=0&&S.stock<=0)S.bankrupt=true;
+  checkRuin();
   S.retireLatch=false; // 出事後,下一步會再問一次要不要退休
   renderHUD();
   const stage=document.getElementById('stage');
@@ -1226,7 +1291,7 @@ function chooseOption(ch){
   applyDelta(out.d);applySet(ch.set);applySet(out.set);
   (ch.f||[]).forEach(f=>S.flags[f]=true);
   S.log.push({yr:S.year,txt:ch.l});
-  if(S.cash<=0&&S.stock<=0)S.bankrupt=true;
+  checkRuin();
   renderHUD();
   const stage=document.getElementById('stage');stage.querySelector('.choices').style.display='none';
   if(out.log){const div=document.createElement('div');div.className='result '+(out.mood||'');const dtxt=out.d?deltaText({...(ch.roll?ch.d:{}),...out.d}):'';div.innerHTML=`${out.log}${dtxt?`<div class="deltas">${dtxt}</div>`:''}`;stage.appendChild(div);}
@@ -1274,7 +1339,7 @@ function resolveBet(sc,i){
   else{loss=Math.round(stake*t.lossMult*Math.max(0.1,1-0.12*lvl('disc')));let rem=loss;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;S.mind=clamp(S.mind-t.mbad*Math.max(0.1,1-0.15*lvl('mindful')));}
   if(t.mult>=5)S.flags.aggressive=true;
   S.log.push({yr:S.year,txt:`投資 ×${t.mult}(成功率${Math.round(winP*100)}%)${win?' 獲利':' 虧損'}`});
-  if(S.cash<=0&&S.stock<=0)S.bankrupt=true;
+  checkRuin();
   renderHUD();
   const stage=document.getElementById('stage');stage.querySelector('.betwrap').style.display='none';
   const div=document.createElement('div');div.className='result '+(win?'good':'bad');
@@ -1334,6 +1399,7 @@ function renderSkillList(){
    ============================================================ */
 const TIERS=[
  {min:200000000,key:'頂級富豪',emoji:'👑',w:'你的資本額突破兩億,躋身頂級富豪的行列,財富多到幾輩子都花不完。'},
+ {min:100000000,key:'億級富豪',emoji:'🏆',w:'你的資本額站上億元關卡,那是絕大多數人一輩子都看不到的數字。'},
  {min:50000000,key:'富豪',emoji:'💎',w:'你坐擁數千萬身家,是旁人眼中不折不扣的有錢人。'},
  {min:10000000,key:'富裕',emoji:'🥂',w:'你的資本額跨過千萬門檻,財務自由的大門已向你敞開。'},
  {min:1000000,key:'小康',emoji:'🏦',w:'你攢下了數百萬的資本,日子過得寬裕而踏實。'},
@@ -1372,7 +1438,7 @@ function traitOf(s){const f=s.flags;const g=+f.gambler||0;
 function moralOf(s,tier){
   const f=s.flags;
   if(((+f.gambler||0)>=3||f.revenge)&&net(S)<0)return'一場又一場的賭局,終究沒能等到翻身的那一把——你把人生押上了牌桌,牌桌沒有還你。';
-  if(tier.key==='頂級富豪'||tier.key==='富豪')return f.married&&s.rel>=58?'如今你考慮的不再是賺錢,而是如何把這份財富與人生的意義,好好傳下去。':'你贏得了金錢,卻在某個深夜發現,能一起分享的人並不多。財富與幸福,你只抓住了一半。';
+  if(tier.key==='頂級富豪'||tier.key==='億級富豪'||tier.key==='富豪')return f.married&&s.rel>=58?'如今你考慮的不再是賺錢,而是如何把這份財富與人生的意義,好好傳下去。':'你贏得了金錢,卻在某個深夜發現,能一起分享的人並不多。財富與幸福,你只抓住了一半。';
   if(tier.min>=1000000)return'回頭看,你沒有走捷徑,而是靠一個個踏實的決定,把日子過成了自己想要的樣子。';
   if(tier.key==='平凡')return'沒有暴富,也沒有慘賠。平凡,或許正是股海裡最難、也最被低估的一種勝利。';
   return'這一生的起落,成了你最昂貴、也最深刻的一堂課。市場從不同情誰,但它教會的東西,無比真實。';
@@ -1465,7 +1531,7 @@ function resolveEnding(){
       <div class="fc big"><div class="k">💰 最終資本額</div><div class="v mono">${fmt(nn)}</div></div>
       <div class="fc"><div class="k">🧠 心態</div><div class="v mono">${Math.round(S.mind)}</div></div>
       <div class="fc"><div class="k">❤️ 關係</div><div class="v mono">${Math.round(S.rel)}</div></div>
-      <div class="fc"><div class="k">🏠 人生軌道</div><div class="v" style="font-size:15px">${E.fam.k}</div></div>
+      <div class="fc"><div class="k">${S.prop>0?'🏠 房產市值':'🏠 人生軌道'}</div>${S.prop>0?`<div class="v mono">${fmt(S.prop)}</div>`:`<div class="v" style="font-size:15px">${E.fam.k}</div>`}</div>
       <div class="fc"><div class="k">🎭 名聲</div><div class="v mono">${Math.round(S.fame)}</div></div>
     </div>
     <div class="endbtns" style="margin-top:16px">
@@ -1475,7 +1541,7 @@ function resolveEnding(){
     <div class="toast" id="toast"></div>
     <div class="foot"><span class="by">${SEED?`命運種子 <span class="mono">${SEED}</span>`:''}</div>
   </div>`;
-  LAST_END={E,nn,rankTxt,rarity:RARITY,verdict:VERDICT,mind:Math.round(S.mind),rel:Math.round(S.rel),fame:Math.round(S.fame),age:S.age,ovr:calcOVR(),skills:SKILLS.map(s=>({n:s.n,lv:lvl(s.id)}))};
+  LAST_END={E,nn,rankTxt,rarity:RARITY,verdict:VERDICT,prop:S.prop||0,houses:(S.flags&&S.flags.houses)||0,mind:Math.round(S.mind),rel:Math.round(S.rel),fame:Math.round(S.fame),age:S.age,ovr:calcOVR(),skills:SKILLS.map(s=>({n:s.n,lv:lvl(s.id)}))};
   try{const cv=drawResultImage();const im=document.getElementById('resultImg');if(im){im.src=cv.toDataURL('image/jpeg',0.85);
     /* 📊 長按 / 右鍵存圖:手機長按圖片會觸發 contextmenu,補上按鈕以外的存圖路徑 */
     let lp=false;im.addEventListener('contextmenu',()=>{if(lp)return;lp=true;track('image_longpress',{character:CURID,ending:E.title});});
@@ -1557,6 +1623,8 @@ function drawResultImage(){
   const lblY=y+22; y+=62;
   const amtY=y+96; y+=152;
   const phaseY=y+30; y+=78;          // 階段徽章:讓玩家知道自己到底算哪一級
+  const propTxt=(d.prop>0)?('🏠 名下房產 '+(d.houses||1)+' 間 · 市值 '+fmt(d.prop)):'';
+  const propY=propTxt?y+18:0; if(propTxt)y+=52;
   const skY=y+20; y+=84;
   const hrY=y; y+=64;
   const sumY0=y+30; y+=sum.length*54+64;
@@ -1621,6 +1689,8 @@ function drawResultImage(){
     x.fillStyle='rgba(140,95,60,.78)';x.font='600 24px '+TC;x.fillText(sub,px0+26+nw+22,phaseY-1);
     x.textAlign=prev;
   })();
+  /* 房產:資本額裡有一塊是磚頭,標出來才不會被誤會 */
+  if(propTxt){x.fillStyle='rgba(140,95,60,.8)';x.font='600 26px '+TC+','+EMO;x.fillText(propTxt,cx,propY);}
   /* 戰力 + 技能,一行棕金小字 */
   x.fillStyle='rgba(140,95,60,.8)';x.font='500 27px '+TC;x.fillText(skTxt,cx,skY);
   /* 金色細分隔線 */
@@ -1676,8 +1746,8 @@ A({
     {l:'娶了最美的那一個,砸錢辦世紀婚禮',d:{cash:-6000000,rel:-4,fame:8},set:{married:true},log:'婚禮登上社交版面,風光無限。但你隱約知道,對方要的是什麼。',mood:'bad',go:'house'},
     {l:'繼續單身,享受花花世界',d:{rel:-6,mind:2,fame:5},set:{playboy:true},log:'你享受著無拘無束,只是夜深人靜時,豪宅顯得格外空曠。',go:'house'}]},
   house:{chap:'第四章 · 置產',age:33,t:'錢要變成什麼',x:'長輩說「有土斯有財」,勸你把浮動的股票換成看得見的房子。你手上的資金,足以買下不只一間。',c:[
-    {l:'買一間自住豪宅,安定下來',d:{cash:-22000000,rel:8,mind:4},set:{houses:1},log:'你買下一間兩千多萬、採光極好的豪宅,把它布置成真正的家。',mood:'good',go:'borrow'},
-    {l:'買好幾間收租,當包租公',d:{cash:-24000000,debt:8000000},set:{houses:2,landlord:true},log:'你用槓桿一口氣置入三千多萬的多間套房,每月現金流入帳,當起了包租公。',mood:'good',go:'borrow'},
+    {l:'買一間自住豪宅,安定下來',d:{cash:-22000000,prop:22000000,rel:8,mind:4},set:{houses:1},log:'你買下一間兩千多萬、採光極好的豪宅,把它布置成真正的家。',mood:'good',go:'borrow'},
+    {l:'買好幾間收租,當包租公',d:{cash:-24000000,debt:8000000,prop:32000000,mort:8000000,mortInit:8000000},set:{houses:2,landlord:true},log:'你用槓桿一口氣置入三千多萬的多間套房,每月現金流入帳,當起了包租公。',mood:'good',go:'borrow'},
     {l:'不置產,資金全留在股市滾',d:{mind:2},f:['allin'],log:'你相信股市的複利遠勝磚頭,把資金全留在市場裡。',go:'borrow'}]},
   borrow:{chap:'第五章 · 人情',age:35,t:'落難的親戚',x:'一位曾經風光的叔叔生意失敗,揹了一身債,登門向你借三百萬周轉。他紅著眼眶,說只有你幫得了他。',c:[
     {l:'爽快借出,親戚有難就該幫',d:{cash:-3000000,rel:10},set:{lent:true},log:'你二話不說開了支票。叔叔老淚縱橫。這筆錢,你沒指望能全數要回。',mood:'good',go:'gamble'},
@@ -1724,9 +1794,9 @@ A({
     {l:'先不結,把錢留著衝事業與投資',d:{rel:-10,mind:2},log:'你委婉地說「再等等」。對方的眼神黯了一下,你把愧疚壓進了 Excel 試算表。',mood:'bad',go:'house'},
     {l:'結婚,並決定一起生個孩子',d:{rel:14,cash:-1200000},set:{married:true,kids:true},log:'你們不只結了婚,還迎來新生命。開銷翻倍,但家也更完整了。',mood:'good',go:'house'}]},
   house:{chap:'第四章 · 買房',age:37,t:'那座翻不過的山',x:'房東通知要收回房子。買房的念頭再也躲不掉——頭期款會掏空你大半積蓄,還要揹二十年房貸。但租房的漂泊,也讓人疲憊。',c:[
-    {l:'咬牙買房,揹起二十年房貸',d:{cash:-2500000,debt:8000000,rel:10,mind:-4},set:{houses:1},log:'你簽下人生最大的一筆合約。有了自己的家,卻也揹上了沉甸甸的貸款。',mood:'good',go:'borrow'},
+    {l:'咬牙買房,揹起二十年房貸',d:{cash:-2500000,debt:8000000,prop:10500000,mort:8000000,mortInit:8000000,rel:10,mind:-4},set:{houses:1},log:'你簽下人生最大的一筆合約。有了自己的家,卻也揹上了沉甸甸的貸款。',mood:'good',go:'borrow'},
     {l:'不買房,把頭期款拿去投資錢滾錢',d:{mind:2,rel:-6},f:['allin'],log:'你賭一把:與其被房貸綁死二十年,不如讓這筆錢在市場裡長大。',go:'borrow'},
-    {l:'買間小的,量力而為',d:{cash:-1500000,debt:5000000,rel:6},set:{houses:1},log:'你選了間負擔得起的小宅,不讓房貸壓垮生活品質。',mood:'good',go:'borrow'}]},
+    {l:'買間小的,量力而為',d:{cash:-1500000,debt:5000000,prop:6500000,mort:5000000,mortInit:5000000,rel:6},set:{houses:1},log:'你選了間負擔得起的小宅,不讓房貸壓垮生活品質。',mood:'good',go:'borrow'}]},
   borrow:{chap:'第五章 · 人情',age:39,t:'哥哥的請求',x:'哥哥創業缺周轉,開口向你借五十萬。你手頭因為買房正緊,這筆錢幾乎是你僅剩的活動資金。血濃於水,但你也有自己的家要顧。',c:[
     {l:'借給哥哥,家人總要互相',d:{cash:-500000,rel:8},set:{lent:true},log:'你把僅剩的積蓄借了出去。太太雖有微詞,但也理解。',mood:'good',go:'gamble'},
     {l:'只借一半,量力而為',d:{cash:-250000,rel:2},set:{lent:true},log:'你借了能力範圍內的數字,把話說清楚。哥哥有點失望,但沒撕破臉。',go:'gamble'},
@@ -1768,9 +1838,9 @@ A({
     {l:'先拚出成績再談,暫時分開',h:'得:專注事業　失:感情、心情',d:{rel:-14,mind:-4,fame:4},log:'你怕拖累對方,選擇先拚事業,衝出了一點成績;夜裡卻常想,這樣的犧牲到底值不值得。',go:'house'},
     {l:'結婚,並約定一起省吃儉用買房',d:{rel:15,cash:-150000},set:{married:true},log:'你們結了婚,把每一塊錢都花在刀口上,朝著共同的目標前進。',mood:'good',go:'house'}]},
   house:{chap:'第四章 · 買房',age:33,t:'第一間房的門檻',x:'存了好幾年,你們的頭期款終於湊得差不多。但房價又漲了一波,買下去會揹上沉重的貸款,不買又怕永遠追不上。',c:[
-    {l:'買下小宅,苦一點也要有個家',d:{cash:-1000000,debt:6000000,rel:12,mind:-4},set:{houses:1},log:'你們買下人生第一間房,雖是老公寓,卻是實實在在屬於自己的窩。',mood:'good',go:'borrow'},
+    {l:'買下小宅,苦一點也要有個家',d:{cash:-1000000,debt:6000000,prop:7000000,mort:6000000,mortInit:6000000,rel:12,mind:-4},set:{houses:1},log:'你們買下人生第一間房,雖是老公寓,卻是實實在在屬於自己的窩。',mood:'good',go:'borrow'},
     {l:'先不買,把錢繼續投資滾大',d:{mind:2,rel:-4},f:['allin'],log:'你說服另一半再等等,把頭期款留在市場裡,賭它長得比房價快。',go:'borrow'},
-    {l:'回鄉買房,遠離高房價',d:{cash:-600000,debt:2500000,rel:6,fame:-3},set:{houses:1},log:'你們決定離開台北,回到房價親民的家鄉。生活慢了,壓力也小了。',mood:'good',go:'borrow'}]},
+    {l:'回鄉買房,遠離高房價',d:{cash:-600000,debt:2500000,prop:3100000,mort:2500000,mortInit:2500000,rel:6,fame:-3},set:{houses:1},log:'你們決定離開台北,回到房價親民的家鄉。生活慢了,壓力也小了。',mood:'good',go:'borrow'}]},
   borrow:{chap:'第五章 · 人情',age:36,t:'發財夢的朋友',x:'一個老朋友興沖沖找你,說有個「穩賺的生意」,只差一筆啟動資金,想向你借二十萬,還信誓旦旦要分你紅利。',c:[
     {l:'看不懂的生意不碰,婉拒',d:{mind:6,rel:-4},log:'你委婉拒絕。半年後那「穩賺生意」果然血本無歸,你慶幸沒被拖下水。',mood:'good',go:'gamble'},
     {l:'念在交情,借出一部分',d:{cash:-200000,rel:4},set:{lent:true},log:'你借了一些,權當交個朋友。這筆錢,你做了要不回來的心理準備。',go:'gamble'},
@@ -1810,8 +1880,8 @@ A({
     {l:'跟她說「等我財富自由就好」',h:'得:全力衝事業　失:感情、心情',d:{rel:-16,mind:-4,fame:4},log:'你把她的話當耳邊風、把時間全給了工作;她的失望,在一次次「等一下」裡累積成裂痕。',go:'house'},
     {l:'拉她一起研究投資,變成共同目標',d:{rel:8,mind:4},set:{married:true},log:'你們開始一起看財報、一起規劃。偶爾爭執,但至少在同一條船上。',go:'house'}]},
   house:{chap:'第四章 · 買房',age:39,t:'科技新貴的煩惱',x:'高薪讓你買得起房,但竹科周邊的房價也被同行們炒得驚人。你可以買豪宅、可以買多間投資,也可以繼續把錢留在你最熟悉的股市。',c:[
-    {l:'買一間自住好宅,安定生活',d:{cash:-8000000,debt:22000000,rel:10},set:{houses:1},log:'你買下一間三千萬的電梯好宅——科技新貴的眼光,連房子都不將就。頭期八百萬,房貸兩千多萬。',mood:'good',go:'borrow'},
-    {l:'買多間收租,打造被動收入',d:{cash:-10000000,debt:25000000},set:{houses:2,landlord:true},log:'你用高薪撐起三千五百萬的槓桿,置入多間房產,替自己鋪一條被動收入的路。',mood:'good',go:'borrow'},
+    {l:'買一間自住好宅,安定生活',d:{cash:-8000000,debt:22000000,prop:30000000,mort:22000000,mortInit:22000000,rel:10},set:{houses:1},log:'你買下一間三千萬的電梯好宅——科技新貴的眼光,連房子都不將就。頭期八百萬,房貸兩千多萬。',mood:'good',go:'borrow'},
+    {l:'買多間收租,打造被動收入',d:{cash:-10000000,debt:25000000,prop:35000000,mort:25000000,mortInit:25000000},set:{houses:2,landlord:true},log:'你用高薪撐起三千五百萬的槓桿,置入多間房產,替自己鋪一條被動收入的路。',mood:'good',go:'borrow'},
     {l:'不買房,資金全押最懂的科技股',d:{mind:2,rel:-6},f:['allin'],log:'你堅信科技股的成長遠勝房產,把資金全留在市場。',go:'borrow'}]},
   borrow:{chap:'第五章 · 人情',age:41,t:'老同學的新創',x:'大學同學拉你投資他的 AI 新創,開口要五百萬,說「上市後翻十倍,只找信得過的人」。你懂技術,也看得出這其中有夢想、也有風險。',c:[
     {l:'理性評估後,只投能賠得起的金額',d:{cash:-1000000,mind:4},set:{lent:true},log:'你投了一小筆當天使,把它當成可能歸零的樂透。',roll:[
@@ -1854,8 +1924,8 @@ A({
     {l:'跟她說「等公司上軌道就好」',h:'得:全力衝事業　失:家庭、心情',d:{rel:-16,mind:-4,fame:4},set:{married:true},log:'你把家庭排在事業後面、把公司衝上了一階;太太的失望,卻在一次次缺席裡結成了冰。',go:'house'},
     {l:'乾脆讓太太一起經營,夫妻同心',d:{rel:10,mind:4},set:{married:true},log:'你們變成事業夥伴,並肩作戰。少了浪漫,多了革命情感。',go:'house'}]},
   house:{chap:'第四章 · 置產',age:45,t:'廠房與住宅',x:'手頭寬裕了,你考慮置產。是買間好宅安頓家人、買廠辦收租當包租公,還是把資金全留著周轉與投資?',c:[
-    {l:'買一間好宅,給家人安穩',d:{cash:-5000000,debt:10000000,rel:10},set:{houses:1},log:'你買下一間一千五百萬的舒適房子,總算給了家人一個安穩的窩。',mood:'good',go:'borrow'},
-    {l:'買廠辦與店面收租,當包租公',d:{cash:-8000000,debt:16000000},set:{houses:2,landlord:true},log:'你砸兩千四百萬把不動產也變成生財工具,租金成了另一條穩定現金流。',mood:'good',go:'borrow'},
+    {l:'買一間好宅,給家人安穩',d:{cash:-5000000,debt:10000000,prop:15000000,mort:10000000,mortInit:10000000,rel:10},set:{houses:1},log:'你買下一間一千五百萬的舒適房子,總算給了家人一個安穩的窩。',mood:'good',go:'borrow'},
+    {l:'買廠辦與店面收租,當包租公',d:{cash:-8000000,debt:16000000,prop:24000000,mort:16000000,mortInit:16000000},set:{houses:2,landlord:true},log:'你砸兩千四百萬把不動產也變成生財工具,租金成了另一條穩定現金流。',mood:'good',go:'borrow'},
     {l:'不置產,資金全留著擴張與投資',d:{mind:2,rel:-6},f:['allin'],log:'你信奉「現金為王、周轉為大」,把資金全留在能生利的地方。',go:'borrow'}]},
   borrow:{chap:'第五章 · 人情',age:47,t:'合夥人的求援',x:'一起打拚多年的老合夥人,家裡出了急事,開口向你借三百萬。你們有交情,但你也清楚,借錢給朋友,常常是連本帶友一起賠。',c:[
     {l:'念在多年交情,爽快借出',d:{cash:-3000000,rel:12},set:{lent:true},log:'你二話不說幫了忙。這份義氣,朋友記在心裡。',mood:'good',go:'gamble'},
