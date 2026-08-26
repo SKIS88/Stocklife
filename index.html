@@ -855,15 +855,21 @@ function showChallenge(c){
 }
 /* 稀有度:依實測 15 局 + 機率模型估的達成率,讓玩家知道自己這張圖值不值得曬 */
 function rarityOf(nn,s){
+  /* 回傳 {p,txt}:p = 大約多少比例的玩家會走到這裡。
+     賠錢的結局不套「越厲害越稀有」的加成,也不用「稀有」的語氣——那是失敗,不是成就。 */
+  if(nn<0){
+    const p=(nn<-20000000)?8:(nn<-5000000)?14:(nn<-1000000)?18:12;
+    return {p,txt:`💀 大約每 ${Math.round(100/p)} 個人,就有 1 個走到這個下場`};
+  }
   let pi=0;for(let k=0;k<PHASE_AMT.length;k++){if(nn>=PHASE_AMT[k])pi=k;}
-  let p;                                        // p = 大約多少比例的玩家會走到這裡
-  if(nn<0)p=(nn<-10000000)?4:(nn<-3000000)?11:18;
-  else if(pi>=5)p=0.3; else if(pi>=4)p=1.5; else if(pi>=3)p=4; else if(pi>=2)p=13; else if(pi>=1)p=27; else p=22;
+  let p;
+  if(pi>=5)p=0.3; else if(pi>=4)p=1.5; else if(pi>=3)p=4; else if(pi>=2)p=13; else if(pi>=1)p=24; else p=30;
   if(s.retired)p*=0.75;                          // 主動功成身退比較少見
   if(s.mind>=70&&s.rel>=70)p*=0.55;              // 錢跟人都顧到,更少見
   if(lvl('insight')>=6||lvl('disc')>=5)p*=0.7;
   p=Math.max(0.2,Math.min(45,p));
-  return p<1?p.toFixed(1):Math.round(p);
+  const ps=p<1?p.toFixed(1):Math.round(p);
+  return {p:ps,txt:`🏅 這個結局,大約只有 ${ps}% 的人走得到`};
 }
 /* ---------- 開始 ---------- */
 let PNAME='';
@@ -1430,7 +1436,7 @@ function resolveEnding(){
   let statusLine='你走出了 1,000+ 種可能命運中,獨一無二的這一種';
   if(S.retired){statusLine='🏖️ 你選擇在人生高點功成身退';E.para='🏖️ 你在資本額最風光的時刻急流勇退,漂亮地為股海生涯畫下句點——真正的贏家,懂得何時離場。\n\n'+E.para;E.emoji='🏖️';E.title='功成身退的'+traitOf(S);}
   else if(S.bankrupt){statusLine='💀 你賠光了一切,人生被迫在此結束';E.para='💀 你把手上的現金與持股全數賠光,遊戲被迫在此結束——但別灰心,人生永遠可以重來。\n\n'+E.para;E.emoji='💸';}
-  const RARITY=rarityOf(nn,S);
+  const RARITY=rarityOf(nn,S);   // {p,txt}
   /* 戰帖對戰結果:同角色同種子才比,不然不公平 */
   let VERDICT=null;
   if(CHAL&&CHAL.char===CURID&&CHAL.seed===SEED){
@@ -1451,7 +1457,7 @@ function resolveEnding(){
     <div class="em" style="margin-top:26px">${E.emoji}</div>
     <div class="ti">${E.title}</div>
     <div class="rank">${rankTxt}</div>
-    <div class="rarity">🏅 這個結局,大約只有 ${RARITY}% 的人走得到</div>
+    <div class="rarity">${RARITY.txt}</div>
     ${VERDICT?`<div class="chal-verdict ${VERDICT.win?'win':'lose'}">${VERDICT.txt}</div>`:''}
     <div class="combo2">${statusLine}</div>
     <div class="tx">${E.para}</div>
@@ -1545,7 +1551,7 @@ function drawResultImage(){
   const emojiY=y+96; y+=140;
   const titleY0=y+titleFont; y+=titleLines.length*titleLH+18;
   const rankY=y+30; y+=92;
-  const rarTxt='🏅 這個結局,大約只有 '+(d.rarity!=null?d.rarity:'—')+'% 的人走得到';
+  const rarTxt=(d.rarity&&d.rarity.txt)||'';
   const rarY=y+4; y+=52;
   const vd=d.verdict; const vdY=vd?y+42:0; if(vd)y+=96;
   const lblY=y+22; y+=62;
@@ -1586,7 +1592,7 @@ function drawResultImage(){
   x.fillStyle='#2b0d10';x.font='900 '+titleFont+'px '+TC;let tly=titleY0;titleLines.forEach(l=>{x.fillText(l,cx,tly);tly+=titleLH;});
   x.fillStyle='#b8860b';x.font='600 34px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='4px';x.fillText(d.rankTxt.replace(/\s+/g,' '),cx,rankY);x.restore();
   /* 稀有度:給這張圖一個「值得曬」的理由 */
-  x.fillStyle='rgba(140,95,60,.85)';x.font='700 26px '+TC+','+EMO;x.fillText(rarTxt,cx,rarY);
+  if(rarTxt){x.fillStyle=(d.nn<0)?'rgba(194,40,54,.8)':'rgba(140,95,60,.85)';x.font='700 26px '+TC+','+EMO;x.fillText(rarTxt,cx,rarY);}
   /* 戰帖結果:贏過誰 / 輸給誰 */
   if(vd){
     x.font='800 32px '+TC+','+EMO;const vw=Math.min(W-200,x.measureText(vd.txt).width+72),vh=72,vx0=cx-vw/2,vy0=vdY-48;
