@@ -96,6 +96,18 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .dicebar input{width:132px;min-width:0;flex:0 1 auto}
 .dicebar label{font-weight:800;color:var(--sk-red3);white-space:nowrap}
 .dicebar .btn-mini{white-space:nowrap}
+.chalcard{text-align:center}
+.chal-kicker{font-size:13px;font-weight:800;letter-spacing:3px;color:var(--sk-red);margin-bottom:10px}
+.chal-who{font-size:15px;color:var(--ink2);line-height:1.7}
+.chal-who b{color:var(--ink);font-size:19px}
+.chal-amt{font-size:46px;font-weight:900;line-height:1.15;margin:8px 0 2px;background:linear-gradient(90deg,#d99a0b,#a06a00);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.chal-amt.neg{background:linear-gradient(90deg,#e8515f,#c22836);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.chal-sub{font-size:13px;color:var(--ink3);letter-spacing:1px}
+.chal-rule{font-size:12.5px;line-height:1.85;color:var(--ink3);margin-top:14px;padding-top:13px;border-top:1px solid rgba(184,134,11,.25)}
+.chal-verdict{font-size:15px;font-weight:800;text-align:center;margin:14px 0 0;padding:11px 14px;border-radius:14px;line-height:1.6}
+.chal-verdict.win{background:rgba(184,134,11,.12);border:1px solid rgba(184,134,11,.5);color:#8a5a00}
+.chal-verdict.lose{background:rgba(227,6,19,.07);border:1px solid rgba(227,6,19,.25);color:var(--sk-red)}
+.rarity{font-size:12.5px;font-weight:700;letter-spacing:1px;color:#8a5a00;text-align:center;margin-top:8px}
 .dicehint{font-size:11.5px;line-height:1.7;color:var(--ink3);margin:9px 4px 2px;text-align:center}
 .dicehint b{color:var(--sk-red);font-weight:800}
 .btn-mini{font-size:12px;color:var(--ink2);border:1px solid var(--glassborder);padding:9px 13px;border-radius:12px;transition:.15s;background:var(--glass2)}
@@ -483,7 +495,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
         <input id="seedInput" spellcheck="false">
         <button class="btn-mini" id="seedRand">🎲 重骰</button>
       </div>
-      <div class="dicehint">這顆<b>命運骰子</b>決定你一生的<b>一切</b>——資質、機運、股災時機。<br>手氣不順就<b>重骰</b>;把編號傳給朋友,一起挑戰同一段命運。</div>
+      <div class="dicehint">這顆<b>命運骰子</b>決定你一生的<b>一切</b>——資質、機運、股災時機。手氣不順就<b>重骰</b>。<br>⚔️ <b>玩完可以把這局當成戰帖傳給朋友</b>:他會遇到<b>一模一樣</b>的事件與股災,比誰活得漂亮。</div>
     </div>
 
     <div class="section-title">選擇你的出身</div>
@@ -492,6 +504,28 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
     <div class="foot">
       本作純屬虛構娛樂體驗,不構成任何投資建議或招攬。投資有風險,人生更是。
     </div>
+  </div>
+
+  <!-- 戰帖:朋友點分享連結進來看到的第一頁 -->
+  <div id="chal" style="display:none">
+    <div class="glass hero chalcard">
+      <div class="chal-kicker">🥊 你收到一封戰帖</div>
+      <div class="chal-who"><b id="chalBy"></b> 用這段命運走完了一生</div>
+      <div class="chal-amt mono" id="chalAmt"></div>
+      <div class="chal-sub" id="chalSub"></div>
+      <div class="chal-rule">你會拿到 <b>完全相同</b> 的命運骰子——同樣的事件、同樣的時機、同樣的股災。<br>差別只有一個:<b>你的選擇</b>。</div>
+      <div class="seedbar" style="margin-top:14px">
+        <label>你的名字</label>
+        <input id="chalName" placeholder="輸入你的名字(可留空)" spellcheck="false" maxlength="12">
+      </div>
+      <div class="endbtns" style="margin-top:14px">
+        <button class="eb-main" id="chalGo">⚔️ 接受挑戰,走同一段命運</button>
+      </div>
+      <div class="endbtns" style="margin-top:9px">
+        <button class="eb-alt" id="chalSkip">我想自己重新開一局</button>
+      </div>
+    </div>
+    <div class="foot">本作純屬虛構娛樂體驗,不構成任何投資建議或招攬。投資有風險,人生更是。</div>
   </div>
 
   <!-- GAME -->
@@ -799,6 +833,38 @@ function buildStart(){
 }
 document.getElementById('seedRand').onclick=()=>{document.getElementById('seedInput').value=genSeed();};
 
+/* ---------- 戰帖 ---------- */
+let CHAL=null;                       // {by,vs,seed,char} — 從朋友的分享連結進來時才有
+function showChallenge(c){
+  document.getElementById('start').style.display='none';
+  document.getElementById('chal').style.display='block';
+  document.getElementById('chalBy').textContent=CHAL.by;
+  const a=document.getElementById('chalAmt');a.textContent=fmt(CHAL.vs);a.className='chal-amt mono'+(CHAL.vs<0?' neg':'');
+  document.getElementById('chalSub').textContent=`${c.emoji} ${roleOf(c)} · 命運種子 ${CHAL.seed}`;
+  try{track('challenge_view',{character:c.id,vs_wan:Math.round(CHAL.vs/10000)});}catch(e){}
+  document.getElementById('chalGo').onclick=()=>{
+    const n=(document.getElementById('chalName').value||'').trim();
+    if(n)document.getElementById('nameInput').value=n;
+    try{track('challenge_accept',{character:c.id});}catch(e){}
+    document.getElementById('chal').style.display='none';startGame(c);};
+  document.getElementById('chalSkip').onclick=()=>{CHAL=null;
+    document.getElementById('chal').style.display='none';
+    document.getElementById('start').style.display='block';
+    document.getElementById('seedInput').value=genSeed();window.scrollTo(0,0);};
+  window.scrollTo(0,0);
+}
+/* 稀有度:依實測 15 局 + 機率模型估的達成率,讓玩家知道自己這張圖值不值得曬 */
+function rarityOf(nn,s){
+  let pi=0;for(let k=0;k<PHASE_AMT.length;k++){if(nn>=PHASE_AMT[k])pi=k;}
+  let p;                                        // p = 大約多少比例的玩家會走到這裡
+  if(nn<0)p=(nn<-10000000)?4:(nn<-3000000)?11:18;
+  else if(pi>=5)p=0.3; else if(pi>=4)p=1.5; else if(pi>=3)p=4; else if(pi>=2)p=13; else if(pi>=1)p=27; else p=22;
+  if(s.retired)p*=0.75;                          // 主動功成身退比較少見
+  if(s.mind>=70&&s.rel>=70)p*=0.55;              // 錢跟人都顧到,更少見
+  if(lvl('insight')>=6||lvl('disc')>=5)p*=0.7;
+  p=Math.max(0.2,Math.min(45,p));
+  return p<1?p.toFixed(1):Math.round(p);
+}
 /* ---------- 開始 ---------- */
 let PNAME='';
 function startGame(c){
@@ -1124,7 +1190,7 @@ function renderMisfortune(){
     <div class="result bad" style="margin-top:16px">這場意外讓你損失了 <b>${fmt(dmg)}</b>${mf.mind?`,心態受創`:''}。你開始重新掂量:繼續留在市場裡,到底值不值得?</div>`;
   stage.style.animation='none';void stage.offsetWidth;stage.style.animation='fade .35s';
   const nb=document.createElement('button');nb.className='nextbtn';
-  if(S.bankrupt){nb.textContent='💀 破產結算 →';nb.onclick=()=>resolveEnding();}
+  if(S.bankrupt){nb.textContent='💀 破產結算 →';nb.onclick=()=>bankruptGate();}
   else{nb.textContent='繼續 →';nb.onclick=()=>{step();window.scrollTo({top:0,behavior:'smooth'});};}
   stage.appendChild(nb);
 }
@@ -1210,7 +1276,7 @@ function resolveBet(sc,i){
     ${win?`<b>${t.label}(×${t.mult})</b>,成功率 ${Math.round(winP*100)}% —— <b style="color:var(--up)">投資成功!</b>獲利 <b>+${fmt(profit)}</b>,連同本金轉入<b>持股</b>,之後每年跟著市場滾複利。`:`<b>${t.label}(×${t.mult})</b>,成功率 ${Math.round(winP*100)}% —— <b style="color:var(--down)">這次沒看準</b>,虧損 <b>−${fmt(loss)}</b>。`}`;
   stage.appendChild(div);
   const nb=document.createElement('button');nb.className='nextbtn';
-  if(S.bankrupt){nb.textContent='💀 破產結算 →';nb.onclick=()=>resolveEnding();}
+  if(S.bankrupt){nb.textContent='💀 破產結算 →';nb.onclick=()=>bankruptGate();}
   else{nb.textContent='繼續 →';nb.onclick=()=>{if(sc.gen)stepKeep();else continueTo(sc.go);};}
   stage.appendChild(nb);
 }
@@ -1334,11 +1400,44 @@ function rankOf(nn,s){
 
 const LOGO_SVG=`<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:22px;font-weight:900;letter-spacing:5px;color:#fff">新光證券</div><div style="font-size:11px;letter-spacing:3px;color:#ffd9d0;font-weight:700">股神養成計畫 · 新光證券 製作</div></div>`;
 
+/* 破產不直接結算:先給一次「同一副命運再走一次」的機會(第二幕) */
+let RETRIED=false;
+function bankruptGate(){
+  if(RETRIED){resolveEnding();return;}
+  try{track('bankrupt_gate',{character:CURID,age:S.age});}catch(e){}
+  document.getElementById('logBox').style.display='none';
+  const stage=document.getElementById('stage');
+  stage.innerHTML=`<div class="ending" id="bkGate" style="text-align:center">
+    <div class="em">💸</div>
+    <div class="ti">你在 ${S.age} 歲賠光了</div>
+    <div class="combo2">現金和持股全數歸零,這一局到此為止</div>
+    <div class="tx" style="text-align:center">但你已經知道這副命運長什麼樣子了——<b>同樣的事件、同樣的時機、同樣的股災</b>。<br><br>要不要用<b>一模一樣的命運</b>再走一次,看看換個選擇會怎樣?</div>
+    <div class="endbtns" style="margin-top:18px">
+      <button class="eb-main" id="retryBtn">🔁 用同一副命運,再走一次</button>
+    </div>
+    <div class="endbtns" style="margin-top:10px">
+      <button class="eb-alt" id="acceptBtn">接受這個結局,看我的結算圖</button>
+    </div>
+  </div>`;
+  document.getElementById('retryBtn').onclick=()=>{
+    try{track('bankrupt_retry',{character:CURID,age:S.age});}catch(e){}
+    RETRIED=true;document.getElementById('seedInput').value=SEED;startGame(CUR);};
+  document.getElementById('acceptBtn').onclick=()=>resolveEnding();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 function resolveEnding(){
   const nn=net(S),E=composeEnding(S),rankTxt=rankOf(nn,S);
   let statusLine='你走出了 1,000+ 種可能命運中,獨一無二的這一種';
   if(S.retired){statusLine='🏖️ 你選擇在人生高點功成身退';E.para='🏖️ 你在資本額最風光的時刻急流勇退,漂亮地為股海生涯畫下句點——真正的贏家,懂得何時離場。\n\n'+E.para;E.emoji='🏖️';E.title='功成身退的'+traitOf(S);}
   else if(S.bankrupt){statusLine='💀 你賠光了一切,人生被迫在此結束';E.para='💀 你把手上的現金與持股全數賠光,遊戲被迫在此結束——但別灰心,人生永遠可以重來。\n\n'+E.para;E.emoji='💸';}
+  const RARITY=rarityOf(nn,S);
+  /* 戰帖對戰結果:同角色同種子才比,不然不公平 */
+  let VERDICT=null;
+  if(CHAL&&CHAL.char===CURID&&CHAL.seed===SEED){
+    const df=nn-CHAL.vs,win=df>=0;
+    VERDICT={win,txt:win?`🏆 你贏了 ${CHAL.by}!同一段命運,你多留下 ${fmt(df)}`:`😤 你輸給 ${CHAL.by} ${fmt(-df)}——要不要再走一次?`,img:win?`🏆 同一段命運,贏 ${CHAL.by} ${fmt(df)}`:`😤 同一段命運,輸 ${CHAL.by} ${fmt(-df)}`};
+    try{track('challenge_result',{character:CURID,result:win?'win':'lose',diff_wan:Math.round(df/10000)});}catch(e){}
+  }
   document.getElementById('logBox').style.display='none';
   const stage=document.getElementById('stage');
   stage.innerHTML=`<div class="ending">
@@ -1352,6 +1451,8 @@ function resolveEnding(){
     <div class="em" style="margin-top:26px">${E.emoji}</div>
     <div class="ti">${E.title}</div>
     <div class="rank">${rankTxt}</div>
+    <div class="rarity">🏅 這個結局,大約只有 ${RARITY}% 的人走得到</div>
+    ${VERDICT?`<div class="chal-verdict ${VERDICT.win?'win':'lose'}">${VERDICT.txt}</div>`:''}
     <div class="combo2">${statusLine}</div>
     <div class="tx">${E.para}</div>
     <div class="final">
@@ -1368,20 +1469,20 @@ function resolveEnding(){
     <div class="toast" id="toast"></div>
     <div class="foot"><span class="by">${SEED?`命運種子 <span class="mono">${SEED}</span>`:''}</div>
   </div>`;
-  LAST_END={E,nn,rankTxt,mind:Math.round(S.mind),rel:Math.round(S.rel),fame:Math.round(S.fame),age:S.age,ovr:calcOVR(),skills:SKILLS.map(s=>({n:s.n,lv:lvl(s.id)}))};
+  LAST_END={E,nn,rankTxt,rarity:RARITY,verdict:VERDICT,mind:Math.round(S.mind),rel:Math.round(S.rel),fame:Math.round(S.fame),age:S.age,ovr:calcOVR(),skills:SKILLS.map(s=>({n:s.n,lv:lvl(s.id)}))};
   try{const cv=drawResultImage();const im=document.getElementById('resultImg');if(im){im.src=cv.toDataURL('image/jpeg',0.85);
     /* 📊 長按 / 右鍵存圖:手機長按圖片會觸發 contextmenu,補上按鈕以外的存圖路徑 */
     let lp=false;im.addEventListener('contextmenu',()=>{if(lp)return;lp=true;track('image_longpress',{character:CURID,ending:E.title});});
   }}catch(e){const w=document.querySelector('.resultimg');if(w)w.style.display='none';}
   /* 📊 完成率、玩到幾歲、結局好壞、結局稱號 */
   track('game_finish',{character:CURID,ending:E.title,outcome:S.bankrupt?'破產':(S.retired?'退休':'終局'),final_age:S.age,net_wan:Math.round(nn/10000)});
-  document.getElementById('againBtn').onclick=()=>{track('play_again',{character:CURID});startGame(CUR);};
+  document.getElementById('againBtn').onclick=()=>{track('play_again',{character:CURID});RETRIED=false;startGame(CUR);};
   document.getElementById('otherBtn').onclick=()=>{track('change_character');quitToStart();};
   document.getElementById('imgBtn').onclick=()=>{track('download_image',{character:CURID,ending:E.title});downloadResultImage();};
   document.getElementById('shareBtn').onclick=()=>{track('share_link',{character:CURID});copyShareLink();};
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function quitToStart(){document.getElementById('game').style.display='none';document.getElementById('start').style.display='block';buildStart();window.scrollTo(0,0);}
+function quitToStart(){RETRIED=false;CHAL=null;document.getElementById('game').style.display='none';document.getElementById('start').style.display='block';buildStart();window.scrollTo(0,0);}
 document.getElementById('quitBtn').onclick=()=>{if(confirm('確定放棄這一生,回去重選出身嗎?')){
   /* 📊 中途放棄:記錄放棄時的角色、年齡、資本額,才知道玩家都卡在哪一段 */
   try{track('quit_game',{character:CURID,quit_age:S.age,years_played:S.age-((CUR.start&&CUR.start.age)||S.age),net_wan:Math.round(net(S)/10000)});}catch(e){}
@@ -1392,9 +1493,13 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheets);
 
 /* ---------- 分享 ---------- */
 function toast(m){const t=document.getElementById('toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400);}
-function shareURL(){return location.origin+location.pathname+'?char='+encodeURIComponent(CURID)+'&seed='+encodeURIComponent(SEED)+(PNAME?'&name='+encodeURIComponent(PNAME):'');}
-function copyShareLink(){const u=shareURL();const done=()=>toast('分享連結已複製!貼給朋友走同一條命運');const copy=()=>{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done).catch(()=>fb(u,done));else fb(u,done);};
-  if(navigator.share){navigator.share({title:'股神養成計畫',text:'我在股海走完了一生,來挑戰跟我同一段命運,看你能不能贏過我!',url:u}).catch(copy);}else copy();}
+/* 分享連結 = 戰帖:帶上「我的成績」與「我是誰」,不帶 name(朋友要用自己的名字玩,才會產出屬於他的圖) */
+function shareURL(){const wan=LAST_END?Math.round(LAST_END.nn/10000):null;
+  return location.origin+location.pathname+'?char='+encodeURIComponent(CURID)+'&seed='+encodeURIComponent(SEED)
+    +(wan!==null?'&vs='+wan:'')+(PNAME?'&by='+encodeURIComponent(PNAME):'');}
+function copyShareLink(){const u=shareURL();const done=()=>toast('戰帖連結已複製!貼給朋友,看他能不能贏過你');const copy=()=>{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done).catch(()=>fb(u,done));else fb(u,done);};
+  const wanTxt=LAST_END?fmt(LAST_END.nn):'';
+  if(navigator.share){navigator.share({title:'股神養成計畫',text:`我在股海走完了一生,最後留下 ${wanTxt}。同一段命運換你走一次,看你能不能贏過我!`,url:u}).catch(copy);}else copy();}
 function fb(t,cb){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');cb&&cb();}catch(e){toast('複製失敗,請手動複製網址');}document.body.removeChild(ta);}
 
 /* ---------- 結局圖(canvas) ---------- */
@@ -1440,6 +1545,9 @@ function drawResultImage(){
   const emojiY=y+96; y+=140;
   const titleY0=y+titleFont; y+=titleLines.length*titleLH+18;
   const rankY=y+30; y+=92;
+  const rarTxt='🏅 這個結局,大約只有 '+(d.rarity!=null?d.rarity:'—')+'% 的人走得到';
+  const rarY=y+4; y+=52;
+  const vd=d.verdict; const vdY=vd?y+42:0; if(vd)y+=96;
   const lblY=y+22; y+=62;
   const amtY=y+96; y+=152;
   const phaseY=y+30; y+=78;          // 階段徽章:讓玩家知道自己到底算哪一級
@@ -1477,6 +1585,16 @@ function drawResultImage(){
   x.font='104px '+EMO;x.fillText(E.emoji,cx,emojiY);
   x.fillStyle='#2b0d10';x.font='900 '+titleFont+'px '+TC;let tly=titleY0;titleLines.forEach(l=>{x.fillText(l,cx,tly);tly+=titleLH;});
   x.fillStyle='#b8860b';x.font='600 34px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='4px';x.fillText(d.rankTxt.replace(/\s+/g,' '),cx,rankY);x.restore();
+  /* 稀有度:給這張圖一個「值得曬」的理由 */
+  x.fillStyle='rgba(140,95,60,.85)';x.font='700 26px '+TC+','+EMO;x.fillText(rarTxt,cx,rarY);
+  /* 戰帖結果:贏過誰 / 輸給誰 */
+  if(vd){
+    x.font='800 32px '+TC+','+EMO;const vw=Math.min(W-200,x.measureText(vd.txt).width+72),vh=72,vx0=cx-vw/2,vy0=vdY-48;
+    x.fillStyle=vd.win?'rgba(184,134,11,.14)':'rgba(227,6,19,.07)';
+    x.strokeStyle=vd.win?'rgba(184,134,11,.6)':'rgba(227,6,19,.3)';x.lineWidth=2;
+    roundRect(x,vx0,vy0,vw,vh,20);x.fill();x.stroke();
+    x.fillStyle=vd.win?'#8a5a00':'#c22836';x.fillText(vd.img||vd.txt,cx,vdY);
+  }
   /* 資產:主角級大數字 */
   x.fillStyle='rgba(160,110,60,.65)';x.font='600 26px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='8px';x.fillText('最 終 資 本 額',cx,lblY);x.restore();
   const amtGrad=x.createLinearGradient(0,amtY-100,0,amtY);
@@ -1755,7 +1873,14 @@ A({
  }
 });
 buildStart();
-(function(){const p=new URLSearchParams(location.search);const seed=p.get('seed'),cid=p.get('char'),nm=p.get('name');if(seed)document.getElementById('seedInput').value=seed;if(nm)document.getElementById('nameInput').value=nm;if(cid){const c=CHARS.find(x=>x.id===cid);if(c)startGame(c);}})();
+(function(){const p=new URLSearchParams(location.search);
+  const seed=p.get('seed'),cid=p.get('char'),by=p.get('by'),vs=p.get('vs'),nm=p.get('name');
+  if(seed)document.getElementById('seedInput').value=seed;
+  if(nm&&!by)document.getElementById('nameInput').value=nm;   // 舊版連結相容
+  const c=cid?CHARS.find(x=>x.id===cid):null;
+  if(!c)return;
+  if(by&&vs!==null&&vs!==''&&isFinite(+vs)){CHAL={by:by.slice(0,12),vs:Math.round(+vs)*10000,seed:seed||'',char:cid};showChallenge(c);return;}
+  startGame(c);})();
 </script>
 </body>
 </html>
