@@ -108,7 +108,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .chal-verdict.win{background:rgba(184,134,11,.12);border:1px solid rgba(184,134,11,.5);color:#8a5a00}
 .chal-verdict.lose{background:rgba(227,6,19,.07);border:1px solid rgba(227,6,19,.25);color:var(--sk-red)}
 .rarity{font-size:12.5px;font-weight:700;letter-spacing:1px;color:#8a5a00;text-align:center;margin-top:8px}
-.dicehint{font-size:11.5px;line-height:1.7;color:var(--ink3);margin:9px 4px 2px;text-align:center}
+.dicehint{font-size:11.5px;line-height:1.9;color:var(--ink3);margin:10px 2px 2px;text-align:center}
+.dicehint .ln{display:block}          /* 每一句自成一行,斷句由文案決定,不交給瀏覽器 */
+.dicehint .ln+.ln{margin-top:1px}
+.dicehint .sep{display:block;height:6px}
+@media(max-width:370px){.dicehint{font-size:10.5px}}
 .dicehint b{color:var(--sk-red);font-weight:800}
 .btn-mini{font-size:12px;color:var(--ink2);border:1px solid var(--glassborder);padding:9px 13px;border-radius:12px;transition:.15s;background:var(--glass2)}
 .btn-mini:hover{border-color:var(--sk-red3);color:#fff}
@@ -465,7 +469,17 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
 .wealth2 .wnet{display:flex;align-items:baseline;justify-content:space-between}
 .wealth2 .wk{font-size:12.5px;color:var(--ink3);font-weight:600}
 .wealth2 .wv{font-size:23px;font-weight:900;color:#b8860b}
-.wealth2 .wmini{font-size:12.5px;color:var(--ink2);margin-top:5px;padding-top:6px;border-top:1px dashed rgba(0,0,0,.1)}
+.wealth2 .wmini{font-size:12.5px;color:var(--ink2);margin-top:5px;padding-top:6px;border-top:1px dashed rgba(0,0,0,.1);
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;row-gap:2px}
+.wealth2 .wmini .wm{white-space:nowrap;padding:0 6px}          /* 名稱和金額綁在一起,不會斷到下一行 */
+.wealth2 .wmini .wm:not(:first-child)::before{content:'·';margin-right:6px;opacity:.38;font-weight:400}
+/* 有房產時是四欄,自動縮一級讓四個項目擠得進同一行 */
+.wealth2 .wmini.four{font-size:11px;letter-spacing:-.2px}
+.wealth2 .wmini.four .wm{padding:0 3.5px}
+.wealth2 .wmini.four .wm:not(:first-child)::before{margin-right:3.5px}
+@media(max-width:400px){.wealth2 .wmini{font-size:11.5px}.wealth2 .wmini .wm{padding:0 4px}
+  .wealth2 .wmini .wm:not(:first-child)::before{margin-right:4px}
+  .wealth2 .wmini.four{font-size:10.5px}}
 .wealth2 .wmini b{color:var(--ink);font-weight:700}
 .wealth2 .wmini .neg{color:#d63d4c}
 .hud .bars{gap:9px}
@@ -495,7 +509,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
         <input id="seedInput" spellcheck="false">
         <button class="btn-mini" id="seedRand">🎲 重骰</button>
       </div>
-      <div class="dicehint">這顆<b>命運骰子</b>決定你一生的<b>一切</b>——資質、機運、股災時機。手氣不順就<b>重骰</b>。<br>⚔️ <b>玩完可以把這局當成戰帖傳給朋友</b>:他會遇到<b>一模一樣</b>的事件與股災,比誰活得漂亮。</div>
+      <div class="dicehint"><span class="ln">這顆<b>命運骰子</b>決定你一生的<b>一切</b></span><span class="ln">資質、機運、股災時機,手氣不順就<b>重骰</b>。</span><span class="sep"></span><span class="ln">⚔️ <b>玩完可以把這局當成戰帖傳給朋友</b></span><span class="ln">他會遇到<b>一模一樣</b>的事件與股災,比誰活得漂亮。</span></div>
     </div>
 
     <div class="section-title">選擇你的出身</div>
@@ -540,7 +554,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
       </div>
       <div class="wealth2">
         <div class="wnet"><span class="wk">資本額</span><span class="wv mono" id="wNet">—</span></div>
-        <div class="wmini">現金 <b class="mono" id="wCash">—</b> · 持股 <b class="mono" id="wStock">—</b><span id="wPropWrap" style="display:none"> · 房產 <b class="mono" id="wProp">—</b></span> · 負債 <b class="mono neg" id="wDebt">—</b></div>
+        <div class="wmini"><span class="wm">現金 <b class="mono" id="wCash">—</b></span><span class="wm">持股 <b class="mono" id="wStock">—</b></span><span class="wm" id="wPropWrap" style="display:none">房產 <b class="mono" id="wProp">—</b></span><span class="wm">負債 <b class="mono neg" id="wDebt">—</b></span></div>
       </div>
       <div class="phasebar">
         <div class="phz"><span class="phname" id="hPhase">—</span><span class="phnext" id="hPhaseNext"></span></div>
@@ -939,7 +953,8 @@ function renderHUD(){
   document.getElementById('wCash').textContent=fmt(S.cash);
   document.getElementById('wStock').textContent=fmt(S.stock);
   document.getElementById('wDebt').textContent=S.debt>0?fmt(S.debt):'0';
-  const pw=document.getElementById('wPropWrap');if(pw){if(S.prop>0){pw.style.display='';document.getElementById('wProp').textContent=fmt(S.prop);}else pw.style.display='none';}
+  const pw=document.getElementById('wPropWrap');const wmi=document.querySelector('.wealth2 .wmini');
+  if(pw){if(S.prop>0){pw.style.display='inline';document.getElementById('wProp').textContent=fmt(S.prop);wmi&&wmi.classList.add('four');}else{pw.style.display='none';wmi&&wmi.classList.remove('four');}}
   const nn=net(S);const ne=document.getElementById('wNet');ne.textContent=fmt(nn);ne.style.color=nn>=0?'#b8860b':'#d63d4c';
   setBar('Mind',S.mind);setBar('Rel',S.rel);setBar('Fame',S.fame);
   const ov=document.getElementById('hOvr');if(ov)ov.textContent=calcOVR();
@@ -991,7 +1006,7 @@ function checkRuin(){
     S.prop=0;S.mort=0;S.mortInit=0;
     S.debt=Math.max(0,(S.debt||0)-payoff);
     S.cash+=Math.max(0,gross-payoff);
-    if(S.flags)S.flags.houses=0;
+    if(S.flags){S.flags.houses=0;S.flags.landlord=false;}   // 房子沒了,包租公的稱號也該一起卸下
     S.soldHouse=true;
     S.log.push({yr:S.year,txt:`🏠 走投無路,只好賣掉名下房產變現 ${fmt(Math.max(0,gross-payoff))}`});
     if(S.cash>0||S.stock>0)return;
