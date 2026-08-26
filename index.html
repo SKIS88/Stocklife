@@ -1007,6 +1007,7 @@ function checkRuin(){
     S.debt=Math.max(0,(S.debt||0)-payoff);
     S.cash+=Math.max(0,gross-payoff);
     if(S.flags){S.flags.houses=0;S.flags.landlord=false;}   // 房子沒了,包租公的稱號也該一起卸下
+    S.lastRent=null;                                        // 也不能再顯示「房客準時匯款」的收租橫幅
     S.soldHouse=true;
     S.log.push({yr:S.year,txt:`🏠 走投無路,只好賣掉名下房產變現 ${fmt(Math.max(0,gross-payoff))}`});
     if(S.cash>0||S.stock>0)return;
