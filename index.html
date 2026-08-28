@@ -1111,7 +1111,7 @@ function startGame(c){
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.prop=0;S.mort=0;S.houseYr=null;
   S.century=false;S.forcedRetire=false;S.usedOnce=[];S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
-  S.retireOffered=false;S.lastRetireAsk=undefined;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
+  S.retireOffered=false;S.lastRetireAsk=undefined;S.recentMisf=[];S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
   S.cash=Math.max(0,Math.round(S.cash+(op.cashU||0)*(c.income||100000)));
@@ -1549,7 +1549,14 @@ function renderRetire(){
 }
 function renderMisfortune(){
   AWAIT=false;
-  const mf=MISFORTUNES[Math.floor(RNG()*MISFORTUNES.length)];
+  /* 意外也不要一直重複同一件(被詐騙六次很怪) */
+  if(!S.recentMisf)S.recentMisf=[];
+  let mpool=MISFORTUNES.map((_,i)=>i).filter(i=>S.recentMisf.indexOf(i)<0);
+  if(!mpool.length){S.recentMisf=[];mpool=MISFORTUNES.map((_,i)=>i);}
+  const mi=mpool[Math.floor(RNG()*mpool.length)];
+  S.recentMisf.push(mi);
+  while(S.recentMisf.length>Math.max(3,MISFORTUNES.length-2))S.recentMisf.shift();
+  const mf=MISFORTUNES[mi];
   const before=net(S);
   let dmg=Math.round(mf.pct*(Math.max(0,S.cash)+Math.max(0,S.stock)));
   let rem=dmg;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;
