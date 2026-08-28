@@ -851,36 +851,36 @@ const GEN_LIFE=[
    {l:'請全辦公室喝手搖慶祝',d:{cash:-Math.min(U*0.05,30000),rel:8,fame:4},log:'你霸氣訂了幾十杯手搖,辦公室歡聲雷動。Team Taiwan,也是 Team 你。',mood:'good'},
    {l:'在家跟著轉播吶喊',d:{mind:8},log:'你抱著抱枕看完最後一個出局數,眼眶有點熱。有些感動,不用花錢。',mood:'good'}]}),
  /* ===== 人生關卡:一次選擇,往後每年都跟著你 ===== */
- (U)=>({ic:'\U0001f9d3',t:'誰來照顧爸媽',req:s=>s.age>=46&&!(s.flags&&s.flags.careDone),x:'一通電話打斷了平常的一天:爸爸在浴室跌倒,住院了。醫生說出院後沒辦法再自己生活。兄弟姊妹在群組裡各自為難,最後那句「那你呢?」還是丟到了你身上。',c:[
+ (U)=>({ic:'🧓',t:'誰來照顧爸媽',req:s=>s.age>=46&&!(s.flags&&s.flags.careDone),x:'一通電話打斷了平常的一天:爸爸在浴室跌倒,住院了。醫生說出院後沒辦法再自己生活。兄弟姊妹在群組裡各自為難,最後那句「那你呢?」還是丟到了你身上。',c:[
    {l:'請專業看護,錢我出',h:'得:專心工作　失:每年一筆固定支出',d:{mind:-4,rel:6},set:{careDone:true},
-    eff:s=>addBurden({kind:'cash',ic:'\U0001f9d1‍⚕️',t:'爸媽的看護費',amt:Math.min(U*0.32,520000),yrs:11,endLog:'\U0001f56f️ 這一年,你不用再繳看護費了。你在銀行看著那筆沒扣掉的錢,坐了很久。'}),
+    eff:s=>addBurden({kind:'cash',ic:'🧑‍⚕️',t:'爸媽的看護費',amt:Math.min(U*0.32,520000),yrs:11,endLog:'🕯️ 這一年,你不用再繳看護費了。你在銀行看著那筆沒扣掉的錢,坐了很久。'}),
     log:'你請了看護,把錢當成盡孝的方式。心裡有一塊地方,始終不太踏實。'},
    {l:'我自己來照顧',h:'得:陪伴與心安　失:本業收入砍到六成',d:{rel:16,mind:-8,fame:-4},set:{careDone:true,caregiver:true},
-    eff:s=>addBurden({kind:'inc',ic:'\U0001f91d',t:'照顧爸媽的日子',mul:0.6,yrs:9,endLog:'\U0001f33f 照顧的日子告一段落。你回到職場,發現世界走得比你快很多。'}),
+    eff:s=>addBurden({kind:'inc',ic:'🤝',t:'照顧爸媽的日子',mul:0.6,yrs:9,endLog:'🌿 照顧的日子告一段落。你回到職場,發現世界走得比你快很多。'}),
     log:'你調整了工作、減少了應酬,把時間還給爸媽。收入掉了一大截,但有些事錯過就沒有了。'},
    {l:'跟手足談分攤',h:'得:壓力分散　失:可能傷了感情',d:{},set:{careDone:true},roll:[
      {w:5,d:{rel:10,mind:4},log:'大家各出一份、輪流排班。爸媽被照顧得很好,你們也久違地常常見面了。',mood:'good'},
      {w:5,d:{rel:-18,mind:-14},log:'錢的事談到最後變成算舊帳。爸媽的看護排好了,家族群組卻安靜了下來。',mood:'bad',
-      eff:s=>addBurden({kind:'cash',ic:'\U0001f9d1‍⚕️',t:'獨自扛下的看護費',amt:Math.min(U*0.25,420000),yrs:9})}]}]}),
- (U)=>({ic:'\U0001f3da️',t:'老家要過戶',req:s=>s.age>=44&&!(s.flags&&s.flags.oldHome),x:'爸媽把權狀攤在餐桌上:「這間老房子,登記到你名下好不好?」三十年的舊公寓,沒電梯、會漏水,但它是你長大的地方。',c:[
+      eff:s=>addBurden({kind:'cash',ic:'🧑‍⚕️',t:'獨自扛下的看護費',amt:Math.min(U*0.25,420000),yrs:9})}]}]}),
+ (U)=>({ic:'🏚️',t:'老家要過戶',req:s=>s.age>=44&&!(s.flags&&s.flags.oldHome),x:'爸媽把權狀攤在餐桌上:「這間老房子,登記到你名下好不好?」三十年的舊公寓,沒電梯、會漏水,但它是你長大的地方。',c:[
    {l:'接下來,那是我家',h:'得:一間房產　失:每年稅金與修繕',d:{rel:12,mind:6},set:{oldHome:true},
     eff:s=>{S.prop=(S.prop||0)+Math.min(U*4,7000000);if(!S.flags.houses)S.flags.houses=0;S.flags.houses++;
-      addBurden({kind:'cash',ic:'\U0001f527',t:'老家的稅金與修繕',amt:Math.min(U*0.1,160000),yrs:99});},
+      addBurden({kind:'cash',ic:'🔧',t:'老家的稅金與修繕',amt:Math.min(U*0.1,160000),yrs:99});},
     log:'你簽了字。房子過到你名下的那天,爸媽笑得很開心,你則開始煩惱屋頂什麼時候要抓漏。',mood:'good'},
    {l:'賣掉,把錢分一分',h:'得:一筆現金　失:家人心裡的疙瘩',d:{cash:Math.min(U*2.6,4200000),rel:-20,mind:-10},set:{oldHome:true},
     log:'房子賣了,錢分得很公平。只是每次經過那條巷子,你都會刻意繞路。',mood:'bad'},
    {l:'先不動,維持現狀',d:{mind:-3},set:{oldHome:true},log:'你說再看看。權狀又被收回抽屜,像這個話題一樣,被折好放著。'}]}),
- (U)=>({ic:'\U0001f4bc',t:'那封資遣通知',req:s=>s.age>=45&&s.age<=62&&!!CUR.income&&!(s.flags&&s.flags.laidoff),x:'人資把你叫進小會議室,桌上放著一份你看過別人拿、沒想過自己會拿的文件。「公司組織調整,你的職位取消了。」窗外的天氣好得不像話。',c:[
+ (U)=>({ic:'💼',t:'那封資遣通知',req:s=>s.age>=45&&s.age<=62&&!!CUR.income&&!(s.flags&&s.flags.laidoff),x:'人資把你叫進小會議室,桌上放著一份你看過別人拿、沒想過自己會拿的文件。「公司組織調整,你的職位取消了。」窗外的天氣好得不像話。',c:[
    {l:'不找了,靠投資養自己',h:'得:全部時間　失:本業收入歸零',d:{mind:-6,fame:-6},set:{laidoff:true,proTrader:true},
-    eff:s=>addBurden({kind:'inc',ic:'\U0001f4c9',t:'沒有薪水的日子',mul:0.15,yrs:99}),
+    eff:s=>addBurden({kind:'inc',ic:'📉',t:'沒有薪水的日子',mul:0.15,yrs:99}),
     log:'你決定不再投履歷。從此每個月的生活費,都要從市場裡拿出來——沒有底薪的那種拿。',mood:'bad'},
    {l:'先求有,屈就一份低薪',h:'得:穩定　失:收入砍半',d:{mind:2,rel:5},set:{laidoff:true},
-    eff:s=>addBurden({kind:'inc',ic:'\U0001f4bc',t:'重新開始的那份工作',mul:0.55,yrs:99}),
+    eff:s=>addBurden({kind:'inc',ic:'💼',t:'重新開始的那份工作',mul:0.55,yrs:99}),
     log:'你接了一份薪水少一半的工作。第一天報到,發現主管比你小十歲。'},
    {l:'拿資遣費創業',h:'得:翻身的可能　失:可能什麼都不剩',d:{cash:Math.min(U*0.8,1200000)},set:{laidoff:true},roll:[
      {w:3,d:{cash:Math.min(U*3.5,6000000),mind:14,fame:12},log:'你把資遣費當成第一桶金。兩年後,你變成那個在會議室另一邊的人。',mood:'good'},
      {w:7,d:{cash:-Math.min(U*1.6,2600000),mind:-16,rel:-6},set:{laidoff:true},log:'燒完了資遣費,還倒貼了積蓄。你把招牌拆下來那天,沒有告訴任何人。',mood:'bad',
-      eff:s=>addBurden({kind:'inc',ic:'\U0001f4bc',t:'創業收攤之後',mul:0.5,yrs:99})}]}]}),
+      eff:s=>addBurden({kind:'inc',ic:'💼',t:'創業收攤之後',mul:0.5,yrs:99})}]}]}),
  (U)=>({ic:'✍️',t:'一個簽名的請求',req:s=>s.age>=34&&!(s.flags&&s.flags.guarantor),x:'認識二十年的朋友約你吃飯,聊到一半才說出真正的目的:他公司要跟銀行借一筆錢,需要一個保證人。「就是簽個名而已,不會有事的。」',c:[
    {l:'簽了,朋友一場',h:'得:一份人情　失:幾年後可能引爆',d:{rel:12,mind:4,fame:3},set:{guarantor:true},
     eff:s=>addFuse({ic:'✍️',t:'當年那個簽名',at:S.year+5,p:0.4,amt:Math.min(U*2.2,3600000),mind:-20,rel:-14,okMind:8,
@@ -890,17 +890,17 @@ const GEN_LIFE=[
     log:'你直接給了一筆錢,說這筆算送的、不用還。保證人三個字,你始終沒有簽下去。'},
    {l:'拒絕,連錢也不借',h:'得:全身而退　失:二十年的交情',d:{rel:-14,mind:-6},set:{guarantor:true},
     log:'你把話說得很直。他點點頭,飯照吃完,只是那頓之後,你們就沒再約過了。',mood:'bad'}]}),
- (U)=>({ic:'\U0001f393',t:'孩子想出國',req:s=>s.flags&&s.flags.kids&&!s.flags.abroad&&s.age>=44,x:'孩子把錄取通知放到你面前,眼睛亮得像很久以前的你。學校很好,學費是你一年薪水的兩倍多。他小聲說:「太貴的話,我可以不去。」',c:[
+ (U)=>({ic:'🎓',t:'孩子想出國',req:s=>s.flags&&s.flags.kids&&!s.flags.abroad&&s.age>=44,x:'孩子把錄取通知放到你面前,眼睛亮得像很久以前的你。學校很好,學費是你一年薪水的兩倍多。他小聲說:「太貴的話,我可以不去。」',c:[
    {l:'去,錢的事我來想辦法',h:'得:孩子的未來　失:連續五年的重擔',d:{rel:18,mind:6,fame:4},set:{abroad:true},
-    eff:s=>addBurden({kind:'cash',ic:'\U0001f393',t:'孩子的海外學費',amt:Math.min(U*0.75,1300000),yrs:5,endLog:'\U0001f393 孩子畢業了。最後一筆學費繳完那天,你把收據留了下來。'}),
+    eff:s=>addBurden({kind:'cash',ic:'🎓',t:'孩子的海外學費',amt:Math.min(U*0.75,1300000),yrs:5,endLog:'🎓 孩子畢業了。最後一筆學費繳完那天,你把收據留了下來。'}),
     log:'你說去吧,家裡撐得住。掛掉電話後,你打開試算表,看了很久很久。',mood:'good'},
    {l:'一人一半,你自己揹學貸',h:'得:負擔減半　失:孩子的十年',d:{rel:4,mind:-2},set:{abroad:true},
-    eff:s=>addBurden({kind:'cash',ic:'\U0001f393',t:'分攤的海外學費',amt:Math.min(U*0.38,650000),yrs:5}),
+    eff:s=>addBurden({kind:'cash',ic:'🎓',t:'分攤的海外學費',amt:Math.min(U*0.38,650000),yrs:5}),
     log:'你們談好各出一半。他很懂事地答應了,你知道那筆學貸會跟著他到三十幾歲。'},
    {l:'留在國內念就好',d:{rel:-16,mind:-8},set:{abroad:true},log:'你算了很久,還是說不出「好」。他沒有吵，只是把那張通知收進抽屜,再也沒拿出來過。',mood:'bad'}]}),
- (U)=>({ic:'\U0001f6e1️',t:'業務員的那張表',req:s=>s.age>=38&&!(s.flags&&s.flags.insured),x:'做保險的老同學攤開一張表:重大傷病、長照、失能。「你現在最貴的資產不是股票,是還能賺錢的自己。」保費不便宜,而且要繳很多年。',c:[
+ (U)=>({ic:'🛡️',t:'業務員的那張表',req:s=>s.age>=38&&!(s.flags&&s.flags.insured),x:'做保險的老同學攤開一張表:重大傷病、長照、失能。「你現在最貴的資產不是股票,是還能賺錢的自己。」保費不便宜,而且要繳很多年。',c:[
    {l:'簽下去,買一份心安',h:'得:重病時損失減半　失:每年保費',d:{mind:6},set:{insured:true},
-    eff:s=>addBurden({kind:'cash',ic:'\U0001f6e1️',t:'保費',amt:Math.min(U*0.14,220000),yrs:20,endLog:'\U0001f6e1️ 保費繳滿了。這份保障,從今以後不用再付錢。'}),
+    eff:s=>addBurden({kind:'cash',ic:'🛡️',t:'保費',amt:Math.min(U*0.14,220000),yrs:20,endLog:'🛡️ 保費繳滿了。這份保障,從今以後不用再付錢。'}),
     log:'你簽了名。往後每年那筆錢扣下去都有點心疼,但你知道自己買的是什麼。'},
    {l:'錢拿去投資,報酬更高',h:'得:更多本金　失:出事時全靠自己',d:{mind:2},set:{insured:true},
     log:'你婉拒了。那筆保費你自己投進市場,心裡想著:真出事再說吧。'}]})
@@ -1017,7 +1017,7 @@ function startGame(c){
   S=JSON.parse(JSON.stringify(c.start));
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.prop=0;S.mort=0;S.houseYr=null;
-  S.century=false;S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
+  S.century=false;S.forcedRetire=false;S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
   S.retireOffered=false;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
@@ -1131,6 +1131,7 @@ function incomeBanner(){
   if(S.lastBurden){S.lastBurden.forEach(b=>{h+= b.mul!==undefined
     ?`<div class="incbanner neg">${b.ic} <b>${b.t}</b> — 這段日子本業收入只剩 <b>${Math.round(b.mul*100)}%</b></div>`
     :`<div class="incbanner neg">${b.ic} <b>${b.t}</b> — 這一年又付出 <b>${fmt(b.amt)}</b>${b.short?'(現金不足,已轉為負債)':''}</div>`;});}
+  if(S.lastPension){h+=`<div class="incbanner">🏛️ <b>月退俸</b> — 不管股市怎麼跌,這筆錢照領 <b>+${fmt(S.lastPension)}</b></div>`;}
   if(S.lastRent){h+=`<div class="incbanner" id="incRent">🏠 <b>包租公</b> — 房客準時匯款,租金收入 <b>+${fmt(S.lastRent)}</b></div>`;}
   if(S.lastStock){const g=S.lastStock.gain,pct=Math.round(S.lastStock.ret*100);
     h+= S.lastStock.crash
@@ -1157,6 +1158,11 @@ function yearlyIncome(){
     if(r<0.2){mult=0.6;situ='家裡今年手頭緊,生活費縮水';}
     else if(r<0.75){mult=1.0;situ='爸爸照常給生活費';}
     else{mult=1.6;situ='家裡投資有賺,多塞你一筆';}
+  }else if(id==='civilservant'){
+    if(r<0.10){mult=0.97;situ='凍薪一年,連年終都縮水';}
+    else if(r<0.55){mult=1.0+0.03*yearsIn;situ='考績乙等,年資照加';}
+    else if(r<0.92){mult=1.06+0.035*yearsIn;situ='考績甲等,年終滿額';}
+    else{mult=1.15+0.04*yearsIn;situ='升了一職等,調薪入袋';}
   }else{
     const senior=1+0.05*yearsIn;let econ;
     if(r<0.15){econ=0.85;situ='景氣寒冬,薪水凍漲';}
@@ -1245,6 +1251,9 @@ function openNewYear(){
   S.age++;S.year++;
   /* 人生有盡頭:活到 100 歲直接收尾,不讓局面無限延長 */
   if(S.age>=AGE_CAP){S.century=true;resolveEnding();return;}
+  /* 屆齡退休:軍公教等有法定退休年齡的出身,到年紀就強制結算 */
+  if(CUR.forceRetire&&S.age>=CUR.forceRetire){S.retired=true;S.forcedRetire=true;
+    S.log.push({yr:S.year,txt:`🏛️ ${S.age} 歲屆齡退休,人事命令下來了`});resolveEnding();return;}
   /* 歲月消磨:心態/關係/名聲每年自然下滑,站得越高越難維持(得靠選擇與事件補回來) */
   const wear=v=>clamp(v-(v>85?3:v>65?2:1));
   S.mind=wear(S.mind);S.rel=wear(S.rel);S.fame=clamp(S.fame-(S.fame>85?2:1));
@@ -1253,6 +1262,10 @@ function openNewYear(){
     S.lastIncome={inc:yi.inc,label:yi.label,situ:yi.situ,hadLoss:yi.inc<0};
     S.log.push({yr:S.year,txt: yi.inc>=0?`${S.age} 歲・${yi.situ},進帳 ${fmt(yi.inc)}`:`${S.age} 歲・${yi.situ},虧損 ${fmt(-yi.inc)}`});
   }else S.lastIncome=null;
+  /* 退休金:軍公教等有月退的出身,到年紀之後每年穩定入帳(不受市場影響) */
+  if(CUR.pension&&S.age>=CUR.pension.from){const pen=CUR.pension.amt;S.cash+=pen;S.lastPension=pen;
+    S.log.push({yr:S.year,txt:`🏛️ 月退俸入帳 ${fmt(pen)}`});}
+  else S.lastPension=null;
   /* 包租公租金:名下第 2 間起的房產,每年穩定收租(第 1 間自住) */
   const hs=(S.flags&&S.flags.houses)||0;
   if(hs>=2){const rent=(hs-1)*(CUR.rentUnit||300000);S.cash+=rent;S.lastRent=rent;
@@ -1295,7 +1308,8 @@ function openNewYear(){
   const r=S.resume;
   if(r&&CUR.scenes[r]&&scAge(r)!==undefined&&scAge(r)<=S.age){S.daysThisYear=(RNG()<0.5?1:0);arriveScripted(r);return;} // 里程碑年
   if(S.age-(S.lastBetAge||S.age)>=3){S.daysThisYear=(RNG()<0.5?1:0);S._genbet=makeGenBet();renderTrainStep('__genbet__');return;}  // 投資年
-  S.daysThisYear=1+(RNG()<0.6?1:0)+(RNG()<0.3?1:0);S.dayIdx=1;renderGenLife(pickDaily());               // 平凡的一年:1~3 件日常
+  const db=(CUR.dayBias===undefined?1:CUR.dayBias);
+  S.daysThisYear=1+(RNG()<0.6*db?1:0)+(RNG()<0.3*db?1:0);S.dayIdx=1;renderGenLife(pickDaily());               // 平凡的一年:1~3 件日常
 }
 function arriveScripted(id){
   const sc=CUR.scenes[id];
@@ -1339,7 +1353,9 @@ function makeGenBet(){
   const idx=pool[Math.floor(RNG()*pool.length)];
   S.recentBet.push(idx);while(S.recentBet.length>Math.min(7,GEN_BET_TITLES.length-1))S.recentBet.shift();
   const p=GEN_BET_TITLES[idx];
-  const base=Math.max(CUR.betBase||100000,Math.round(net(S)*0.05));
+  /* 下注規模隨身家成長,但要有天花板:否則後期每一把都能翻倍,資產會指數爆走 */
+  const bb=CUR.betBase||100000;
+  const base=Math.max(bb,Math.min(Math.round(net(S)*0.05),bb*10));
   return {kind:'bet',gen:true,chap:'投資時刻',t:p.t,x:p.x,base};
 }
 function retireLinkHTML(){return (S.age>=60)?`<button class="quitlife" id="quitLife">🏁 我想收手,結束這一生(退休結算)</button>`:'';}
@@ -1688,6 +1704,7 @@ function resolveEnding(){
   const nn=net(S),E=composeEnding(S),rankTxt=rankOf(nn,S);
   let statusLine='你走出了 1,000+ 種可能命運中,獨一無二的這一種';
   if(S.retired){statusLine='🏖️ 你選擇在人生高點功成身退';E.para='🏖️ 你在資本額最風光的時刻急流勇退,漂亮地為股海生涯畫下句點——真正的贏家,懂得何時離場。\n\n'+E.para;E.emoji='🏖️';E.title='功成身退的'+traitOf(S);}
+  else if(S.forcedRetire){statusLine='🏛️ 你在 '+S.age+' 歲屆齡退休,公職生涯畫上句點';E.para='🏛️ 人事命令下來的那天,同事在辦公室給你辦了一場簡單的歡送會。你把用了三十幾年的識別證交回去,走出大門的時候回頭看了一眼。從今以後,月退俸每個月照進帳,而你終於有時間去做那些「等退休再說」的事。\n\n'+E.para;}
   else if(S.century){statusLine='🕰️ 你活到了一百歲,故事在此畫下句點';E.para='🕰️ 你走完了整整一百年的股海人生。多數人連一半都走不到,而你把這場遊戲玩到了最後一刻。\n\n'+E.para;E.emoji='🕰️';}
   else if(S.bankrupt){statusLine='💀 你賠光了一切,人生被迫在此結束';E.para='💀 你把手上的現金與持股全數賠光,遊戲被迫在此結束——但別灰心,人生永遠可以重來。\n\n'+E.para;E.emoji='💸';}
   const RARITY=rarityOf(nn,S);   // {p,txt}
@@ -2015,6 +2032,52 @@ A({
  }
 });
 A({
+ id:'civilservant',name:'李念慈',emoji:'🏛️',tag:'28歲 · 基層公務員',
+ desc:'考了兩年,終於上榜。薪水不高但幾乎不會斷,月退俸看得到、算得出來——同事都說「不要亂投資,守住就好」。但你看著房價一年年跑掉,知道光靠加薪這輩子追不上。',
+ flaw:'太習慣安穩,常常在該出手的時候按兵不動',
+ betBase:300000,income:800000,rentUnit:400000,incomeLabel:'薪俸與年終',
+ pension:{from:60,amt:600000},forceRetire:65,
+ mid:['love','house','borrow'],
+ start:{year:2026,age:28,cash:800000,stock:0,debt:0,mind:68,rel:66,fame:8},
+ first:'start',
+ scenes:{
+  start:{chap:'第一章 · 上岸之後',age:28,t:'鐵飯碗的第一年',x:'放榜那天全家都哭了。半年後你坐在辦公室,看著薪資單上那個永遠不會大起大落的數字,和房仲傳來的實價登錄,忽然不太確定自己上岸了沒有。',c:[
+    {l:'定期定額買指數,存二十年',h:'得:複利的時間　失:不會有暴富的快感',d:{cash:-400000,stock:400000,mind:6},f:['disciplined'],log:'你設了每月自動扣款,然後刻意不去看帳戶。你買的不是股票,是二十年後的自己。',mood:'good',go:'bull'},
+    {l:'全放定存,本金一毛都不能少',h:'得:絕對的安心　失:被通膨慢慢吃掉',d:{mind:4,rel:4},f:['frugal'],log:'你把錢放進定存,利息少得可憐但睡得著。只是每年物價漲一點,那筆錢就縮水一點。',go:'bull'},
+    {l:'跟同事一起玩當沖,賺點外快',d:{cash:-250000},set:{gambler:'+1'},log:'午休時間,你們幾個躲在茶水間看盤。公務員的日子太靜了,你想要一點心跳。',roll:[
+      {w:4,log:'第一個月就賺了半個月薪水,你開始覺得上班好像有點多餘。',d:{cash:400000,mind:8,fame:4},mood:'good',go:'bull'},
+      {w:6,log:'手續費加上幾次追高殺低,兩個月賠掉快三個月薪水。你把 App 刪了。',d:{cash:-120000,mind:-12},mood:'bad',go:'bull'}]}]},
+  bull:{kind:'bet',chap:'第二章 · 追不上的房價',age:31,t:'安穩的代價',base:260000,go:'love',x:'同期考上的同事去年買了房,今年已經漲了兩百萬。你算了一下自己的存款曲線,和房價曲線永遠不會相交。第一次,你認真想著要不要把部位放大一點。'},
+  love:{chap:'第三章 · 感情',age:33,t:'穩定的另一面',x:'交往三年的對象說想結婚,也說了實話:「跟你在一起很安心,但有時候會覺得,我們的人生已經可以一路看到六十五歲了。」',c:[
+    {l:'結婚,安穩本來就是我能給的',d:{rel:18,cash:-500000,mind:6},set:{married:true},log:'你們辦了場不鋪張的婚禮。你知道自己給不了驚喜,但可以給一輩子不會斷的那種踏實。',mood:'good',go:'house'},
+    {l:'先別結,我想證明我不只有安穩',h:'得:拚一口氣　失:感情降溫',d:{rel:-15,mind:-5,fame:3},f:['revenge'],log:'那句話卡在你心裡很久。你開始把更多錢投進市場,想證明點什麼——雖然你也說不清是要證明給誰看。',go:'house'},
+    {l:'結婚,並說好一起承擔投資的風險',d:{rel:14,cash:-400000},set:{married:true},log:'你把帳戶攤開來給對方看,連虧損的那幾筆也沒藏。你們決定一起承擔,也一起決定。',mood:'good',go:'house'}]},
+  house:{chap:'第四章 · 買房',age:35,t:'公教貸款的門檻',x:'你有一個別人沒有的優勢:公教人員的房貸利率特別低,銀行對你這種「不會失業的人」特別友善。但頭期款,還是得自己湊。',c:[
+    {l:'用優惠房貸買下一間中古屋',d:{cash:-1500000,debt:7000000,prop:8500000,mort:7000000,mortInit:7000000,rel:12,mind:4},set:{houses:1},log:'你動用了公教優惠貸款,買下一間屋齡二十年的公寓。利率低到讓你有點不好意思。',mood:'good',go:'borrow'},
+    {l:'不買,把頭期款全部投進市場',h:'得:更大的部位　失:一直沒有自己的家',d:{mind:-2,rel:-8},f:['allin'],log:'你算過,長期報酬應該贏過房價。這個決定你沒有告訴爸媽——他們不會懂。',go:'borrow'},
+    {l:'買預售屋,用時間換空間',d:{cash:-900000,debt:5500000,prop:6800000,mort:5500000,mortInit:5500000,rel:8,mind:-3},set:{houses:1},log:'你簽了預售屋,分期付頭期款。交屋還要三年,你每個月經過工地都會抬頭看一眼。',mood:'good',go:'borrow'}]},
+  borrow:{chap:'第五章 · 人情',age:37,t:'親戚眼中的鐵飯碗',x:'家族聚會上,姑姑當著所有人的面說:「念慈是公務員耶,收入最穩,幫忙擔一下嘛。」表哥的公司要週轉,大家的眼睛都看著你。',c:[
+    {l:'當場拒絕,把話說清楚',h:'得:守住底線　失:被說成無情',d:{mind:6,rel:-12,fame:-3},f:['disciplined'],log:'你說薪水穩不代表錢多,說完整桌都安靜了。回家的車上,你有點想哭,但不後悔。',mood:'good',go:'gamble'},
+    {l:'借一筆,但白紙黑字寫清楚',d:{cash:-600000,rel:6},set:{lent:true},log:'你借了,同時拿出借據和還款計畫。姑姑說你「當公務員當到不近人情」,你笑一笑,還是請他們簽了。',go:'gamble'},
+    {l:'不好意思拒絕,直接匯過去',d:{cash:-900000,rel:10,mind:-6},set:{lent:true},roll:[
+      {w:4,log:'表哥撐過去了,連本帶利還清,還在群組裡公開謝你。',d:{cash:1000000,rel:8,mind:8},mood:'good',go:'gamble'},
+      {w:6,log:'那筆錢再也沒有回來。過年吃飯時大家都很自然,只有你記得那個數字。',d:{mind:-14,rel:-6},mood:'bad',go:'gamble'}]}]},
+  gamble:{chap:'第六章 · 誘惑',age:39,t:'內線的邊界',x:'業務往來的廠商私下遞了一句話:某個標案的結果還沒公告,但你們單位早就知道了。他說:「你什麼都不用做,只要不要說出去,然後——你懂的。」',c:[
+    {l:'立刻拒絕並報告上級',h:'得:乾淨的職涯　失:得罪人',d:{mind:12,fame:6,rel:-4},f:['disciplined'],log:'你當場拒絕,回辦公室就寫了簽呈。那家廠商後來被查了,而你的名字不在名單上。',mood:'good',go:'crash'},
+    {l:'不說話,也不做任何事',d:{mind:-6},log:'你什麼都沒做,也什麼都沒說。這件事後來不了了之,只是每次開標你都會想起那句話。',go:'crash'},
+    {l:'透過家人的戶頭買一點',d:{cash:-800000},set:{gambler:'+1'},f:['revenge'],log:'你說服自己那只是「公開資訊的合理推論」,用了不是自己名字的帳戶。',roll:[
+      {w:4,log:'消息確實準,你賺了一筆不能跟任何人說的錢。那筆錢你放著沒動,一次也沒花。',d:{cash:1600000,mind:-10,fame:2},mood:'good',go:'crash'},
+      {w:6,log:'政風找你談話那天,你在會議室外面站了很久。事情最後壓下來了,但你的考績和調職令都變了。',d:{cash:-800000,mind:-22,fame:-14,rel:-8},mood:'bad',go:'crash'}]}]},
+  crash:{kind:'bet',chap:'第七章 · 股災',age:41,t:'不會失業的人',base:520000,go:'fork',x:'股市崩了。同事在群組裡哀嚎,你卻發現自己是那個最有本錢承受的人——薪水照領、工作不會沒,別人恐慌性賣出的時候,你手上剛好有現金。這一把,你敢下多重?'},
+  final:{chap:'終章 · 清算',age:47,t:'安穩的總帳',x:'從放榜那天到現在,快二十年了。你沒有暴富過,也沒有真正跌倒過。當年那個懷疑自己有沒有上岸的年輕人,現在有答案了嗎?',c:[
+    {l:'守住月退俸,穩穩過完下半生',d:{mind:14,rel:10},log:'你把部位收得乾乾淨淨,只留下最保守的配置。你算得出自己七十歲那年有多少錢——這件事本身,就是一種奢侈。',mood:'good'},
+    {l:'把理財這件事,教給年輕的同事',d:{fame:16,mind:10,rel:8},log:'你在單位開了讀書會,教新進同仁怎麼看待那份看起來很無聊的薪水。你說:穩定是一種資本,不是一種限制。',mood:'good'},
+    {l:'最後幾年,想拚一次不安穩的',d:{cash:-1000000},set:{gambler:'+1'},log:'你想起三十三歲那年,對方說的那句「人生已經可以一路看到六十五歲」。你決定至少賭一次。',roll:[
+      {w:5,log:'你抓到了一段行情,替一輩子的安穩添上一筆意外的漂亮。',d:{cash:2600000,mind:8,fame:5},mood:'good'},
+      {w:5,log:'你賠掉了一大筆,但月退俸還在,日子還過得下去。你笑著說:至少我知道那是什麼感覺了。',d:{cash:-1000000,mind:-10},mood:'bad'}]}]}
+ }
+});
+A({
  id:'whitecollar',name:'林佳蓉',emoji:'💼',tag:'32歲 · 白領上班族',
  desc:'外商公司專案經理,月薪不錯卻談不上寬裕。標準的三明治世代,夾在結婚、買房、孝親之間。想靠投資,替按部就班的人生擠出一點餘裕。',
  flaw:'夾在婚房壓力間追高殺低,怕錯過也怕賠',
@@ -2061,7 +2124,7 @@ A({
  id:'freshgrad',name:'黃柏翔',emoji:'🎓',tag:'23歲 · 社會新鮮人',
  desc:'非本科出身、白手起家的社會新鮮人,起薪不到三萬,還揹著學貸。你沒有靠山,只有一股不想認命的傻勁——想靠投資,替自己搏一個不一樣的未來。',
  flaw:'本錢太少又急著翻身,容易走捷徑、賭大的',
- betBase:120000,income:350000,incomeLabel:'薪水與下班兼差',mid:['love','house','borrow'],
+ betBase:180000,income:420000,incomeLabel:'薪水與下班兼差',mid:['love','house','borrow'],dayBias:0.55,
  start:{year:2026,age:23,cash:500000,stock:0,debt:300000,mind:60,rel:62,fame:12},
  first:'start',
  scenes:{
@@ -2071,28 +2134,28 @@ A({
       {w:4,log:'新手運爆棚,你小賺一筆,嚐到甜頭。',d:{cash:90000,mind:6,fame:5},mood:'good',go:'bull'},
       {w:6,log:'你買在最高點,幾天就腰斬,連學貸都更難還了。',d:{cash:-40000,mind:-12},mood:'bad',go:'bull'}]},
     {l:'下班兼差,先把本金做大',d:{cash:120000,mind:-3,rel:-3},f:['frugal'],log:'你跑外送、接案,用睡眠換本金。累,但戶頭數字實實在在地長。',mood:'good',go:'bull'}]},
-  bull:{kind:'bet',chap:'第二章 · 想翻身',age:26,t:'別人的暴富',base:90000,go:'love',x:'同梯朋友靠迷因股、靠幣圈曬出翻倍截圖。你的本金太小,再穩健的報酬都像杯水車薪。翻身的焦慮燒得你坐不住——這一把,你敢下多重?'},
-  love:{chap:'第三章 · 感情',age:29,t:'清貧裡的愛情',x:'你遇到一個不嫌你窮、願意陪你吃泡麵存錢的人。但對方的家人隱約覺得你「沒前途」。要不要在還沒站穩時,走入婚姻?',c:[
+  bull:{kind:'bet',chap:'第二章 · 想翻身',age:25,t:'別人的暴富',base:140000,go:'love',x:'同梯朋友靠迷因股、靠幣圈曬出翻倍截圖。你的本金太小,再穩健的報酬都像杯水車薪。翻身的焦慮燒得你坐不住——這一把,你敢下多重?'},
+  love:{chap:'第三章 · 感情',age:27,t:'清貧裡的愛情',x:'你遇到一個不嫌你窮、願意陪你吃泡麵存錢的人。但對方的家人隱約覺得你「沒前途」。要不要在還沒站穩時,走入婚姻?',c:[
     {l:'兩人一起吃苦,結婚',d:{rel:18,cash:-200000},set:{married:true},log:'你們辦了場最簡單的婚禮,把「以後會更好」當成誓言。有人並肩,苦也甜。',mood:'good',go:'house'},
     {l:'先拚出成績再談,暫時分開',h:'得:專注事業　失:感情、心情',d:{rel:-14,mind:-4,fame:4},log:'你怕拖累對方,選擇先拚事業,衝出了一點成績;夜裡卻常想,這樣的犧牲到底值不值得。',go:'house'},
     {l:'結婚,並約定一起省吃儉用買房',d:{rel:15,cash:-150000},set:{married:true},log:'你們結了婚,把每一塊錢都花在刀口上,朝著共同的目標前進。',mood:'good',go:'house'}]},
-  house:{chap:'第四章 · 買房',age:33,t:'第一間房的門檻',x:'存了好幾年,你們的頭期款終於湊得差不多。但房價又漲了一波,買下去會揹上沉重的貸款,不買又怕永遠追不上。',c:[
+  house:{chap:'第四章 · 買房',age:30,t:'第一間房的門檻',x:'存了好幾年,你們的頭期款終於湊得差不多。但房價又漲了一波,買下去會揹上沉重的貸款,不買又怕永遠追不上。',c:[
     {l:'買下小宅,苦一點也要有個家',d:{cash:-1000000,debt:6000000,prop:7000000,mort:6000000,mortInit:6000000,rel:12,mind:-4},set:{houses:1},log:'你們買下人生第一間房,雖是老公寓,卻是實實在在屬於自己的窩。',mood:'good',go:'borrow'},
     {l:'先不買,把錢繼續投資滾大',d:{mind:2,rel:-4},f:['allin'],log:'你說服另一半再等等,把頭期款留在市場裡,賭它長得比房價快。',go:'borrow'},
     {l:'回鄉買房,遠離高房價',d:{cash:-600000,debt:2500000,prop:3100000,mort:2500000,mortInit:2500000,rel:6,fame:-3},set:{houses:1},log:'你們決定離開台北,回到房價親民的家鄉。生活慢了,壓力也小了。',mood:'good',go:'borrow'}]},
-  borrow:{chap:'第五章 · 人情',age:36,t:'發財夢的朋友',x:'一個老朋友興沖沖找你,說有個「穩賺的生意」,只差一筆啟動資金,想向你借二十萬,還信誓旦旦要分你紅利。',c:[
+  borrow:{chap:'第五章 · 人情',age:33,t:'發財夢的朋友',x:'一個老朋友興沖沖找你,說有個「穩賺的生意」,只差一筆啟動資金,想向你借二十萬,還信誓旦旦要分你紅利。',c:[
     {l:'看不懂的生意不碰,婉拒',d:{mind:6,rel:-4},log:'你委婉拒絕。半年後那「穩賺生意」果然血本無歸,你慶幸沒被拖下水。',mood:'good',go:'gamble'},
     {l:'念在交情,借出一部分',d:{cash:-200000,rel:4},set:{lent:true},log:'你借了一些,權當交個朋友。這筆錢,你做了要不回來的心理準備。',go:'gamble'},
     {l:'不但借,還想一起投資分紅',d:{cash:-300000,debt:100000},set:{lent:true,gambler:'+1'},log:'你被分紅沖昏頭,把積蓄和借款都投了進去。',roll:[
       {w:3,log:'意外地,生意真的做起來了,你分到一筆紅利。',d:{cash:600000,mind:4,rel:4},mood:'good',go:'gamble'},
       {w:7,log:'生意慘賠、朋友避不見面,你的錢和交情一起蒸發。',d:{cash:-100000,mind:-12,rel:-10},mood:'bad',go:'gamble'}]}]},
-  gamble:{chap:'第六章 · 誘惑',age:38,t:'翻身的最後一把',x:'人到中年,資產卻還是不上不下。工地認識的大哥揪你去簽賭、玩期貨,說「拚一把,人生就翻篇了」。翻身的執念,又在你胸口燒起來。',c:[
+  gamble:{chap:'第六章 · 誘惑',age:35,t:'翻身的最後一把',x:'三十出頭,資產卻還是不上不下。工地認識的大哥揪你去簽賭、玩期貨,說「拚一把,人生就翻篇了」。翻身的執念,又在你胸口燒起來。',c:[
     {l:'認清捷徑最貴,拒絕',h:'得:守住紀律　失:得罪拉你的人',d:{mind:8,rel:-2},f:['disciplined'],log:'你摸摸口袋裡孩子的照片,轉身離開(拉你的人有些不快)。你已經沒有輸的本錢了。',mood:'good',go:'crash'},
     {l:'壓一注,賭這輩子翻身',d:{cash:-300000,debt:200000},set:{gambler:'+1'},f:['revenge'],log:'你把辛苦攢的錢押了上去,賭一個階級翻轉。',roll:[
       {w:3,log:'老天開眼,你贏了一大筆,離夢想第一次那麼近。',d:{cash:1200000,mind:2,fame:5},mood:'good',go:'crash'},
       {w:7,log:'你輸光了本、揹上了債,翻身夢碎成一地,回家的路格外漫長。',d:{cash:-300000,debt:200000,mind:-18,rel:-10},mood:'bad',go:'crash'}]}]},
-  crash:{kind:'bet',chap:'第七章 · 股災',age:41,t:'沒有安全網的人',base:180000,go:'fork',x:'股災來時,有靠山的人有靠山,沒靠山的你只有自己。每一分虧損都格外痛,因為你沒有可以賠的本錢。這一把,你賭多大?'},
-  final:{chap:'終章 · 清算',age:48,t:'白手起家的答案',x:'從一無所有走到今天,你嚐盡了沒有靠山的辛酸。當年那個握著八萬塊、不想認命的年輕人,如今活成了什麼模樣?',c:[
+  crash:{kind:'bet',chap:'第七章 · 股災',age:38,t:'沒有安全網的人',base:260000,go:'fork',x:'股災來時,有靠山的人有靠山,沒靠山的你只有自己。每一分虧損都格外痛,因為你沒有可以賠的本錢。這一把,你賭多大?'},
+  final:{chap:'終章 · 清算',age:42,t:'白手起家的答案',x:'從一無所有走到今天,你嚐盡了沒有靠山的辛酸。當年那個握著八萬塊、不想認命的年輕人,如今活成了什麼模樣?',c:[
     {l:'知足感恩,守住這得來不易的一切',d:{mind:12,rel:10},log:'你不再和別人比,只珍惜自己一磚一瓦蓋起來的人生。這份踏實,無人能奪。',mood:'good'},
     {l:'把白手起家的故事,說給年輕人聽',d:{fame:16,mind:8,rel:6},log:'你的逆襲故事鼓舞了無數和你當年一樣的年輕人,你成了他們的光。',mood:'good'},
     {l:'還不甘心,想再賭一把翻更大',d:{cash:-300000},set:{gambler:'+1'},log:'你覺得自己還能更好,把積蓄又押了上去。',roll:[
