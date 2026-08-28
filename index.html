@@ -302,6 +302,12 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .dicerow{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;min-height:52px;align-items:center}
 #nameInput.need{border-color:var(--sk-red);box-shadow:0 0 0 3px rgba(214,40,57,.18);animation:nsh .4s}
 @keyframes nsh{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.fxbar{margin:8px 0 10px;padding:9px 12px;border-radius:11px;background:rgba(20,110,200,.08);border-left:3px solid #2f6fd0;font-size:12.5px;line-height:1.75;color:#1d4f96}
+.fxbar b{color:#12386e}
+.fxbar .sep2{margin:0 7px;opacity:.35}
+.fxbar.none{background:rgba(0,0,0,.04);border-left-color:var(--ink3);color:var(--ink2)}
+.skl .mst{font-size:11px;line-height:1.6;color:var(--ink3);opacity:.62;margin-top:2px}
+.skl .mst.on{color:#127a49;opacity:1;font-weight:700}
 .hotbar{margin:10px 0 2px;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.65;border-left:3px solid var(--gold);background:rgba(184,134,11,.13);color:#8a6508}
 .hotbar b{color:#7a5a06}
 .hotbar.streak{border-left-color:var(--sk-red);background:rgba(214,40,57,.10);color:#9c1f2c}
@@ -623,16 +629,24 @@ const fmt=n=>{
   return (neg?'-':'')+s;
 };
 const clamp=v=>Math.max(0,Math.min(100,v));
+const clampMind=v=>Math.max(mast('mindful',10)?30:0,Math.min(100,v));
 const net=s=>Math.round(s.cash+s.stock+(s.prop||0)-s.debt);   /* 房產也是資產:市值計入身家,房貸算在 debt 裡 */
 
 /* 技能系統(5 種,每種 5 級) */
 const SKILLS=[
- {id:'insight',ic:'🔭',n:'眼光',max:10,d:'成功率每級 +1.5%(保守)/ +3.5%(積極)/ +4.5%(梭哈)'},
- {id:'finiq',ic:'📈',n:'財商',max:10,d:'投資獲利每級 +15%'},
- {id:'disc',ic:'🛡️',n:'紀律',max:10,d:'投資虧損每級 −12%'},
- {id:'mindful',ic:'🧘',n:'心法',max:10,d:'負面事件的心態耗損每級 −15%'},
- {id:'network',ic:'🤝',n:'人脈',max:10,d:'關係提升每級 +20%'}
+ {id:'insight',ic:'🔭',n:'眼光',max:10,d:'成功率每級 +1.5%/+3.5%/+4.5%(保守/積極/梭哈)',
+  m5:'盤感 — 下注前就看得出這一年是不是難得的行情',m10:'先知 — 所有下注成功率再 +8%'},
+ {id:'finiq',ic:'📈',n:'財商',max:10,d:'投資獲利每級 +15%',
+  m5:'複利加速 — 持股年報酬 +1.5%',m10:'錢滾錢 — 持股年報酬再 +2%(共 +3.5%)'},
+ {id:'disc',ic:'🛡️',n:'紀律',max:10,d:'投資虧損每級 −12%',
+  m5:'停損線 — 單次下注虧損不超過投入的六成',m10:'防火牆 — 股災的傷害減半'},
+ {id:'mindful',ic:'🧘',n:'心法',max:10,d:'負面事件的心態耗損每級 −15%',
+  m5:'鈍感力 — 免除每年的心態自然衰退',m10:'定錨 — 心態不會低於 30'},
+ {id:'network',ic:'🤝',n:'人脈',max:10,d:'關係提升每級 +20%',
+  m5:'圈子 — 每年有機會多一筆人脈帶來的收入',m10:'貴人 — 本業收入永久 +20%'}
 ];
+/* 精通:練到 5 級、10 級各解鎖一個質變能力。這讓「專精一項」明顯優於「每項點一點」 */
+const mast=(id,n)=>lvl(id)>=n;
 const lvl=id=>(S&&S.skills&&S.skills[id])||0;
 /* 下注倍數三級距:用「成功率%」決定成敗(技能可提高成功率),倍數越大投入越多、報酬越高 */
 const BET_TIERS=[
@@ -644,7 +658,8 @@ const BET_TIERS=[
 function betSurge(){return !!(S&&S.hotSurge);}
 /* 🔥 難得的行情:只加成積極與梭哈,保守不受影響 */
 function betWinP(t,surge){const sg=(surge===undefined?betSurge():surge)&&t.mult>=3?(t.mult>=5?0.14:0.10):0;
-  return Math.min(0.92,Math.max(0.05,t.baseWin+(t.iq||0.03)*lvl('insight')+sg));}
+  const m=mast('insight',10)?0.08:0;
+  return Math.min(0.94,Math.max(0.05,t.baseWin+(t.iq||0.03)*lvl('insight')+sg+m));}
 /* 🔥 手感發燙:連續兩次積極以上的成功之後,下一次非保守的獲利 ×1.5 */
 function hotReady(t){return t.mult>=3&&(S.hot||0)>=2;}
 const DICEFACE=['','⚀','⚁','⚂','⚃','⚄','⚅'];
@@ -689,7 +704,7 @@ const GEN_LIFE=[
    {l:'等回檔再一次換完',d:{},roll:[
      {w:4,d:{cash:Math.min(U*0.2,250000),mind:4},log:'你等到了,省下一筆匯差,得意了好幾天。',mood:'good'},
      {w:6,d:{cash:-Math.min(U*0.18,220000),mind:-8},log:'它沒回來,你追高換了,還多付一筆。等待也是有成本的。',mood:'bad'}]}]}),
- (U)=>({ic:'🌏',t:'兩個市場的拉扯',x:'台股熟悉、看得懂;海外市場陌生、卻是全世界資金在的地方。你的資金該怎麼分?',c:[
+ (U)=>({ic:'🌏',t:'兩個市場的拉扯',once:true,x:'台股熟悉、看得懂;海外市場陌生、卻是全世界資金在的地方。你的資金該怎麼分?',c:[
    {l:'兩邊都放一些,分散風險',d:{mind:8},set:{disciplined:true},log:'你把部位分成兩塊。少了一夕暴富的機會,也少了一夕歸零的風險。',mood:'good'},
    {l:'集中在最熟的市場就好',d:{mind:3,fame:-2},log:'你選擇待在看得懂的地方。能力圈之內,睡得比較安穩。'},
    {l:'全押海外,那裡機會大',d:{},f:['allin'],roll:[
@@ -700,13 +715,13 @@ const GEN_LIFE=[
      {w:4,d:{cash:B*1.2,mind:-4,fame:3},log:'手氣爆棚,你贏了一大筆,眾人簇擁,飄飄然。',mood:'good'},
      {w:6,d:{cash:-B*1.15,mind:-12},log:'莊家的水太深,你一夜輸掉一大塊身家。',mood:'bad'}]},
    {l:'看清就是賭博,轉身離開',d:{mind:6,fame:-2},log:'你按住了衝動,掃了朋友的興,卻守住了荷包。'}]};},
- (U)=>({ic:'✈️',t:'出國散心的念頭',x:'忙到快窒息,你動了出國走走的念頭——豪華一點,還是省一點?',c:[
+ (U)=>({ic:'✈️',t:'出國散心的念頭',once:true,x:'忙到快窒息,你動了出國走走的念頭——豪華一點,還是省一點?',c:[
    {l:'來一趟豪華旅行',d:{cash:-Math.min(U*0.7,600000),mind:12,rel:8,fame:3},log:'你砸錢玩了一趟大的,身心充飽電,回來荷包扁了一圈。',mood:'good'},
    {l:'國內小旅行就好',d:{cash:-Math.min(U*0.15,80000),mind:5},log:'你選了輕巧的小旅行,錢花得少,也算換了口氣。'}]}),
- (U)=>{const P=Math.max(U*0.9,2000000);return{ic:'🚗',t:'想換台好車',x:'看上一台不便宜的車,開價兩百多萬,面子與里子在心裡拉扯。',c:[
+ (U)=>{const P=Math.max(U*0.9,2000000);return{ic:'🚗',t:'想換台好車',once:true,x:'看上一台不便宜的車,開價兩百多萬,面子與里子在心裡拉扯。',c:[
    {l:'犒賞自己,直接入手',d:{cash:-P,mind:10,fame:6},log:'新車入手,開起來意氣風發,代價是一大筆錢。',mood:'good'},
    {l:'舊車還能開,先不換',d:{mind:2,fame:-3},log:'你務實地繼續開舊車,存下了錢,只是同儕間顯得樸素。'}]};},
- (U)=>{const B=Math.min(U*0.5,2000000);return{ic:'💼',t:'副業投資的機會',req:s=>s.cash>=B,x:'有人拉你合資一門生意,要投一筆本錢,回報看得到也看得到風險。',c:[
+ (U)=>{const B=Math.min(U*0.5,2000000);return{ic:'💼',t:'副業投資的機會',once:true,req:s=>s.cash>=B,x:'有人拉你合資一門生意,要投一筆本錢,回報看得到也看得到風險。',c:[
    {l:'投一筆下去經營',d:{cash:-B},set:{entrepreneur:true},roll:[
      {w:5,d:{cash:B*3.2,fame:6,mind:3},log:'生意做起來了,這筆投資翻了好幾倍。',mood:'good'},
      {w:5,d:{cash:-B*0.6,mind:-6},log:'市場不如預期,投進去的錢大半打了水漂。',mood:'bad'}]},
@@ -717,22 +732,22 @@ const GEN_LIFE=[
  (U)=>({ic:'🤝',t:'朋友周轉借錢',req:s=>s.cash>=Math.min(U*0.6,1000000),x:'交情不錯的朋友開口借一大筆錢周轉,借了怕收不回,不借傷感情。',c:[
    {l:'慷慨借出',d:{cash:-Math.min(U*0.6,1000000),rel:8},log:'你二話不說幫了忙,這份義氣朋友記在心裡。',mood:'good'},
    {l:'婉拒,先顧好自己',d:{rel:-8,mind:2},log:'你守住了現金流,交情卻蒙上一層陰影。'}]}),
- (U)=>({ic:'🎓',t:'砸錢投資自己',req:s=>s.age<=40,x:'一堂高階課程/證照學費不便宜,但能拓展競爭力與人脈。',c:[
+ (U)=>({ic:'🎓',t:'砸錢投資自己',once:true,req:s=>s.age<=40,x:'一堂高階課程/證照學費不便宜,但能拓展競爭力與人脈。',c:[
    {l:'報名高階進修',d:{cash:-Math.min(U*0.5,500000),fame:8,mind:3},log:'你花大錢進修,眼界與人脈都拓寬了。',mood:'good'},
    {l:'靠自己摸索就好',d:{mind:2,fame:-3},log:'你省下學費靠自學,慢一點,但踏實。'}]}),
- (U)=>({ic:'🩺',t:'健檢報告亮紅字',req:s=>s.age>=45,x:'多年的操勞反映在健檢報告上,幾個紅字提醒你:身體不是無限的本錢。',c:[
+ (U)=>({ic:'🩺',t:'健檢報告亮紅字',once:true,req:s=>s.age>=45,x:'多年的操勞反映在健檢報告上,幾個紅字提醒你:身體不是無限的本錢。',c:[
    {l:'花錢好好調養,把健康買回來',d:{cash:-Math.min(U*0.4,600000),mind:8},log:'你請了假、看了醫生、調了作息,身體慢慢回到正軌。健康果然是最好的投資。',mood:'good'},
    {l:'先拚再說,身體撐得住',d:{mind:-8},set:{overwork:'+1'},log:'你把報告塞進抽屜繼續拚。夜深人靜時,隱隱的疲憊讓你有點心虛。',mood:'bad'}]}),
- (U)=>({ic:'🤝',t:'後輩來請益',req:s=>s.age>=48&&s.fame>=25,x:'幾個年輕人慕名而來,想聽你聊聊這些年在股海的心得。帶人要花時間,但經驗傳承也是一種成就。',c:[
+ (U)=>({ic:'🤝',t:'後輩來請益',once:true,req:s=>s.age>=48&&s.fame>=25,x:'幾個年輕人慕名而來,想聽你聊聊這些年在股海的心得。帶人要花時間,但經驗傳承也是一種成就。',c:[
    {l:'傾囊相授,當個好前輩',d:{rel:8,fame:8,mind:5},log:'你把踩過的坑毫無保留地分享,後輩眼中的敬佩,讓你想起當年的自己。',mood:'good'},
    {l:'客套幾句,心法留給自己',d:{fame:-4,mind:2},log:'你點到為止。江湖一點訣,說破不值錢。'}]}),
- (U)=>({ic:'🌅',t:'想慢下來的念頭',req:s=>s.age>=52,x:'同齡的朋友有人退休、有人病倒。你開始想:是不是該把日子過得慢一點?',c:[
+ (U)=>({ic:'🌅',t:'想慢下來的念頭',once:true,req:s=>s.age>=52,x:'同齡的朋友有人退休、有人病倒。你開始想:是不是該把日子過得慢一點?',c:[
    {l:'請個長假,帶家人去旅行',d:{cash:-Math.min(U*0.5,800000),mind:10,rel:10},log:'你放下盤勢,陪家人看了很多風景。回來後,你看市場的眼神都溫柔了些。',mood:'good'},
    {l:'盤還是要盯,習慣改不掉',d:{mind:-4,rel:-4},log:'你嘴上說慢,手還是每天打開看盤軟體。家人搖搖頭,見怪不怪。'}]}),
- (U)=>({ic:'💎',t:'精品的心動',x:'一件保值的精品/名錶讓你心動,入手是享受也是一筆大錢。',c:[
+ (U)=>({ic:'💎',t:'精品的心動',once:true,x:'一件保值的精品/名錶讓你心動,入手是享受也是一筆大錢。',c:[
    {l:'入手,犒賞也保值',d:{cash:-Math.min(U*0.6,1500000),fame:8,mind:4},log:'你把它收進櫃裡,面子與心情都滿足,錢包則瘦了。',mood:'good'},
    {l:'忍住,不跟風',d:{mind:2,fame:-2},log:'你壓下慾望,把錢留著,只是少了點虛榮的滿足。'}]}),
- (U)=>({ic:'🏡',t:'房子想翻修',x:'住了多年的家該整理了,大動一場很花錢,將就又住得不舒服。',c:[
+ (U)=>({ic:'🏡',t:'房子想翻修',once:true,x:'住了多年的家該整理了,大動一場很花錢,將就又住得不舒服。',c:[
    {l:'好好整修一番',d:{cash:-Math.min(U*0.7,2000000),mind:6,rel:5},log:'你砸錢把家翻新,住得舒服,家人也開心。',mood:'good'},
    {l:'簡單修一修就好',d:{cash:-Math.min(U*0.15,300000),mind:2},log:'你只做了必要的修繕,省了錢,勉強夠住。'}]}),
  (U)=>({ic:'📈',t:'加碼看好的標的',x:'你研究很久的標的出現進場點,想額外加碼一筆。',c:[
@@ -746,39 +761,39 @@ const GEN_LIFE=[
  (U)=>({ic:'🎉',t:'人情場面',x:'親友的婚喪喜慶接連而來,紅白包與場面都是一筆不小的開銷。',c:[
    {l:'場面做足,禮數周到',d:{cash:-Math.min(U*0.4,300000),rel:8,fame:4},log:'你把人情做得漂亮,關係與名聲都加了分,錢也花了不少。',mood:'good'},
    {l:'低調隨意,量力而為',d:{cash:-U*0.05,rel:-3,mind:2},log:'你把人情壓到最低,省了錢,卻也被說小氣。'}]}),
- (U)=>({ic:'🧧',t:'年夜飯上的明牌大會',x:'過年圍爐,親戚一聽你有在玩股票,輪番逼問「有沒有明牌」。二姨丈還當場掏出手機要你看他的對帳單。',c:[
+ (U)=>({ic:'🧧',t:'年夜飯上的明牌大會',once:true,x:'過年圍爐,親戚一聽你有在玩股票,輪番逼問「有沒有明牌」。二姨丈還當場掏出手機要你看他的對帳單。',c:[
    {l:'隨口報一支敷衍過去',d:{fame:4},roll:[
      {w:4,d:{rel:8,fame:6},log:'沒想到那支真的漲了,親戚逢人就說你是股神,過年紅包都變厚了。',mood:'good'},
      {w:6,d:{rel:-8,fame:-6,mind:-4},log:'那支隔月就跌,二姨丈套在山頂,現在家族群組都在敲你。',mood:'bad'}]},
    {l:'打死不報,勸大家別亂聽明牌',d:{rel:-2,mind:4},log:'你苦口婆心講了半小時風險,親戚覺得你藏私,但你問心無愧。'}]}),
- (U)=>({ic:'📱',t:'「老師」的來電',x:'陌生號碼傳來訊息:「加入VIP群,老師帶你飛,保證獲利30%!」還附上幾張獲利截圖。',c:[
+ (U)=>({ic:'📱',t:'「老師」的來電',once:true,x:'陌生號碼傳來訊息:「加入VIP群,老師帶你飛,保證獲利30%!」還附上幾張獲利截圖。',c:[
    {l:'半信半疑,小額試試水溫',d:{cash:-Math.min(U*0.3,500000)},roll:[
      {w:2,d:{cash:U*0.1,mind:-4},log:'前兩週真的有小賺,正想加碼時群組突然解散——你及時收手,只被騙走一小筆。',mood:'bad'},
      {w:8,d:{mind:-10,fame:-4},log:'「老師」失聯,APP登不進去,錢拿不回來。你成了詐騙案的其中一個號碼。',mood:'bad'}]},
    {l:'截圖檢舉,順手封鎖',d:{mind:5,fame:3},log:'你把訊息轉給165反詐騙,還提醒了家族群組。投資只信自己的功課。',mood:'good'}]}),
- (U)=>({ic:'🔮',t:'命理老師的財位',x:'朋友強力推薦一位「很準」的命理老師,說他連飆股都算得出來。改運要收費,老師還會順便報「財位」。',c:[
+ (U)=>({ic:'🔮',t:'命理老師的財位',once:true,x:'朋友強力推薦一位「很準」的命理老師,說他連飆股都算得出來。改運要收費,老師還會順便報「財位」。',c:[
    {l:'花錢改運兼求明牌',d:{cash:-Math.min(U*0.25,300000)},roll:[
      {w:5,d:{mind:8},log:'老師說你「財庫有破要補」。補完你心情莫名踏實,至於明牌——你理智地沒有跟。',mood:'good'},
      {w:5,d:{cash:-Math.min(U*0.3,500000),mind:-6},log:'你跟了老師報的「財位股」,結果財位變套房。玄學終究賭不贏基本面。',mood:'bad'}]},
    {l:'謝謝再聯絡,命運自己操盤',d:{mind:3},log:'你笑著婉拒。你的財位,在你的紀律裡。'}]}),
- (U)=>({ic:'🏍️',t:'燒錢的新嗜好',x:'朋友揪你入坑——重機、高爾夫、露營、公路車……每一樣都很快樂,每一樣都很燒錢。',c:[
+ (U)=>({ic:'🏍️',t:'燒錢的新嗜好',once:true,x:'朋友揪你入坑——重機、高爾夫、露營、公路車……每一樣都很快樂,每一樣都很燒錢。',c:[
    {l:'入坑!人生要及時行樂',d:{cash:-Math.min(U*0.6,1000000),mind:10,rel:6},log:'你砸錢入了坑,週末多了期待,錢包多了破洞。快樂是真的,貴也是真的。',mood:'good'},
    {l:'免費的散步最健康',d:{mind:3},log:'你維持簡單的運動習慣,省下的錢繼續留在市場裡替你工作。'}]}),
- (U)=>({ic:'📺',t:'財經節目的邀約',req:s=>s.fame>=40,x:'你在圈子裡小有名氣,一個財經節目邀你上節目聊「小資理財」。上電視有曝光,說錯話也會被放大。',c:[
+ (U)=>({ic:'📺',t:'財經節目的邀約',once:true,req:s=>s.fame>=40,x:'你在圈子裡小有名氣,一個財經節目邀你上節目聊「小資理財」。上電視有曝光,說錯話也會被放大。',c:[
    {l:'上!讓更多人認識你',d:{fame:12},roll:[
      {w:6,d:{rel:4,mind:5},log:'你談吐得體、觀點清晰,片段被剪成短影音小小爆紅,連老同學都傳訊息來。',mood:'good'},
      {w:4,d:{fame:-8,mind:-8},log:'你一句玩笑被斷章取義上了新聞,留言區戰成一片。紅是紅了,但不是你要的紅法。',mood:'bad'}]},
    {l:'低調婉拒,悶聲發財',d:{mind:3,fame:-2},log:'你婉拒了邀約。真正的高手,不需要鎂光燈。'}]}),
- (U)=>({ic:'📦',t:'直播間的剁手夜',x:'深夜滑到直播,主播喊著「最後三組!」你的手指在「結帳」上方徘徊。',c:[
+ (U)=>({ic:'📦',t:'直播間的剁手夜',once:true,x:'深夜滑到直播,主播喊著「最後三組!」你的手指在「結帳」上方徘徊。',c:[
    {l:'買爆!壓力需要出口',d:{cash:-Math.min(U*0.2,200000),mind:6},log:'包裹一箱箱到貨,快樂短暫但真實。有幾樣東西,你到現在還沒拆。',mood:'good'},
    {l:'關掉手機,錢包保衛戰',d:{mind:2},log:'你默默關掉直播。隔天醒來,慶幸昨晚的自己懸崖勒馬。'}]}),
- (U)=>({ic:'🐕',t:'毛小孩的緣分',req:s=>!(s.flags&&s.flags.pet),x:'加班回家的路上,一隻小狗跟著你走了三條街,眼神像在說「就是你了」。',c:[
+ (U)=>({ic:'🐕',t:'毛小孩的緣分',once:true,req:s=>!(s.flags&&s.flags.pet),x:'加班回家的路上,一隻小狗跟著你走了三條街,眼神像在說「就是你了」。',c:[
    {l:'帶回家,多個家人',d:{cash:-Math.min(U*0.15,200000),mind:10,rel:5},set:{pet:true},log:'從此你的世界多了一條搖著尾巴的牽掛。飼料、醫藥都是開銷,但牠值得。',mood:'good'},
    {l:'送到收容所,幫牠找好人家',d:{mind:2},log:'你替牠找了個歸宿。偶爾想起那個眼神,還是會有點捨不得。'}]}),
- (U)=>({ic:'🎪',t:'同學會的攀比大戰',x:'久違的同學會,有人聊年薪、有人曬對帳單。輪到你時,全桌安靜下來等你開口。',c:[
+ (U)=>({ic:'🎪',t:'同學會的攀比大戰',once:true,x:'久違的同學會,有人聊年薪、有人曬對帳單。輪到你時,全桌安靜下來等你開口。',c:[
    {l:'霸氣買單,順便曬一下績效',d:{cash:-Math.min(U*0.3,300000),fame:8,mind:4,rel:-3},log:'你包了全場,老同學敬酒敬個不停。爽是很爽,只是隔天群組裡多了幾個借錢的。',mood:'good'},
    {l:'笑而不語,深藏功與名',d:{mind:5},log:'你只說「還過得去」。散場時,真正懂你的老友拍拍你的肩:「悶聲發財吼。」'}]}),
- (U)=>{const B=Math.min(U*0.8,1200000);return{ic:'🫧',t:'AI 泡沫的爭論',req:s=>s.stock>=B,x:'財經版吵成一團:一派說 AI 的資本支出撐得住,一派說這就是 2000 年網通股的翻版。你手上正好有一筆押在這條線上。',c:[
+ (U)=>{const B=Math.min(U*0.8,1200000);return{ic:'🫧',t:'AI 泡沫的爭論',once:true,req:s=>s.stock>=B,x:'財經版吵成一團:一派說 AI 的資本支出撐得住,一派說這就是 2000 年網通股的翻版。你手上正好有一筆押在這條線上。',c:[
    {l:'先減碼一半,落袋為安',d:{stock:-B,cash:B},roll:[
      {w:5,d:{mind:6,fame:2},log:'你把一半換成現金。後來確實回檔了一大段,你慶幸自己手快。',mood:'good'},
      {w:5,d:{mind:-9},log:'你減碼之後它又漲了兩成。少賺不是賠,但那種感覺比賠還難受。',mood:'bad'}]},
@@ -786,12 +801,12 @@ const GEN_LIFE=[
      {w:4,d:{stock:Math.round(B*2.2),mind:9,fame:7},log:'資金持續湧入,你這一加碼剛好吃到整段主升。',mood:'good'},
      {w:6,d:{stock:Math.round(B*0.45),mind:-15},log:'你買在情緒的最高點。財報一出,估值直接被砍掉一半。',mood:'bad'}]},
    {l:'關掉財經台,繼續放著',d:{mind:3},log:'你不再看那些爭論。有些問題,時間會自己給答案。'}]}},
- (U)=>{const B=Math.min(U*0.9,1500000);return{ic:'🎭',t:'那支太真的影片',req:s=>s.cash>=B,x:'滑手機時跳出一支影片,某位你認得的財經名人正在推薦一個穩賺的平台。畫面、聲音、連口頭禪都對——只是他從沒說過這種話。',c:[
+ (U)=>{const B=Math.min(U*0.9,1500000);return{ic:'🎭',t:'那支太真的影片',once:true,req:s=>s.cash>=B,x:'滑手機時跳出一支影片,某位你認得的財經名人正在推薦一個穩賺的平台。畫面、聲音、連口頭禪都對——只是他從沒說過這種話。',c:[
    {l:'查證後反手檢舉',d:{mind:7,fame:3},log:'你把影片存證檢舉,順手提醒了家族群組。幾天後新聞證實那是 AI 合成的。你替不少人擋了一刀。',mood:'good'},
    {l:'金額不大,先投一點試試',d:{cash:-B},roll:[
      {w:2,d:{cash:Math.round(B*1.25),mind:5},log:'前兩週真的出得了金,還多了一點。你正想加碼,隔天平台整個消失——錢是在最後一刻領回來的。',mood:'good'},
      {w:8,d:{mind:-18,rel:-6},log:'第三週,出金鍵變成灰色,客服再也沒回。錢和那個「老師」一起蒸發了。',mood:'bad'}]}]}},
- (U)=>{const B=Math.min(U*0.7,1000000);return{ic:'📦',t:'關稅來的那一天',req:s=>s.stock>=B,x:'凌晨一則公告,新一輪關稅名單出爐,出口類股盤前全面走低。你手上的持股,正好在名單邊緣。',c:[
+ (U)=>{const B=Math.min(U*0.7,1000000);return{ic:'📦',t:'關稅來的那一天',once:true,req:s=>s.stock>=B,x:'凌晨一則公告,新一輪關稅名單出爐,出口類股盤前全面走低。你手上的持股,正好在名單邊緣。',c:[
    {l:'開盤先砍,不接刀',d:{stock:-B,cash:Math.round(B*0.82)},roll:[
      {w:6,d:{mind:4},log:'你認賠出場。後面又跌了一大段,這一刀砍得不好看,但砍對了。',mood:'good'},
      {w:4,d:{mind:-10},log:'你砍在最低點。三天後談判有進展,股價一路補回去,只有你不在車上。',mood:'bad'}]},
@@ -799,7 +814,7 @@ const GEN_LIFE=[
      {w:4,d:{stock:Math.round(B*1.8),mind:8,fame:5},log:'關稅最後打了折扣,恐慌只維持了兩天。你接在別人丟出來的貨上。',mood:'good'},
      {w:6,d:{stock:Math.round(B*0.55),mind:-13},log:'名單後來還擴大了。你接的不是底部,是半山腰。',mood:'bad'}]},
    {l:'不動,等談判結果',d:{mind:-3},log:'你決定什麼都不做。那幾週的對帳單,你一次也沒點開。'}]}},
- (U)=>{const B=Math.min(U*0.6,900000);return{ic:'🧊',t:'傳產老同學',req:s=>s.cash>=B,x:'同學會上,做鋼鐵的老同學苦笑:「你們 AI 的漲上天,我們這種的沒人要。」他說他那支已經跌到淨值以下了。',c:[
+ (U)=>{const B=Math.min(U*0.6,900000);return{ic:'🧊',t:'傳產老同學',once:true,req:s=>s.cash>=B,x:'同學會上,做鋼鐵的老同學苦笑:「你們 AI 的漲上天,我們這種的沒人要。」他說他那支已經跌到淨值以下了。',c:[
    {l:'買一點,冷門總有輪動的一天',d:{cash:-B},roll:[
      {w:3,d:{stock:Math.round(B*1.9),mind:8,fame:4},log:'兩年後資金真的輪過來了。你在沒人看的地方,撿到一段乾淨的行情。',mood:'good'},
      {w:7,d:{stock:Math.round(B*0.62),mind:-11},log:'它繼續跌,而且沒有故事可以講。便宜的東西,常常是有理由的。',mood:'bad'}]},
@@ -807,47 +822,47 @@ const GEN_LIFE=[
    {l:'不買股票,借他一筆週轉',req:s=>s.cash>=Math.round(B*0.5),d:{cash:-Math.round(B*0.5)},roll:[
      {w:5,d:{cash:Math.round(B*0.6),rel:10,mind:5},log:'他撐過去了,連本帶利還你,還多請了一頓。這筆錢的報酬,不只在帳上。',mood:'good'},
      {w:5,d:{rel:-8,mind:-12},log:'工廠還是收了。他傳了很長一段話道歉,然後就再也沒有出現在群組裡。',mood:'bad'}]}]}},
- (U)=>({ic:'🍗',t:'雞排店老闆的明牌',x:'買雞排時,老闆邊炸邊跟隔壁客人聊股票,連菜市場阿姨都在討論同一支飆股。你想起那句老話:擦鞋童都在談股票時……',c:[
+ (U)=>({ic:'🍗',t:'雞排店老闆的明牌',once:true,x:'買雞排時,老闆邊炸邊跟隔壁客人聊股票,連菜市場阿姨都在討論同一支飆股。你想起那句老話:擦鞋童都在談股票時……',c:[
    {l:'警覺過熱,悄悄減碼',d:{mind:6,fame:2},log:'你嗅到市場過熱的味道,默默把部位降下來。幾週後回頭看,這片雞排救了你一筆錢。',mood:'good'},
    {l:'跟著全民行情衝一波',d:{},roll:[
      {w:3,d:{cash:U*0.5,mind:3},log:'行情比想像中撐得久,你小賺一段出場。運氣好,但你知道這不是實力。',mood:'good'},
      {w:7,d:{cash:-U*0.7,mind:-8},log:'你進場沒多久行情就反轉——雞排指標再度應驗。你邊吃雞排邊看對帳單,五味雜陳。',mood:'bad'}]}]}),
- (U)=>({ic:'💬',t:'前任的深夜訊息',req:s=>s.flags&&s.flags.married,x:'深夜手機一亮:「最近好嗎?看到新聞想起你。」是前任。游標在輸入框閃了很久。',c:[
+ (U)=>({ic:'💬',t:'前任的深夜訊息',once:true,req:s=>s.flags&&s.flags.married,x:'深夜手機一亮:「最近好嗎?看到新聞想起你。」是前任。游標在輸入框閃了很久。',c:[
    {l:'拿給另一半一起看,笑著已讀',d:{rel:12,mind:5},log:'你把手機遞給另一半,兩人研究了半天要不要回貼圖。最後決定:已讀,就是最好的回覆。這段婚姻,穩得很。',mood:'good'},
    {l:'禮貌回覆兩句,就此打住',d:{rel:-4,mind:2},log:'你客氣地寒暄兩句便收起手機。沒什麼波瀾,只是另一半知道後,眼神多了一秒的停頓。'}]}),
- (U)=>({ic:'🎮',t:'孩子的電競夢',req:s=>s.flags&&s.flags.kids,x:'孩子鼓起勇氣說:「我不想補習了,我想練電競。」餐桌瞬間安靜,另一半看向你。全家的未來走向,繫於你這一句話。',c:[
+ (U)=>({ic:'🎮',t:'孩子的電競夢',once:true,req:s=>s.flags&&s.flags.kids,x:'孩子鼓起勇氣說:「我不想補習了,我想練電競。」餐桌瞬間安靜,另一半看向你。全家的未來走向,繫於你這一句話。',c:[
    {l:'支持夢想,但約法三章',d:{cash:-Math.min(U*0.3,800000),rel:12,mind:5},log:'你陪孩子研究了戰隊、青訓和學業備案,訂下目標與期限。孩子紅著眼眶說謝謝。不管結果如何,他會記得你站在他那邊。',mood:'good'},
    {l:'先把書讀完再說',d:{rel:-8,mind:-3},log:'你搬出了所有大人的道理。孩子沒再提過這件事,只是房門關上的聲音,比以前重了一點。'}]}),
- (U)=>({ic:'💼',t:'獵頭的天價挖角',req:s=>s.age<=45&&(CURID==='whitecollar'||CURID==='techbro'||CURID==='freshgrad'),x:'獵頭捎來一個薪水多五成的職位——但要搬到外地、砍掉重練。安穩與野心,在你心裡拔河。',c:[
+ (U)=>({ic:'💼',t:'獵頭的天價挖角',once:true,req:s=>s.age<=45&&(CURID==='whitecollar'||CURID==='techbro'||CURID==='freshgrad'),x:'獵頭捎來一個薪水多五成的職位——但要搬到外地、砍掉重練。安穩與野心,在你心裡拔河。',c:[
    {l:'跳!人生要衝一次',d:{cash:U*0.5,mind:-4,fame:8},set:{jobhop:true},log:'你收拾行囊接受挑戰。新環境水土不服是真的,帳戶變厚也是真的。',mood:'good'},
    {l:'留下來,穩穩地走',d:{mind:4,rel:4},log:'你婉拒了offer,把時間留給家人和自己的節奏。錢少賺一點,日子踏實很多。'}]}),
- (U)=>({ic:'🎴',t:'寶可夢卡包的誘惑',x:'卡牌店新到一批寶可夢卡盒,群組瘋傳有人抽中天價閃卡轉手翻十倍。你盯著貨架上的卡盒,手心有點癢。',c:[
+ (U)=>({ic:'🎴',t:'寶可夢卡包的誘惑',once:true,x:'卡牌店新到一批寶可夢卡盒,群組瘋傳有人抽中天價閃卡轉手翻十倍。你盯著貨架上的卡盒,手心有點癢。',c:[
    {l:'搬一整盒回家開!',d:{cash:-Math.min(U*0.15,100000)},roll:[
      {w:1,d:{cash:400000,mind:12,fame:5},log:'撕到最後一包——傳說級閃卡!鑑定完轉手賣了40萬,全群組跪著喊你歐皇。這波開箱影片直接爆紅。',mood:'good'},
      {w:2,d:{cash:40000,mind:5},log:'抽中幾張不錯的稀有卡,回了點血。開包的多巴胺,比看盤刺激多了。',mood:'good'},
      {w:7,d:{mind:-4},log:'整盒開完全是普卡,桌上堆成小山。你默默體會到:卡包跟股票一樣,追高的人多,歐皇只有一個。',mood:'bad'}]},
    {l:'看別人開箱就好,錢留在市場',d:{mind:3},log:'你看著開箱直播過乾癮。別人的歐氣看看就好,你的錢有自己的去處。'}]}),
- (U)=>({ic:'🧸',t:'盲盒隱藏款之亂',x:'最近全民瘋抽盲盒公仔,隱藏款在二手市場被炒到十倍價。同事桌上已經排了一整排,揪你一起端盒。',c:[
+ (U)=>({ic:'🧸',t:'盲盒隱藏款之亂',once:true,x:'最近全民瘋抽盲盒公仔,隱藏款在二手市場被炒到十倍價。同事桌上已經排了一整排,揪你一起端盒。',c:[
    {l:'端一盒,賭隱藏款',d:{cash:-Math.min(U*0.1,60000)},roll:[
      {w:1,d:{cash:200000,mind:8,fame:3},log:'手感爆棚——隱藏款!二手平台秒售,價差賺了好幾倍。同事看你的眼神都變了。',mood:'good'},
      {w:9,d:{mind:3},log:'開出一排普通款,擺在桌上倒也療癒。快樂無價,錢包有價。',mood:'good'}]},
    {l:'不跟風,療癒自己有更便宜的方式',d:{mind:2},log:'你看著同事的公仔牆笑了笑。這波熱潮,你選擇當觀眾。'}]}),
- (U)=>{const B=Math.min(U*0.8,2000000);return{ic:'🪙',t:'迷因幣的暴富神話',req:s=>s.age<=50,x:'群組瘋傳一支迷因幣「三天翻五倍」,朋友曬出獲利截圖喊你上車。線圖一路噴,像永遠不會跌。',c:[
+ (U)=>{const B=Math.min(U*0.8,2000000);return{ic:'🪙',t:'迷因幣的暴富神話',once:true,req:s=>s.age<=50,x:'群組瘋傳一支迷因幣「三天翻五倍」,朋友曬出獲利截圖喊你上車。線圖一路噴,像永遠不會跌。',c:[
    {l:'上車!錯過這村沒這店',d:{cash:-B},roll:[
      {w:2,d:{cash:B*4,mind:5,fame:4},log:'你搭上瘋狂的行情,在崩盤前及時跳車,翻了好幾倍。你知道這是運氣,但爽是真的爽。',mood:'good'},
      {w:8,d:{cash:B*0.1,mind:-10},log:'你進場沒幾天,項目方捲款跑路,幣價歸零。「去中心化」的,原來是你的錢。',mood:'bad'}]},
    {l:'看戲就好,神話通常是收割',d:{mind:4},log:'你搬好板凳看戲。幾週後那支幣歸零,群組安靜得像沒發生過。'}]};},
- (U)=>({ic:'🤖',t:'AI 選股神器',x:'一款號稱「AI 大數據選股」的訂閱服務在網路上爆紅,首頁掛滿會員的獲利對帳單。年費不便宜,但廣告詞很動人:讓 AI 替你工作。',c:[
+ (U)=>({ic:'🤖',t:'AI 選股神器',once:true,x:'一款號稱「AI 大數據選股」的訂閱服務在網路上爆紅,首頁掛滿會員的獲利對帳單。年費不便宜,但廣告詞很動人:讓 AI 替你工作。',c:[
    {l:'訂閱一年,試試 AI 的眼光',d:{cash:-Math.min(U*0.1,50000)},roll:[
      {w:4,d:{cash:Math.min(U*0.4,1000000),mind:4},log:'AI 挑的幾支確實有兩下子,你賺回了好幾倍年費。但你也發現:最後按下買進的,還是你自己。',mood:'good'},
      {w:6,d:{cash:-Math.min(U*0.3,800000),mind:-6},log:'AI 在盤整市場裡進退失據,你跟著訊號追高殺低。原來 AI 也會唬爛,只是講得比較有自信。',mood:'bad'}]},
    {l:'工具再強,不如自己的功課',d:{mind:4},log:'你把年費省下來,繼續啃財報。慢,但每一步都是自己的。'}]}),
- (U)=>({ic:'🎤',t:'天王演唱會搶票',x:'天王級歌手宣布開唱,全網搶票。正規管道秒殺,黃牛票喊到三倍價。另一半期待的眼神正看著你。',c:[
+ (U)=>({ic:'🎤',t:'天王演唱會搶票',once:true,x:'天王級歌手宣布開唱,全網搶票。正規管道秒殺,黃牛票喊到三倍價。另一半期待的眼神正看著你。',c:[
    {l:'加價收票,回憶無價',d:{cash:-Math.min(U*0.15,80000),mind:8,rel:8},log:'你咬牙收了票。演唱會那晚,另一半跟著安可曲大合唱,你覺得這錢花得值。',mood:'good'},
    {l:'乖乖抽籤,聽天由命',d:{},roll:[
      {w:3,d:{cash:-Math.min(U*0.04,15000),mind:10,rel:6},log:'官方加場,你抽中了原價票!省下的價差,爽感加倍。',mood:'good'},
      {w:7,d:{mind:-4,rel:-3},log:'抽籤槓龜,演唱會當晚你們在家看網友的限動。另一半嘴上說沒關係,你默默記下補償計畫。',mood:'bad'}]}]}),
- (U)=>({ic:'⚾',t:'中華隊奪冠之夜',x:'中華隊在國際賽一路打進冠軍戰,全台瘋棒球。奪冠那一刻,整條街都在歡呼。',c:[
+ (U)=>({ic:'⚾',t:'中華隊奪冠之夜',once:true,x:'中華隊在國際賽一路打進冠軍戰,全台瘋棒球。奪冠那一刻,整條街都在歡呼。',c:[
    {l:'請全辦公室喝手搖慶祝',d:{cash:-Math.min(U*0.05,30000),rel:8,fame:4},log:'你霸氣訂了幾十杯手搖,辦公室歡聲雷動。Team Taiwan,也是 Team 你。',mood:'good'},
    {l:'在家跟著轉播吶喊',d:{mind:8},log:'你抱著抱枕看完最後一個出局數,眼眶有點熱。有些感動,不用花錢。',mood:'good'}]}),
  /* ===== 人生關卡:一次選擇,往後每年都跟著你 ===== */
@@ -903,7 +918,85 @@ const GEN_LIFE=[
     eff:s=>addBurden({kind:'cash',ic:'🛡️',t:'保費',amt:Math.min(U*0.14,220000),yrs:20,endLog:'🛡️ 保費繳滿了。這份保障,從今以後不用再付錢。'}),
     log:'你簽了名。往後每年那筆錢扣下去都有點心疼,但你知道自己買的是什麼。'},
    {l:'錢拿去投資,報酬更高',h:'得:更多本金　失:出事時全靠自己',d:{mind:2},set:{insured:true},
-    log:'你婉拒了。那筆保費你自己投進市場,心裡想著:真出事再說吧。'}]})
+    log:'你婉拒了。那筆保費你自己投進市場,心裡想著:真出事再說吧。'}]}),
+ /* ===== 自媒體副業:一條會越走越大的支線 ===== */
+ (U)=>({ic:'📱',t:'下班後的第二個身分',once:true,req:s=>s.age>=25&&!(s.flags&&s.flags.creatorAsked),x:'你滑到一個跟你差不多年紀的人,靠拍影片一個月多賺三、四萬。你看著自己的薪資單,想著:我好像也有東西可以講。',c:[
+   {l:'開一個帳號,記錄自己的投資',h:'得:一個舞台　失:每週要生內容',d:{mind:5,fame:6},set:{creatorAsked:true,creator:true,creatorFin:true},
+    log:'你開了帳號,把每一筆交易的想法寫下來。前三個月只有二十幾個追蹤,其中五個是同事。'},
+   {l:'拍自己真正喜歡的東西',h:'得:做得比較久　失:比較難變現',d:{mind:9,rel:4,fame:4},set:{creatorAsked:true,creator:true},
+    log:'你決定不追流量,拍自己有興趣的東西。剪片剪到半夜,但那是你一天裡最清醒的兩小時。',mood:'good'},
+   {l:'算了,我沒那個時間',d:{mind:-3},set:{creatorAsked:true},log:'你把 App 關掉。回頭想想,這種事本來就不是每個人都做得起來。'}]}),
+ (U)=>({ic:'📈',t:'第一支爆的影片',once:true,req:s=>s.flags&&s.flags.creator&&!s.flags.creatorHit,x:'一支你隨手發的影片,一夜之間衝到五十萬觀看。手機整晚沒停過,追蹤數從三百變成一萬二。',c:[
+   {l:'趁勢每天更新,把熱度吃滿',h:'得:粉絲翻倍　失:身心透支',d:{fame:20,mind:-12,rel:-6},set:{creatorHit:true},
+    log:'你連續三十天沒斷更。追蹤數衝到五萬,而你已經想不起上一次好好吃飯是什麼時候。'},
+   {l:'維持原本的步調,不追熱度',d:{fame:9,mind:6},set:{creatorHit:true},
+    log:'你沒有加快更新。熱度退得比想像中快,但留下來的人是真的在看你的東西。',mood:'good'},
+   {l:'開一門線上課程,趁現在變現',req:s=>s.flags&&s.flags.creatorFin,d:{fame:6},set:{creatorHit:true},roll:[
+     {w:5,d:{cash:Math.min(U*1.1,1800000),mind:6},log:'課程賣得不錯,一次進帳抵得上好幾個月薪水。你第一次覺得,原來知識真的可以換錢。',mood:'good'},
+     {w:5,d:{cash:Math.min(U*0.25,350000),mind:-14,fame:-12},log:'課程上架後被截圖出來公審:「這種東西也敢收錢?」退款潮加上留言區的火,你把頁面下架了。',mood:'bad'}]}]}),
+ (U)=>({ic:'💰',t:'業配的邀約',req:s=>s.flags&&s.flags.creator&&s.fame>=32,x:'第一封業配信進來了。金額是你半個月的薪水,產品你沒用過,對方說「照我們給的腳本念就好」。',c:[
+   {l:'照腳本接,錢先拿再說',d:{cash:Math.min(U*0.45,700000)},roll:[
+     {w:5,d:{fame:5,mind:-4},log:'影片發出去,錢入帳,沒什麼人在意。你發現業配比想像中容易,也比想像中空虛。'},
+     {w:5,d:{fame:-16,mind:-16,rel:-5},log:'那個產品後來出事了。留言區全是「你收錢就亂推」,你把影片刪掉,但截圖已經在到處跑。',mood:'bad'}]},
+   {l:'只接自己真的在用的',h:'得:留住信任　失:少賺很多',d:{cash:Math.min(U*0.15,250000),fame:6,mind:6},
+    log:'你退掉了三分之二的邀約,只留下自己真的用過的。收入少了很多,但你敢把影片給家人看。',mood:'good'},
+   {l:'全部拒絕,不接業配',d:{mind:8,fame:2},log:'你在限動上寫了「這個帳號不接業配」。有人說你清高,也有人因為這句話追蹤了你。'}]}),
+ (U)=>({ic:'🔥',t:'留言區翻車',once:true,req:s=>s.flags&&s.flags.creator&&s.fame>=42,x:'你半年前講過的一句話被翻出來剪成一支影片,標題是「他當初是這樣說的」。通知一分鐘跳一百則,沒有一則是好話。',c:[
+   {l:'公開道歉,把錯的地方講清楚',h:'得:止血　失:一段時間的聲量',d:{fame:-12,mind:-8,rel:4},
+    log:'你錄了一支沒有剪輯的影片,把當初想錯的地方一條一條講。罵聲慢慢小了,留下來的人反而更信你。',mood:'good'},
+   {l:'硬回嗆,我沒有錯',d:{},roll:[
+     {w:3,d:{fame:14,mind:4},log:'你反擊得很漂亮,反而圈了一批喜歡你這個調性的人。',mood:'good'},
+     {w:7,d:{fame:-26,mind:-20,rel:-8},log:'你越回,火越大。最後連原本挺你的人都安靜了。那幾週你不敢打開手機。',mood:'bad'}]},
+   {l:'已讀不回,等它過去',d:{fame:-8,mind:-10},log:'你什麼都沒說,關掉通知過了兩個禮拜。事情確實過去了,但有些東西也回不來了。'}]}),
+ (U)=>({ic:'🎙️',t:'要不要全職做這個',once:true,req:s=>s.flags&&s.flags.creator&&s.fame>=55&&s.age>=29&&!!CUR.income,x:'副業的收入已經逼近正職。你算了一整晚:辭掉工作,就沒有底薪、沒有勞健保、沒有年終,但你會有全部的時間。',c:[
+   {l:'辭職,全職做創作者',h:'得:創作收入與自由　失:穩定的薪水',d:{mind:12,fame:10,rel:-6},set:{fullCreator:true},
+    eff:s=>{addBurden({kind:'inc',ic:'🎙️',t:'離開職場之後',mul:0.12,yrs:99});
+      addBurden({kind:'cash',ic:'🎙️',t:'創作與業配收入',amt:-Math.min(U*0.85,1500000),yrs:99});},
+    log:'你遞了辭呈。走出公司那天,你發了一支影片,標題是「我把飯碗辭了」——那支的觀看數,是你史上最高。',mood:'good'},
+   {l:'兩邊都做,累一點沒關係',h:'得:兩份收入　失:身體與家庭',d:{rel:-10,mind:-10,fame:5},
+    eff:s=>addBurden({kind:'cash',ic:'📱',t:'副業的額外收入',amt:-Math.min(U*0.3,450000),yrs:12,endLog:'📱 你停更了。最後一支影片下面,還有人在問你什麼時候回來。'}),
+    log:'你選擇兩邊都不放。白天上班、晚上剪片,一年後健檢報告上多了三個紅字。'},
+   {l:'收起來,回去專心上班',d:{mind:-6,fame:-15},log:'你把帳號設成私人。有時候還是會點進去看那支五十萬觀看的影片,然後關掉。'}]}),
+ /* ===== 其他日常 ===== */
+ (U)=>({ic:'🚪',t:'房東要收回房子',once:true,req:s=>!(s.flags&&s.flags.houses),x:'房東傳訊息說房子要收回去自住,給你兩個月。你翻了翻租屋網,同樣的坪數,租金已經比三年前貴了快四成。',c:[
+   {l:'咬牙租更貴的,住原本的區域',d:{cash:-Math.min(U*0.35,550000),mind:-6},log:'你搬到隔壁棟,租金多了六千。生活沒變,只是每個月少了六千。'},
+   {l:'搬遠一點,用通勤換房租',d:{cash:-Math.min(U*0.1,150000),mind:-8,rel:-4},log:'你搬到通勤要一小時的地方。房租省下來了,睡眠也一起省掉了。',mood:'bad'},
+   {l:'搬回家跟爸媽住',d:{cash:Math.min(U*0.25,400000),rel:8,mind:-10},log:'你搬回老家的房間,牆上還貼著高中的海報。省下的錢很實在,但每次朋友問你住哪,你都停頓一下。'}]}),
+ (U)=>({ic:'🧾',t:'報稅季的那封信',once:true,x:'國稅局來信,說你去年有一筆所得漏報。金額不算大,但信封上那幾個字讓你心跳漏了一拍。',c:[
+   {l:'補繳並自行申報,乾淨處理',d:{cash:-Math.min(U*0.18,280000),mind:4},log:'你補繳了稅和一點滯納金,順便把過去三年的資料整理成一個資料夾。麻煩,但從此不用再怕。',mood:'good'},
+   {l:'找會計師處理,錢我不想煩',d:{cash:-Math.min(U*0.28,400000),mind:8},log:'你花錢請人處理掉,順便學到幾個以後用得到的觀念。有些錢花了會回本。',mood:'good'},
+   {l:'裝作沒看到',d:{},roll:[
+     {w:4,d:{mind:-4},log:'後來沒有下文。你把信丟了,但每年這個時候還是會想起來。'},
+     {w:6,d:{cash:-Math.min(U*0.5,800000),mind:-14},log:'半年後來了第二封,金額加上罰鍰翻了一倍。這次沒得裝作沒看到。',mood:'bad'}]}]}),
+ (U)=>({ic:'🧳',t:'外派的機會',once:true,req:s=>s.age>=28&&s.age<=52&&!!CUR.income,x:'公司問你要不要外派三年,薪水加五成,但要一個人過去。你看著身邊的人,又看了看那個數字。',c:[
+   {l:'去,三年很快就過了',d:{cash:Math.min(U*1.6,2800000),fame:8,rel:-18,mind:-6},log:'你去了。存款長得很快,視訊裡的家人也老得很快。三年後回來,有些關係要重新學怎麼經營。'},
+   {l:'不去,人生不是只有錢',d:{rel:12,mind:6,fame:-4},log:'你婉拒了。主管說可惜,但那年你陪家人過了每一個生日。',mood:'good'},
+   {l:'談成兩年,每季飛回來一次',d:{cash:Math.min(U*0.9,1500000),rel:-6,mind:2,fame:5},log:'你談了一個折衷的版本。錢少賺一點,機票錢自己出,但至少沒有真的離開。',mood:'good'}]}),
+ (U)=>({ic:'💍',t:'紅色炸彈的季節',once:true,req:s=>s.age>=27&&s.age<=45,x:'這個月收到第四張喜帖。同一批朋友一個接一個結婚,你的行事曆和帳戶同時被掏空。',c:[
+   {l:'每一場都到,包得漂漂亮亮',d:{cash:-Math.min(U*0.16,240000),rel:14,mind:4},log:'你場場都去,紅包也沒省。那幾個週末很累,但你在每一張合照裡都在。',mood:'good'},
+   {l:'挑重要的去,其他寄紅包',d:{cash:-Math.min(U*0.07,110000),rel:4},log:'你選了三場真的重要的。有人在群組裡問你怎麼沒來,你說最近比較忙。'},
+   {l:'全部推掉,那筆錢我要投資',d:{cash:0,rel:-14,mind:-4},log:'你一場都沒去,把紅包錢投進市場。那年報酬還不錯,但有兩個朋友從此沒再約過你。',mood:'bad'}]}),
+ (U)=>({ic:'🎓',t:'想去念 EMBA',once:true,req:s=>s.age>=33&&s.cash>=Math.min(U*0.9,1400000),x:'同業幾乎都去念了。學費是一筆不小的錢,但大家說「你去了就知道,人脈才是重點」。',c:[
+   {l:'念,花錢買一個圈子',d:{cash:-Math.min(U*0.9,1400000),fame:12,rel:6},f:['networker'],roll:[
+     {w:5,d:{cash:Math.min(U*1.4,2200000),mind:8},log:'同學裡真的有人帶你進了一個你原本進不去的局。這筆學費,兩年就賺回來了。',mood:'good'},
+     {w:5,d:{mind:-8},log:'課上得很開心,同學也都很好,但兩年後你發現通訊錄裡多了一百個人,能打的還是那幾個。',mood:'bad'}]},
+   {l:'錢拿去投資,人脈自己慢慢累積',d:{mind:4},log:'你算了一下報酬率,決定把那筆錢留在市場。你相信實力比名片有用。'},
+   {l:'念在職進修就好,學費便宜很多',d:{cash:-Math.min(U*0.2,300000),mind:6,fame:4},log:'你選了學費少一個零的班。學到的東西不比較少,只是沒有那些飯局。',mood:'good'}]}),
+ (U)=>({ic:'🍜',t:'什麼都漲的那一年',once:true,x:'便當從八十漲到一百一,電費調漲,連你固定買的那款咖啡都縮水了。薪水沒動,但每個月剩下的錢肉眼可見地變少。',c:[
+   {l:'認真記帳,把支出砍下來',d:{cash:Math.min(U*0.12,180000),mind:-4},f:['frugal'],log:'你把每一筆都記下來,砍掉幾個訂閱和幾頓外食。省下來的數字不大,但你第一次知道錢花去哪了。',mood:'good'},
+   {l:'不省了,錢要拿去讓自己開心',d:{cash:-Math.min(U*0.15,200000),mind:10,rel:5},log:'你決定不虧待自己。日子有滋味多了,存款也薄了一點。'},
+   {l:'加碼投資,通膨要靠報酬打贏',d:{},roll:[
+     {w:5,d:{stock:Math.min(U*0.4,600000),cash:-Math.min(U*0.4,600000),mind:5},log:'你把生活費以外的錢全丟進市場,賭報酬跑得比物價快。'},
+     {w:5,d:{stock:Math.min(U*0.4,600000),cash:-Math.min(U*0.4,600000),mind:-6},log:'你加碼了,然後市場接下來兩年都沒動。通膨照漲,你的錢卡在裡面。',mood:'bad'}]}]}),
+ (U)=>({ic:'🎰',t:'尾牙的最大獎',once:true,req:s=>!!CUR.income,x:'尾牙抽獎,主持人念到倒數第二個號碼時停頓了一下——那個尾數,跟你的一樣。',c:[
+   {l:'衝上台領獎',d:{},roll:[
+     {w:3,d:{cash:Math.min(U*0.5,800000),mind:12,fame:8},log:'真的是你!你在全公司面前領走了最大獎,那晚被灌了很多酒,但值得。',mood:'good'},
+     {w:7,d:{mind:-5,rel:4},log:'差一號。你站到一半又坐下去,整桌笑成一團,隔壁部門的人還幫你拍了照。'}]},
+   {l:'坐著不動,反正不會是我',d:{mind:2},log:'你連號碼牌都懶得看。後來確實不是你,你鬆了一口氣——不用上台講話。'}]}),
+ (U)=>({ic:'🛵',t:'深夜的第二份工作',once:true,req:s=>s.age<=45&&s.cash<Math.min(U*2,2500000),x:'你算過了:每天下班再跑三小時外送,一個月可以多兩萬多。代價是這一年你不會有晚上。',c:[
+   {l:'跑,本金比睡眠重要',d:{cash:Math.min(U*0.55,750000),mind:-12,rel:-8},f:['frugal'],log:'你跑了一整年。存款多了一截,健檢報告也多了一行。有些本金,是用身體換的。'},
+   {l:'跑半年就好,存到一筆就收',d:{cash:Math.min(U*0.28,380000),mind:-5},log:'你設了一個數字,存到就停。這是你第一次替自己的辛苦設停損點。',mood:'good'},
+   {l:'不跑,時間拿去進修',d:{mind:6,fame:5},f:['studious'],log:'你把晚上拿去上課、讀書。短期什麼都沒多,但兩年後你換工作時,面試官問的正好是你學的那個。',mood:'good'}]})
 ];
 /* 一般年份偶爾出現的「投資機會」標題(用『判斷/眼光』而非賭博的語氣) */
 const GEN_BET_TITLES=[
@@ -911,7 +1004,7 @@ const GEN_BET_TITLES=[
  {t:'深夜的財報電話',x:'美股龍頭盤後開財報,台灣時間半夜三點。你可以熬夜等第一手,也可以睡飽了明天再說——但部位要先決定。'},
  {t:'聯準會的那句話',x:'主席的措辭只變了兩個字,全球資金一夜換邊站。你聽出了味道,問題是敢押多重。'},
  {t:'匯率的兩面刃',x:'美股帳面漂亮,匯率卻反著走。賺了指數賠了匯差的故事,你聽過太多次——這次換你決定。'},
- {t:'全世界最貴的市場',x:'所有人都說美股太貴了,然後它又創新高。貴,從來不是賣出的理由,但也不是買進的理由。'},
+ {t:'全世界最貴的市場',once:true,x:'所有人都說美股太貴了,然後它又創新高。貴,從來不是賣出的理由,但也不是買進的理由。'},
  {t:'指數還是個股',x:'一邊是躺著不動的大盤指數,一邊是你研究很久的那家公司。同樣一筆錢,你要放哪邊?'},
  {t:'那斯達克的回檔',x:'科技股連跌數日,群組裡開始有人喊「崩了」。你翻開自己的筆記——這是第幾次「崩了」?'},
  {t:'產業輪動的機會',x:'資金開始往某個族群移動,你嗅到一絲熟悉的味道。要不要順勢布局?'},
@@ -1017,7 +1110,7 @@ function startGame(c){
   S=JSON.parse(JSON.stringify(c.start));
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.prop=0;S.mort=0;S.houseYr=null;
-  S.century=false;S.forcedRetire=false;S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
+  S.century=false;S.forcedRetire=false;S.usedOnce=[];S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
   S.retireOffered=false;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
@@ -1088,7 +1181,7 @@ function animateAge(fromA,fromY,toA,toY){
   },200);
 }
 
-function applyDelta(d){if(!d)return;for(const k in d){let v=d[k];if(k==='mind'&&v<0)v*=Math.max(0.1,1-0.15*lvl('mindful'));if(k==='rel'&&v>0)v*=(1+0.2*lvl('network'));if(k==='mind'||k==='rel'||k==='fame')S[k]=clamp(S[k]+v);else S[k]=(S[k]||0)+v;}
+function applyDelta(d){if(!d)return;for(const k in d){let v=d[k];if(k==='mind'&&v<0)v*=Math.max(0.1,1-0.15*lvl('mindful'));if(k==='rel'&&v>0)v*=(1+0.2*lvl('network'));if(k==='mind')S[k]=clampMind(S[k]+v);else if(k==='rel'||k==='fame')S[k]=clamp(S[k]+v);else S[k]=(S[k]||0)+v;}
   if(S.prop<0)S.prop=0; if(S.mort<0)S.mort=0;
   if(S.stock<0){S.cash+=S.stock;S.stock=0;}   // 持股最多賠到歸零,超出的部分從現金扣(不足再轉負債)
   if(S.cash<0){S.debt=(S.debt||0)-S.cash;S.cash=0;}}
@@ -1130,7 +1223,10 @@ function incomeBanner(){
   if(S.lastFuse){S.lastFuse.forEach(f=>{h+=`<div class="incbanner ${f.amt>0?'neg':''}">${f.ic} <b>${f.t}</b> — ${f.txt}${f.amt>0?` <b>−${fmt(f.amt)}</b>`:''}</div>`;});}
   if(S.lastBurden){S.lastBurden.forEach(b=>{h+= b.mul!==undefined
     ?`<div class="incbanner neg">${b.ic} <b>${b.t}</b> — 這段日子本業收入只剩 <b>${Math.round(b.mul*100)}%</b></div>`
-    :`<div class="incbanner neg">${b.ic} <b>${b.t}</b> — 這一年又付出 <b>${fmt(b.amt)}</b>${b.short?'(現金不足,已轉為負債)':''}</div>`;});}
+    :(b.gain
+      ?`<div class="incbanner">${b.ic} <b>${b.t}</b> — 這一年多賺了 <b>+${fmt(-b.amt)}</b></div>`
+      :`<div class="incbanner neg">${b.ic} <b>${b.t}</b> — 這一年又付出 <b>${fmt(b.amt)}</b>${b.short?'(現金不足,已轉為負債)':''}</div>`);});}
+  if(S.lastNet){h+=`<div class="incbanner">🤝 <b>圈子</b> — 人脈帶來一筆計畫外的收入 <b>+${fmt(S.lastNet)}</b></div>`;}
   if(S.lastPension){h+=`<div class="incbanner">🏛️ <b>月退俸</b> — 不管股市怎麼跌,這筆錢照領 <b>+${fmt(S.lastPension)}</b></div>`;}
   if(S.lastRent){h+=`<div class="incbanner" id="incRent">🏠 <b>包租公</b> — 房客準時匯款,租金收入 <b>+${fmt(S.lastRent)}</b></div>`;}
   if(S.lastStock){const g=S.lastStock.gain,pct=Math.round(S.lastStock.ret*100);
@@ -1172,6 +1268,7 @@ function yearlyIncome(){
     else{econ=1.7;situ='升遷加薪,收入大跳';}
     mult=senior*econ;
   }
+  if(mast('network',10))mult*=1.2;   /* 貴人 */
   return {inc:Math.round(base*mult*incomeMul()),label:CUR.incomeLabel||'工作收入',situ};
 }
 /* ===== 人生關卡:一次選擇,之後每年都跟著你 =====
@@ -1186,10 +1283,15 @@ function tickBurdens(){
     if(b.left<=0)return;
     if(b.kind==='cash'){
       const due=Math.round(b.amt);
+      if(due<0){   /* 負數 = 每年進帳(例如自媒體的長期收入) */
+        const inc=-due;S.cash+=inc;
+        hit.push({ic:b.ic,t:b.t,amt:-inc,gain:true});
+        S.log.push({yr:S.year,txt:`${b.ic} ${b.t} 進帳 ${fmt(inc)}`});
+      }else{
       const pay=Math.min(Math.max(0,S.cash),due);
       S.cash-=pay;const rem=due-pay;if(rem>0)S.debt=(S.debt||0)+rem;
       hit.push({ic:b.ic,t:b.t,amt:due,short:rem>0});
-      S.log.push({yr:S.year,txt:`${b.ic} ${b.t} ${fmt(due)}${rem>0?'(現金不足,轉為負債)':''}`});
+      S.log.push({yr:S.year,txt:`${b.ic} ${b.t} ${fmt(due)}${rem>0?'(現金不足,轉為負債)':''}`});}
     }else if(b.kind==='inc'){
       hit.push({ic:b.ic,t:b.t,amt:0,mul:b.mul});
     }
@@ -1256,12 +1358,17 @@ function openNewYear(){
     S.log.push({yr:S.year,txt:`🏛️ ${S.age} 歲屆齡退休,人事命令下來了`});resolveEnding();return;}
   /* 歲月消磨:心態/關係/名聲每年自然下滑,站得越高越難維持(得靠選擇與事件補回來) */
   const wear=v=>clamp(v-(v>85?3:v>65?2:1));
-  S.mind=wear(S.mind);S.rel=wear(S.rel);S.fame=clamp(S.fame-(S.fame>85?2:1));
+  if(!mast('mindful',5))S.mind=wear(S.mind);
+  S.rel=wear(S.rel);S.fame=clamp(S.fame-(S.fame>85?2:1));
   tickFuses();tickBurdens();
   if(CUR.income){const yi=yearlyIncome();S.cash+=yi.inc;if(S.cash<0){S.debt=(S.debt||0)-S.cash;S.cash=0;}
     S.lastIncome={inc:yi.inc,label:yi.label,situ:yi.situ,hadLoss:yi.inc<0};
     S.log.push({yr:S.year,txt: yi.inc>=0?`${S.age} 歲・${yi.situ},進帳 ${fmt(yi.inc)}`:`${S.age} 歲・${yi.situ},虧損 ${fmt(-yi.inc)}`});
   }else S.lastIncome=null;
+  /* 人脈精通「圈子」:每年有機會靠關係多一筆收入 */
+  if(mast('network',5)&&RNG()<0.45){const nb=Math.round((CUR.income||300000)*(0.12+RNG()*0.25));
+    S.cash+=nb;S.lastNet=nb;S.log.push({yr:S.year,txt:`🤝 靠圈子接到一個機會,多賺 ${fmt(nb)}`});}
+  else S.lastNet=null;
   /* 退休金:軍公教等有月退的出身,到年紀之後每年穩定入帳(不受市場影響) */
   if(CUR.pension&&S.age>=CUR.pension.from){const pen=CUR.pension.amt;S.cash+=pen;S.lastPension=pen;
     S.log.push({yr:S.year,txt:`🏛️ 月退俸入帳 ${fmt(pen)}`});}
@@ -1296,7 +1403,10 @@ function openNewYear(){
     const rr=RNG();let ret;   // 每年市場報酬:平均約 +2%,波動更大;約7%機率遇到股災重挫
     if(rr<0.07)ret=-0.30-RNG()*0.20;   // 股災:−30%~−50%,不算罕見而且很痛
     else if(rr<0.22)ret=-0.10;else if(rr<0.45)ret=0.03;else if(rr<0.72)ret=0.07;else if(rr<0.90)ret=0.12;else ret=0.17;
+    if(mast('finiq',5))ret+=0.015;
+    if(mast('finiq',10))ret+=0.02;
     const crash=ret<=-0.22;
+    if(crash&&mast('disc',10))ret=ret/2;   /* 防火牆:股災傷害減半 */
     const gain=Math.round(S.stock*ret);S.stock=Math.max(0,S.stock+gain);
     S.lastStock={gain,ret,crash};
     S.log.push({yr:S.year,txt: crash?`💥 股災!持股重挫 ${fmt(-gain)}`:(gain>=0?`持股複利滾出 ${fmt(gain)}`:`持股回檔 ${fmt(-gain)}`)});
@@ -1326,7 +1436,11 @@ function pickDaily(){
   if(!S.recentDaily)S.recentDaily=[];
   const U=CUR.income||100000;
   /* 只挑「符合條件」的事件(例如沒生小孩就不會出現育兒事件) */
-  const elig=[];for(let i=0;i<GEN_LIFE.length;i++){const ev=GEN_LIFE[i](U);if(!ev.req||ev.req(S))elig.push(i);}
+  if(!S.usedOnce)S.usedOnce=[];
+  /* once 的事件一局只會遇到一次(中華隊不會每年都奪冠) */
+  const elig=[];for(let i=0;i<GEN_LIFE.length;i++){const ev=GEN_LIFE[i](U);
+    if(ev.once&&S.usedOnce.indexOf(i)>=0)continue;
+    if(!ev.req||ev.req(S))elig.push(i);}
   const avoid=new Set(S.recentDaily);
   let pool=elig.filter(i=>!avoid.has(i));
   if(!pool.length)pool=elig.length?elig.slice():GEN_LIFE.map((_,i)=>i);
@@ -1340,8 +1454,9 @@ function pickDaily(){
   }
   S.dailyCount=(S.dailyCount||0)+1;
   const idx=pool[Math.floor(RNG()*pool.length)];
+  if(GEN_LIFE[idx](U).once)S.usedOnce.push(idx);
   S.recentDaily.push(idx);
-  const keep=Math.min(9,GEN_LIFE.length-1);   // 記住最近 9 件,這段時間內不重覆
+  const keep=Math.min(Math.max(14,Math.floor(GEN_LIFE.length*0.55)),GEN_LIFE.length-1);   // 記住超過一半,重複要隔很久
   while(S.recentDaily.length>keep)S.recentDaily.shift();
   return GEN_LIFE[idx](U);
 }
@@ -1495,6 +1610,22 @@ function renderLog(){if(!S.log.length)return;document.getElementById('logBox').s
 
 /* ---------- 倍數下注事件 ---------- */
 function betRisk(sc,t){const base=sc.base||CUR.betBase||100000;const avail=Math.max(0,S.cash)+Math.max(0,S.stock);return Math.max(0,Math.min(base*t.mult,Math.floor(avail)));}
+/* 把技能此刻的實際貢獻寫出來,不然玩家永遠感覺不到 */
+function skillFX(){
+  const it=[];
+  const i=lvl('insight'),f=lvl('finiq'),d=lvl('disc'),mf=lvl('mindful'),nw=lvl('network');
+  if(i)it.push(`🔭 眼光 Lv${i} 成功率 <b>+${(i*3.5).toFixed(1)}%</b>(積極)`);
+  if(mast('insight',10))it.push('🔭 <b>先知</b> 再 +8%');
+  if(f)it.push(`📈 財商 Lv${f} 獲利 <b>+${f*15}%</b>`);
+  if(mast('finiq',5))it.push(`📈 <b>複利加速</b> 年報酬 +${mast('finiq',10)?'3.5':'1.5'}%`);
+  if(d)it.push(`🛡️ 紀律 Lv${d} 虧損 <b>−${Math.min(90,d*12)}%</b>`);
+  if(mast('disc',5))it.push('🛡️ <b>停損線</b> 單次最多賠六成');
+  if(mast('disc',10))it.push('🛡️ <b>防火牆</b> 股災傷害減半');
+  if(mast('mindful',5))it.push('🧘 <b>鈍感力</b> 不再自然衰退');
+  if(mast('network',10))it.push('🤝 <b>貴人</b> 本業 +20%');
+  if(!it.length)return `<div class="fxbar none">🎓 你還沒練起任何技能 — 技能練到 <b>Lv5</b> 會解鎖質變能力,把點數集中在一項比每項點一點有用得多。</div>`;
+  return `<div class="fxbar">${it.join('<span class="sep2">·</span>')}</div>`;
+}
 function renderBet(sc){
   AWAIT=false;
   const story=(typeof sc.x==='function')?sc.x(S):sc.x;
@@ -1506,7 +1637,7 @@ function renderBet(sc){
   if(surge)banner+=`<div class="hotbar surge">🔥 <b>難得的行情</b> — 這一年的盤特別燙,<b>積極 +10%</b>、<b>梭哈 +14%</b> 成功率,保守沒有加成。</div>`;
   if(streak>=2)banner+=`<div class="hotbar streak">⚡ <b>手感發燙</b>(連 ${streak} 次押對)— 這次押<b>積極以上</b>,獲利 <b>×1.5</b>;<span class="ck">選保守會歸零</span>。</div>`;
   let html=sceneHead(sc)+incomeBanner()+`<div class="story">${story}</div>`+banner+`
-    <div class="betwrap"><div class="bl">📊 選一個投入倍數 · 成功率越高越安全,倍數越大賺賠越多(升「眼光」技能可提高成功率)</div><div class="bets">`;
+    <div class="betwrap"><div class="bl">📊 選一個投入倍數 · 成功率越高越安全,倍數越大賺賠越多</div>`+skillFX()+`<div class="bets">`;
   BET_TIERS.forEach((t,i)=>{
     const risk=betRisk(sc,t);
     const winP=Math.round(betWinP(t,surge)*100);
@@ -1535,8 +1666,11 @@ function resolveBet(sc,i){
     const fromCash=Math.min(Math.max(0,S.cash),stake);   // 買進:本金從現金轉進持股
     S.cash-=fromCash;S.stock=(S.stock||0)+fromCash+profit; // 賺到的部位抱著,之後每年跟著市場滾複利
     S.mind=clamp(S.mind+t.mgood);if(t.mult>=3)S.fame=clamp(S.fame+3);}
-  else{loss=Math.round(stake*t.lossMult*Math.max(0.1,1-0.12*lvl('disc')));let rem=loss;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;S.mind=clamp(S.mind-t.mbad*Math.max(0.1,1-0.15*lvl('mindful')));}
+  else{loss=Math.round(stake*t.lossMult*Math.max(0.1,1-0.12*lvl('disc')));
+    if(mast('disc',5))loss=Math.min(loss,Math.round(stake*0.6));   /* 停損線 */
+    S.lastLossSaved=Math.max(0,Math.round(stake*t.lossMult)-loss);let rem=loss;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;S.mind=clamp(S.mind-t.mbad*Math.max(0.1,1-0.15*lvl('mindful')));}
   if(t.mult>=5)S.flags.aggressive=true;
+  if(!win&&S.lastLossSaved>0)S.log.push({yr:S.year,txt:`🛡️ 紀律讓你少賠了 ${fmt(S.lastLossSaved)}`});
   try{track('bet_choice',{character:CURID,tier:t.label,surge:betSurge()?'yes':'no',streak:hotUsed?'yes':'no'});}catch(e){}
   /* 手感:押積極以上又押對才會累積,保守或押錯直接歸零 */
   if(win&&t.mult>=3)S.hot=hotUsed?1:(S.hot||0)+1; else S.hot=0;
@@ -1586,8 +1720,10 @@ function renderSkillList(){
     const prog=S.skillProg[sk.id]||0;
     const pips=Array.from({length:sk.max},(_,i)=>`<i class="${i<cur?'on':''}"></i>`).join('');
     const note=maxed?'<span style="color:var(--up);font-weight:700">已點滿 MAX</span>':`下一級 <b>${prog}/${cost}</b> 點${prog>=cost?'':`(再投 ${cost-prog} 點升級)`}`;
+    const m5=`<div class="mst ${cur>=5?'on':''}">Lv5 ${sk.m5}${cur>=5?' ✓':''}</div>`;
+    const m10=`<div class="mst ${cur>=10?'on':''}">Lv10 ${sk.m10}${cur>=10?' ✓':''}</div>`;
     const el=document.createElement('div');el.className='skl';
-    el.innerHTML=`<div class="ic">${sk.ic}</div><div class="info"><div class="n">${sk.n} <span style="color:var(--ink3);font-size:11px">Lv.${cur}/${sk.max}</span></div><div class="d">${sk.d}</div><div class="lv">${pips}</div><div class="prog">${note}</div></div>`;
+    el.innerHTML=`<div class="ic">${sk.ic}</div><div class="info"><div class="n">${sk.n} <span style="color:var(--ink3);font-size:11px">Lv.${cur}/${sk.max}</span></div><div class="d">${sk.d}</div><div class="lv">${pips}</div><div class="prog">${note}</div>${m5}${m10}</div>`;
     const up=document.createElement('button');up.className='up'+(maxed?' max':'');
     if(maxed){up.textContent='MAX';up.disabled=true;}
     else{up.innerHTML='＋1';up.disabled=(S.sp<1);up.title='投入 1 技能點';
