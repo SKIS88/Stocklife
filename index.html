@@ -1021,12 +1021,14 @@ const GEN_BET_TITLES=[
  {t:'熱門新股掛牌',x:'一檔萬眾矚目的新股掛牌,首日就演出瘋狂行情。全市場都在追,你決定用多大的部位參與。'}
 ];
 /* 開局狀況:每局隨機一種,微調起始資金與狀態,讓每次開場都不太一樣。cashU = 幾年份的收入 */
+/* 開局狀況:一律用「起始現金的百分比」,不能用收入去乘——
+   有些角色的年收入比起始現金還高(公務員、白領、科技新貴),乘下去會直接歸零 */
 const OPENINGS=[
  {t:'平順的起點',x:'一切照計畫進行,你穩穩站上起跑線。'},
  {t:'景氣正熱',x:'你入場這年市場一片樂觀,錢似乎特別好賺——但人人都這麼想時,風險也在累積。',mind:5,fame:3},
- {t:'景氣寒冬',x:'你偏偏在景氣最冷時起步,開局艱難,卻也逼出你的謹慎。',cashU:-0.6,mind:-3},
- {t:'一筆意外之財',x:'一份遲來的獎金入袋,你的起步資金比預期多了一些。',cashU:1.5,mind:3},
- {t:'開局先破了個財',x:'起步前一場突發花費,讓你的現金比預期少了一截。',cashU:-1.2,mind:-2},
+ {t:'景氣寒冬',x:'你偏偏在景氣最冷時起步,開局艱難,卻也逼出你的謹慎。',cashP:-0.18,mind:-3},
+ {t:'一筆意外之財',x:'一份遲來的獎金入袋,你的起步資金比預期多了一些。',cashP:0.40,mind:3},
+ {t:'開局先破了個財',x:'起步前一場突發花費,讓你的現金比預期少了一截。',cashP:-0.32,mind:-2},
  {t:'志得意滿',x:'最近諸事順遂,你信心滿滿地進場——只是過度自信,往往是虧損的開始。',mind:6,fame:4},
  {t:'低潮中出發',x:'你在一段低潮裡決定改變,帶著點不服輸的倔強起步。',mind:-4,rel:-2,fame:3},
  {t:'貴人看好',x:'一位前輩很看好你,替你引薦了些人脈,起步時名聲響亮了點。',fame:6,rel:4}
@@ -1114,7 +1116,9 @@ function startGame(c){
   S.retireOffered=false;S.lastRetireAsk=undefined;S.recentMisf=[];S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
-  S.cash=Math.max(0,Math.round(S.cash+(op.cashU||0)*(c.income||100000)));
+  /* 開局現金:按比例增減,並保底至少留下六成——絕不會 0 元開局 */
+  if(op.cashP){const base0=S.cash;
+    S.cash=Math.max(Math.round(base0*0.6),Math.round(base0*(1+op.cashP)));}
   if(op.mind)S.mind=clampMind(S.mind+op.mind);if(op.rel)S.rel=clamp(S.rel+op.rel);if(op.fame)S.fame=clamp(S.fame+op.fame);
   S.openingLine=op.t+' — '+op.x;
   const mid=(c.mid||[]).slice();
