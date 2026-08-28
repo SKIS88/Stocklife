@@ -1115,7 +1115,7 @@ function startGame(c){
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
   S.cash=Math.max(0,Math.round(S.cash+(op.cashU||0)*(c.income||100000)));
-  if(op.mind)S.mind=clamp(S.mind+op.mind);if(op.rel)S.rel=clamp(S.rel+op.rel);if(op.fame)S.fame=clamp(S.fame+op.fame);
+  if(op.mind)S.mind=clampMind(S.mind+op.mind);if(op.rel)S.rel=clamp(S.rel+op.rel);if(op.fame)S.fame=clamp(S.fame+op.fame);
   S.openingLine=op.t+' — '+op.x;
   const mid=(c.mid||[]).slice();
   for(let i=mid.length-1;i>0;i--){const j=Math.floor(RNG()*(i+1));const tmp=mid[i];mid[i]=mid[j];mid[j]=tmp;}   // 洗牌
@@ -1310,12 +1310,12 @@ function tickFuses(){
       const amt=Math.round(f.amt);
       const pay=Math.min(Math.max(0,S.cash),amt);S.cash-=pay;const rem=amt-pay;
       if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;if(rem-fs>0)S.debt=(S.debt||0)+(rem-fs);}
-      if(f.mind)S.mind=clamp(S.mind+f.mind);
+      if(f.mind)S.mind=clampMind(S.mind+f.mind);
       if(f.rel)S.rel=clamp(S.rel+f.rel);
       fired.push({ic:f.ic,t:f.t,txt:f.bad,amt});
       S.log.push({yr:S.year,txt:`${f.ic} ${f.t} — ${f.bad}(${fmt(amt)})`});
     }else{
-      if(f.okMind)S.mind=clamp(S.mind+f.okMind);
+      if(f.okMind)S.mind=clampMind(S.mind+f.okMind);
       fired.push({ic:f.ic,t:f.t,txt:f.ok,amt:0});
       S.log.push({yr:S.year,txt:`${f.ic} ${f.t} — ${f.ok}`});
     }
@@ -1560,7 +1560,7 @@ function renderMisfortune(){
   const before=net(S);
   let dmg=Math.round(mf.pct*(Math.max(0,S.cash)+Math.max(0,S.stock)));
   let rem=dmg;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;
-  if(mf.mind)S.mind=clamp(S.mind+mf.mind);if(mf.rel)S.rel=clamp(S.rel+mf.rel);if(mf.fame)S.fame=clamp(S.fame+mf.fame);
+  if(mf.mind)S.mind=clampMind(S.mind+mf.mind);if(mf.rel)S.rel=clamp(S.rel+mf.rel);if(mf.fame)S.fame=clamp(S.fame+mf.fame);
   S.log.push({yr:S.year,txt:`意外:${mf.t},損失 ${fmt(dmg)}`});
   checkRuin();
   S.retireLatch=false; // 出事後,下一步會再問一次要不要退休
@@ -1673,10 +1673,10 @@ function resolveBet(sc,i){
   if(win){profit=Math.round(stake*t.winMult*(hotUsed?1.5:1)*(1+0.15*lvl('finiq')));
     const fromCash=Math.min(Math.max(0,S.cash),stake);   // 買進:本金從現金轉進持股
     S.cash-=fromCash;S.stock=(S.stock||0)+fromCash+profit; // 賺到的部位抱著,之後每年跟著市場滾複利
-    S.mind=clamp(S.mind+t.mgood);if(t.mult>=3)S.fame=clamp(S.fame+3);}
+    S.mind=clampMind(S.mind+t.mgood);if(t.mult>=3)S.fame=clamp(S.fame+3);}
   else{loss=Math.round(stake*t.lossMult*Math.max(0.1,1-0.12*lvl('disc')));
     if(mast('disc',5))loss=Math.min(loss,Math.round(stake*0.6));   /* 停損線 */
-    S.lastLossSaved=Math.max(0,Math.round(stake*t.lossMult)-loss);let rem=loss;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;S.mind=clamp(S.mind-t.mbad*Math.max(0.1,1-0.15*lvl('mindful')));}
+    S.lastLossSaved=Math.max(0,Math.round(stake*t.lossMult)-loss);let rem=loss;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;S.mind=clampMind(S.mind-t.mbad*Math.max(0.1,1-0.15*lvl('mindful')));}
   if(t.mult>=5)S.flags.aggressive=true;
   if(!win&&S.lastLossSaved>0)S.log.push({yr:S.year,txt:`🛡️ 紀律讓你少賠了 ${fmt(S.lastLossSaved)}`});
   try{track('bet_choice',{character:CURID,tier:t.label,surge:betSurge()?'yes':'no',streak:hotUsed?'yes':'no'});}catch(e){}
