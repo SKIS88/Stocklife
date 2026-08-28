@@ -300,6 +300,15 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .dice.sm.g{background:#e9fff5;color:#1c9963;box-shadow:0 6px 16px rgba(46,194,126,.35)}
 .dice.sm.b{background:#ffecef;color:#d63d4c;box-shadow:0 6px 16px rgba(255,91,106,.3)}
 .dicerow{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;min-height:52px;align-items:center}
+#nameInput.need{border-color:var(--sk-red);box-shadow:0 0 0 3px rgba(214,40,57,.18);animation:nsh .4s}
+@keyframes nsh{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.hotbar{margin:10px 0 2px;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.65;border-left:3px solid var(--gold);background:rgba(184,134,11,.13);color:#8a6508}
+.hotbar b{color:#7a5a06}
+.hotbar.streak{border-left-color:var(--sk-red);background:rgba(214,40,57,.10);color:#9c1f2c}
+.hotbar.streak b{color:#8c1826}
+.hotbar .ck{opacity:.72}
+.betopt .btag{margin-left:5px;font-size:11px;font-weight:800;letter-spacing:-.2px;vertical-align:1px}
+.betopt.lit{box-shadow:0 0 0 2px rgba(184,134,11,.55),0 4px 14px rgba(184,134,11,.22)}
 .incbanner{margin:12px 0 4px;padding:10px 13px;border-radius:12px;border-left:3px solid var(--up);background:rgba(46,194,126,.12);font-size:13.5px;color:#1c7a52}
 .incbanner b{color:#127a49}
 .incbanner.stk{border-left-color:var(--gold);background:rgba(184,134,11,.12);color:#8a6508}
@@ -506,7 +515,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
       <div class="combo" id="comboLine">— 超過 1,000 種結局組合,沒有人的人生會一樣 —</div>
       <div class="seedbar">
         <label>你的名字</label>
-        <input id="nameInput" placeholder="輸入你的名字(可留空)" spellcheck="false" maxlength="12">
+        <input id="nameInput" placeholder="打上名字,結算圖才是你的" spellcheck="false" maxlength="12">
       </div>
       <div class="seedbar dicebar">
         <label>🎲 命運骰子</label>
@@ -534,7 +543,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
       <div class="chal-rule">你會拿到 <b>完全相同</b> 的命運骰子——同樣的事件、同樣的時機、同樣的股災。<br>差別只有一個:<b>你的選擇</b>。</div>
       <div class="seedbar" style="margin-top:14px">
         <label>你的名字</label>
-        <input id="chalName" placeholder="輸入你的名字(可留空)" spellcheck="false" maxlength="12">
+        <input id="chalName" placeholder="打上名字,結算圖才是你的" spellcheck="false" maxlength="12">
       </div>
       <div class="endbtns" style="margin-top:14px">
         <button class="eb-main" id="chalGo">⚔️ 接受挑戰,走同一段命運</button>
@@ -618,7 +627,7 @@ const net=s=>s.cash+s.stock+(s.prop||0)-s.debt;   /* 房產也是資產:市值�
 
 /* 技能系統(5 種,每種 5 級) */
 const SKILLS=[
- {id:'insight',ic:'🔭',n:'眼光',max:10,d:'投資成功率每級 +3%'},
+ {id:'insight',ic:'🔭',n:'眼光',max:10,d:'成功率每級 +1.5%(保守)/ +3.5%(積極)/ +4.5%(梭哈)'},
  {id:'finiq',ic:'📈',n:'財商',max:10,d:'投資獲利每級 +15%'},
  {id:'disc',ic:'🛡️',n:'紀律',max:10,d:'投資虧損每級 −12%'},
  {id:'mindful',ic:'🧘',n:'心法',max:10,d:'負面事件的心態耗損每級 −15%'},
@@ -627,11 +636,17 @@ const SKILLS=[
 const lvl=id=>(S&&S.skills&&S.skills[id])||0;
 /* 下注倍數三級距:用「成功率%」決定成敗(技能可提高成功率),倍數越大投入越多、報酬越高 */
 const BET_TIERS=[
- {mult:1,cls:'t1',label:'保守',sub:'投入本金 ×1',baseWin:0.58,winMult:0.55,lossMult:0.55,mgood:3,mbad:5},
- {mult:3,cls:'t2',label:'積極',sub:'投入本金 ×3',baseWin:0.38,winMult:1.5,lossMult:1.3,mgood:5,mbad:9},
- {mult:5,cls:'t3',label:'梭哈',sub:'投入本金 ×5',baseWin:0.24,winMult:3.2,lossMult:2.2,mgood:7,mbad:15}
+ {mult:1,cls:'t1',label:'保守',sub:'投入本金 ×1',baseWin:0.58,winMult:0.40,lossMult:0.55,mgood:3,mbad:5,iq:0.015},
+ {mult:3,cls:'t2',label:'積極',sub:'投入本金 ×3',baseWin:0.38,winMult:1.5,lossMult:1.3,mgood:5,mbad:9,iq:0.035},
+ {mult:5,cls:'t3',label:'梭哈',sub:'投入本金 ×5',baseWin:0.24,winMult:3.2,lossMult:2.2,mgood:7,mbad:15,iq:0.045}
 ];
-function betWinP(t){return Math.min(0.92,Math.max(0.05,t.baseWin+0.03*lvl('insight')));}
+/* 眼光對成功率的加成分級:保守本來就穩,練眼光的回報有限;倍數越大,眼光越關鍵 */
+function betSurge(){return !!(S&&S.hotSurge);}
+/* 🔥 難得的行情:只加成積極與梭哈,保守不受影響 */
+function betWinP(t,surge){const sg=(surge===undefined?betSurge():surge)&&t.mult>=3?(t.mult>=5?0.14:0.10):0;
+  return Math.min(0.92,Math.max(0.05,t.baseWin+(t.iq||0.03)*lvl('insight')+sg));}
+/* 🔥 手感發燙:連續兩次積極以上的成功之後,下一次非保守的獲利 ×1.5 */
+function hotReady(t){return t.mult>=3&&(S.hot||0)>=2;}
 const DICEFACE=['','⚀','⚁','⚂','⚃','⚄','⚅'];
 /* 財富自由臨界值:依各角色收入與本金校準,讓五種出身的達標難度接近 */
 const RETIRE_AT={richkid:120000000,whitecollar:28000000,freshgrad:11000000,techbro:130000000,founder:65000000};
@@ -768,11 +783,35 @@ const GEN_LIFE=[
      {w:4,d:{stock:U*2.5,mind:10,rel:6},log:'天啊——是放了幾十年、配股配息滾出一大筆的績優股!阿公在天上都在笑。全家族都轟動了。',mood:'good'},
      {w:6,d:{mind:-3,rel:5},log:'查了才知道,那間公司早就下市,股票成了名副其實的壁紙。全家笑成一團,把它裱框留念——阿公的浪漫,無價。',mood:'bad'}]},
    {l:'收好留作紀念,不去查',d:{mind:4,rel:3},log:'你把箱子擦乾淨收好。有些東西的價值,不需要市場來定義。'}]}),
- (U)=>({ic:'🧾',t:'對發票的奇蹟',req:s=>!(s.flags&&s.flags.lotto),x:'超商咖啡的發票隨手一對——等等,這串號碼怎麼有點眼熟?你揉了揉眼睛再看一次。',c:[
-   {l:'再對一次!',d:{},set:{lotto:true},roll:[
-     {w:2,d:{cash:2000000,mind:12,fame:5},log:'特別獎!兩百萬!!你在超商當場尖叫,店員比你還激動。這杯咖啡,是你人生最劃算的一筆投資。',mood:'good'},
-     {w:8,d:{cash:200,mind:3},log:'中了兩百塊。你笑著去換了兩杯咖啡,發限動昭告天下:「本月投報率最高的操作。」',mood:'good'}]},
-   {l:'一定是看錯了,丟進袋子',d:{},log:'你把發票塞回袋子。人生有些奇蹟,就這樣擦肩而過也未可知。'}]}),
+ (U)=>{const B=Math.min(U*0.8,1200000);return{ic:'🫧',t:'AI 泡沫的爭論',req:s=>s.stock>=B,x:'財經版吵成一團:一派說 AI 的資本支出撐得住,一派說這就是 2000 年網通股的翻版。你手上正好有一筆押在這條線上。',c:[
+   {l:'先減碼一半,落袋為安',d:{stock:-B,cash:B},roll:[
+     {w:5,d:{mind:6,fame:2},log:'你把一半換成現金。後來確實回檔了一大段,你慶幸自己手快。',mood:'good'},
+     {w:5,d:{mind:-9},log:'你減碼之後它又漲了兩成。少賺不是賠,但那種感覺比賠還難受。',mood:'bad'}]},
+   {l:'加碼,泡沫沒破就是行情',req:s=>s.cash>=B,d:{cash:-B},roll:[
+     {w:4,d:{stock:Math.round(B*2.2),mind:9,fame:7},log:'資金持續湧入,你這一加碼剛好吃到整段主升。',mood:'good'},
+     {w:6,d:{stock:Math.round(B*0.45),mind:-15},log:'你買在情緒的最高點。財報一出,估值直接被砍掉一半。',mood:'bad'}]},
+   {l:'關掉財經台,繼續放著',d:{mind:3},log:'你不再看那些爭論。有些問題,時間會自己給答案。'}]}},
+ (U)=>{const B=Math.min(U*0.9,1500000);return{ic:'🎭',t:'那支太真的影片',req:s=>s.cash>=B,x:'滑手機時跳出一支影片,某位你認得的財經名人正在推薦一個穩賺的平台。畫面、聲音、連口頭禪都對——只是他從沒說過這種話。',c:[
+   {l:'查證後反手檢舉',d:{mind:7,fame:3},log:'你把影片存證檢舉,順手提醒了家族群組。幾天後新聞證實那是 AI 合成的。你替不少人擋了一刀。',mood:'good'},
+   {l:'金額不大,先投一點試試',d:{cash:-B},roll:[
+     {w:2,d:{cash:Math.round(B*1.25),mind:5},log:'前兩週真的出得了金,還多了一點。你正想加碼,隔天平台整個消失——錢是在最後一刻領回來的。',mood:'good'},
+     {w:8,d:{mind:-18,rel:-6},log:'第三週,出金鍵變成灰色,客服再也沒回。錢和那個「老師」一起蒸發了。',mood:'bad'}]}]}},
+ (U)=>{const B=Math.min(U*0.7,1000000);return{ic:'📦',t:'關稅來的那一天',req:s=>s.stock>=B,x:'凌晨一則公告,新一輪關稅名單出爐,出口類股盤前全面走低。你手上的持股,正好在名單邊緣。',c:[
+   {l:'開盤先砍,不接刀',d:{stock:-B,cash:Math.round(B*0.82)},roll:[
+     {w:6,d:{mind:4},log:'你認賠出場。後面又跌了一大段,這一刀砍得不好看,但砍對了。',mood:'good'},
+     {w:4,d:{mind:-10},log:'你砍在最低點。三天後談判有進展,股價一路補回去,只有你不在車上。',mood:'bad'}]},
+   {l:'跌深就是機會,逢低接',req:s=>s.cash>=B,d:{cash:-B},roll:[
+     {w:4,d:{stock:Math.round(B*1.8),mind:8,fame:5},log:'關稅最後打了折扣,恐慌只維持了兩天。你接在別人丟出來的貨上。',mood:'good'},
+     {w:6,d:{stock:Math.round(B*0.55),mind:-13},log:'名單後來還擴大了。你接的不是底部,是半山腰。',mood:'bad'}]},
+   {l:'不動,等談判結果',d:{mind:-3},log:'你決定什麼都不做。那幾週的對帳單,你一次也沒點開。'}]}},
+ (U)=>{const B=Math.min(U*0.6,900000);return{ic:'🧊',t:'傳產老同學',req:s=>s.cash>=B,x:'同學會上,做鋼鐵的老同學苦笑:「你們 AI 的漲上天,我們這種的沒人要。」他說他那支已經跌到淨值以下了。',c:[
+   {l:'買一點,冷門總有輪動的一天',d:{cash:-B},roll:[
+     {w:3,d:{stock:Math.round(B*1.9),mind:8,fame:4},log:'兩年後資金真的輪過來了。你在沒人看的地方,撿到一段乾淨的行情。',mood:'good'},
+     {w:7,d:{stock:Math.round(B*0.62),mind:-11},log:'它繼續跌,而且沒有故事可以講。便宜的東西,常常是有理由的。',mood:'bad'}]},
+   {l:'不碰,錢要放在有成長的地方',d:{mind:3},log:'你婉轉地換了話題。有些便宜,不是你的菜。'},
+   {l:'不買股票,借他一筆週轉',req:s=>s.cash>=Math.round(B*0.5),d:{cash:-Math.round(B*0.5)},roll:[
+     {w:5,d:{cash:Math.round(B*0.6),rel:10,mind:5},log:'他撐過去了,連本帶利還你,還多請了一頓。這筆錢的報酬,不只在帳上。',mood:'good'},
+     {w:5,d:{rel:-8,mind:-12},log:'工廠還是收了。他傳了很長一段話道歉,然後就再也沒有出現在群組裡。',mood:'bad'}]}]}},
  (U)=>({ic:'🍗',t:'雞排店老闆的明牌',x:'買雞排時,老闆邊炸邊跟隔壁客人聊股票,連菜市場阿姨都在討論同一支飆股。你想起那句老話:擦鞋童都在談股票時……',c:[
    {l:'警覺過熱,悄悄減碼',d:{mind:6,fame:2},log:'你嗅到市場過熱的味道,默默把部位降下來。幾週後回頭看,這片雞排救了你一筆錢。',mood:'good'},
    {l:'跟著全民行情衝一波',d:{},roll:[
@@ -925,11 +964,11 @@ function startGame(c){
   const nm=(document.getElementById('nameInput').value||'').trim();
   PNAME=nm||c.name;
   CUR=c;CURID=c.id;
-  track('game_start',{character:c.id,character_name:c.name});   // 📊 哪個出身最熱門
+  track('game_start',{character:c.id,character_name:c.name,named:nm?'yes':'no'});   // 📊 哪個出身最熱門
   S=JSON.parse(JSON.stringify(c.start));
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.prop=0;S.mort=0;S.houseYr=null;
-  S.century=false;
+  S.century=false;S.hot=0;S.hotKey=null;S.hotSurge=false;
   S.retireOffered=false;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
@@ -1177,7 +1216,7 @@ function pickDaily(){
   let pool=elig.filter(i=>!avoid.has(i));
   if(!pool.length)pool=elig.length?elig.slice():GEN_LIFE.map((_,i)=>i);
   /* 開局前幾年優先抽「話題事件」:先讓玩家遇到好玩、想截圖的事,正經沉重的留給中後期 */
-  const VIRAL=new Set(['寶可夢卡包的誘惑','盲盒隱藏款之亂','迷因幣的暴富神話','雞排店老闆的明牌','年夜飯上的明牌大會','命理老師的財位','「老師」的來電','對發票的奇蹟','阿公留下的老箱子','同學會的攀比大戰','天王演唱會搶票','中華隊奪冠之夜','AI 選股神器','直播間的剁手夜','毛小孩的緣分','燒錢的新嗜好']);
+  const VIRAL=new Set(['寶可夢卡包的誘惑','盲盒隱藏款之亂','迷因幣的暴富神話','雞排店老闆的明牌','年夜飯上的明牌大會','命理老師的財位','「老師」的來電','AI 泡沫的爭論','那支太真的影片','關稅來的那一天','傳產老同學','阿公留下的老箱子','同學會的攀比大戰','天王演唱會搶票','中華隊奪冠之夜','AI 選股神器','直播間的剁手夜','毛小孩的緣分','燒錢的新嗜好']);
   const early=(S.age-((CUR.start&&CUR.start.age)||S.age))<=4;
   if(early){
     const vp=pool.filter(i=>VIRAL.has(GEN_LIFE[i](U).t));
@@ -1340,15 +1379,24 @@ function betRisk(sc,t){const base=sc.base||CUR.betBase||100000;const avail=Math.
 function renderBet(sc){
   AWAIT=false;
   const story=(typeof sc.x==='function')?sc.x(S):sc.x;
-  let html=sceneHead(sc)+incomeBanner()+`<div class="story">${story}</div>
+  /* 每個下注年份只擲一次:這一年是不是「難得的行情」 */
+  const hk=(sc.chap||'')+'@'+S.year;
+  if(S.hotKey!==hk){S.hotKey=hk;S.hotSurge=RNG()<0.3;}
+  const surge=S.hotSurge, streak=(S.hot||0);
+  let banner='';
+  if(surge)banner+=`<div class="hotbar surge">🔥 <b>難得的行情</b> — 這一年的盤特別燙,<b>積極 +10%</b>、<b>梭哈 +14%</b> 成功率,保守沒有加成。</div>`;
+  if(streak>=2)banner+=`<div class="hotbar streak">⚡ <b>手感發燙</b>(連 ${streak} 次押對)— 這次押<b>積極以上</b>,獲利 <b>×1.5</b>;<span class="ck">選保守會歸零</span>。</div>`;
+  let html=sceneHead(sc)+incomeBanner()+`<div class="story">${story}</div>`+banner+`
     <div class="betwrap"><div class="bl">📊 選一個投入倍數 · 成功率越高越安全,倍數越大賺賠越多(升「眼光」技能可提高成功率)</div><div class="bets">`;
   BET_TIERS.forEach((t,i)=>{
     const risk=betRisk(sc,t);
-    const winP=Math.round(betWinP(t)*100);
-    const winAmt=Math.round(risk*t.winMult*(1+0.15*lvl('finiq')));
-    html+=`<button class="betopt ${t.cls}" data-i="${i}">
+    const winP=Math.round(betWinP(t,surge)*100);
+    const hb=hotReady(t)?1.5:1;
+    const winAmt=Math.round(risk*t.winMult*hb*(1+0.15*lvl('finiq')));
+    const tags=(surge&&t.mult>=3?'<span class="btag">🔥</span>':'')+(hb>1?'<span class="btag">⚡×1.5</span>':'');
+    html+=`<button class="betopt ${t.cls}${(surge&&t.mult>=3)||hb>1?' lit':''}" data-i="${i}">
       <div class="mx">×${t.mult}</div>
-      <div class="bi"><div class="bt">${t.label}</div><div class="bs">${t.sub}　投入約 ${fmt(risk)}</div></div>
+      <div class="bi"><div class="bt">${t.label}${tags}</div><div class="bs">${t.sub}　投入約 ${fmt(risk)}</div></div>
       <div class="odds">成功率<br><b style="font-size:17px">${winP}%</b><br><span style="color:var(--up)">賺 ${fmt(winAmt)}</span></div></button>`;
   });
   html+=`</div></div>`;
@@ -1361,14 +1409,19 @@ function resolveBet(sc,i){
   if(AWAIT)return;
   AWAIT=true;
   const t=BET_TIERS[i],stake=betRisk(sc,t),winP=betWinP(t);
+  const hotUsed=hotReady(t);
   const win=RNG()<winP;
   let profit=0,loss=0;
-  if(win){profit=Math.round(stake*t.winMult*(1+0.15*lvl('finiq')));
+  if(win){profit=Math.round(stake*t.winMult*(hotUsed?1.5:1)*(1+0.15*lvl('finiq')));
     const fromCash=Math.min(Math.max(0,S.cash),stake);   // 買進:本金從現金轉進持股
     S.cash-=fromCash;S.stock=(S.stock||0)+fromCash+profit; // 賺到的部位抱著,之後每年跟著市場滾複利
     S.mind=clamp(S.mind+t.mgood);if(t.mult>=3)S.fame=clamp(S.fame+3);}
   else{loss=Math.round(stake*t.lossMult*Math.max(0.1,1-0.12*lvl('disc')));let rem=loss;const fc=Math.min(Math.max(0,S.cash),rem);S.cash-=fc;rem-=fc;if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;rem-=fs;}if(rem>0)S.debt=(S.debt||0)+rem;S.mind=clamp(S.mind-t.mbad*Math.max(0.1,1-0.15*lvl('mindful')));}
   if(t.mult>=5)S.flags.aggressive=true;
+  try{track('bet_choice',{character:CURID,tier:t.label,surge:betSurge()?'yes':'no',streak:hotUsed?'yes':'no'});}catch(e){}
+  /* 手感:押積極以上又押對才會累積,保守或押錯直接歸零 */
+  if(win&&t.mult>=3)S.hot=hotUsed?1:(S.hot||0)+1; else S.hot=0;
+  if(t.mult>=3)S.flags.tookRisk=true;
   S.log.push({yr:S.year,txt:`投資 ×${t.mult}(成功率${Math.round(winP*100)}%)${win?' 獲利':' 虧損'}`});
   checkRuin();
   renderHUD();
@@ -1598,7 +1651,18 @@ document.getElementById('quitBtn').onclick=()=>{if(confirm('確定放棄這一�
   /* 📊 中途放棄:記錄放棄時的角色、年齡、資本額,才知道玩家都卡在哪一段 */
   try{track('quit_game',{character:CURID,quit_age:S.age,years_played:S.age-((CUR.start&&CUR.start.age)||S.age),net_wan:Math.round(net(S)/10000)});}catch(e){}
   quitToStart();}};
-document.getElementById('introStart').onclick=()=>{closeSheets();if(PENDING)startGame(PENDING);};
+let NAME_NUDGED=false;
+document.getElementById('introStart').onclick=()=>{
+  const ni=document.getElementById('nameInput');
+  if(!NAME_NUDGED&&!(ni.value||'').trim()){
+    NAME_NUDGED=true;
+    try{track('name_nudge',{character:(PENDING&&PENDING.id)||''});}catch(e){}
+    document.getElementById('start').scrollIntoView({behavior:'smooth',block:'start'});
+    ni.classList.add('need');ni.focus();
+    toast('打上你的名字,結算圖和戰帖才會掛你的名字 —— 不想填再按一次就好');
+    setTimeout(()=>ni.classList.remove('need'),2600);
+    return;}
+  closeSheets();if(PENDING)startGame(PENDING);};
 document.getElementById('sheetBg').onclick=closeSheets;
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheets);
 
@@ -1978,7 +2042,7 @@ A({
  }
 });
 A({
- id:'founder',name:'王大明',emoji:'🏭',tag:'38歲 · 創業小老闆',
+ id:'founder',name:'王雅琪',emoji:'🏭',tag:'38歲 · 創業小老闆',
  desc:'白手創立一家小型製造廠的老闆,手握一筆營運資金,也揹著營運風險。你習慣了「拿錢滾錢、以債擴張」的膽識,想把這套生意人的直覺搬到股市——但商海與股海,不完全是同一套規則。',
  flaw:'把做生意的膽識與槓桿硬搬到股市,容易過度擴張',
  betBase:1100000,income:1500000,rentUnit:650000,incomeLabel:'工廠本業的營運獲利',mid:['love','house','borrow'],
@@ -1991,10 +2055,10 @@ A({
       {w:5,log:'擴廠後接到大單,產能開滿,營收再上一層。',d:{cash:6000000,mind:8,fame:8},mood:'good',go:'bull'},
       {w:5,log:'擴廠後市場需求卻放緩,設備閒置、利息照付,現金流吃緊。',d:{cash:1000000,mind:-12},mood:'bad',go:'bull'}]}]},
   bull:{kind:'bet',chap:'第二章 · 商海直覺',age:41,t:'把膽識搬進股市',base:1800000,go:'love',x:'股市正熱,你用做生意的膽識看待它:別人怕的時候貪、該押就重押。但股票的波動,和你熟悉的訂單可不一樣。這一把,你壓多大?'},
-  love:{chap:'第三章 · 家庭',age:43,t:'聚少離多的老闆',x:'你把大半心力給了工廠與股票,太太獨自扛起家庭,孩子也漸漸和你疏遠。她說:「錢再多,這個家你也缺席了。」',c:[
+  love:{chap:'第三章 · 家庭',age:43,t:'聚少離多的老闆',x:'你把大半心力給了工廠與股票,另一半獨自扛起家庭,孩子也漸漸和你疏遠。他說:「錢再多,這個家你也缺席了。」',c:[
     {l:'調整步調,把時間還給家庭',d:{rel:18,mind:8},set:{married:true},log:'你把一部分管理權下放,週末不再進工廠。家的溫度,一點點回來了。',mood:'good',go:'house'},
-    {l:'跟她說「等公司上軌道就好」',h:'得:全力衝事業　失:家庭、心情',d:{rel:-16,mind:-4,fame:4},set:{married:true},log:'你把家庭排在事業後面、把公司衝上了一階;太太的失望,卻在一次次缺席裡結成了冰。',go:'house'},
-    {l:'乾脆讓太太一起經營,夫妻同心',d:{rel:10,mind:4},set:{married:true},log:'你們變成事業夥伴,並肩作戰。少了浪漫,多了革命情感。',go:'house'}]},
+    {l:'跟他說「等公司上軌道就好」',h:'得:全力衝事業　失:家庭、心情',d:{rel:-16,mind:-4,fame:4},set:{married:true},log:'你把家庭排在事業後面、把公司衝上了一階;另一半的失望,卻在一次次缺席裡結成了冰。',go:'house'},
+    {l:'乾脆讓另一半一起經營,夫妻同心',d:{rel:10,mind:4},set:{married:true},log:'你們變成事業夥伴,並肩作戰。少了浪漫,多了革命情感。',go:'house'}]},
   house:{chap:'第四章 · 置產',age:45,t:'廠房與住宅',x:'手頭寬裕了,你考慮置產。是買間好宅安頓家人、買廠辦收租當包租公,還是把資金全留著周轉與投資?',c:[
     {l:'買一間好宅,給家人安穩',d:{cash:-5000000,debt:10000000,prop:15000000,mort:10000000,mortInit:10000000,rel:10},set:{houses:1},log:'你買下一間一千五百萬的舒適房子,總算給了家人一個安穩的窩。',mood:'good',go:'borrow'},
     {l:'買廠辦與店面收租,當包租公',d:{cash:-8000000,debt:16000000,prop:24000000,mort:16000000,mortInit:16000000},set:{houses:2,landlord:true},log:'你砸兩千四百萬把不動產也變成生財工具,租金成了另一條穩定現金流。',mood:'good',go:'borrow'},
