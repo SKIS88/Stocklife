@@ -623,7 +623,7 @@ const fmt=n=>{
   return (neg?'-':'')+s;
 };
 const clamp=v=>Math.max(0,Math.min(100,v));
-const net=s=>s.cash+s.stock+(s.prop||0)-s.debt;   /* 房產也是資產:市值計入身家,房貸算在 debt 裡 */
+const net=s=>Math.round(s.cash+s.stock+(s.prop||0)-s.debt);   /* 房產也是資產:市值計入身家,房貸算在 debt 裡 */
 
 /* 技能系統(5 種,每種 5 級) */
 const SKILLS=[
@@ -870,7 +870,7 @@ const GEN_LIFE=[
    {l:'賣掉,把錢分一分',h:'得:一筆現金　失:家人心裡的疙瘩',d:{cash:Math.min(U*2.6,4200000),rel:-20,mind:-10},set:{oldHome:true},
     log:'房子賣了,錢分得很公平。只是每次經過那條巷子,你都會刻意繞路。',mood:'bad'},
    {l:'先不動,維持現狀',d:{mind:-3},set:{oldHome:true},log:'你說再看看。權狀又被收回抽屜,像這個話題一樣,被折好放著。'}]}),
- (U)=>({ic:'💼',t:'那封資遣通知',req:s=>s.age>=45&&s.age<=62&&!!CUR.income&&!(s.flags&&s.flags.laidoff),x:'人資把你叫進小會議室,桌上放著一份你看過別人拿、沒想過自己會拿的文件。「公司組織調整,你的職位取消了。」窗外的天氣好得不像話。',c:[
+ (U)=>({ic:'💼',t:'那封資遣通知',req:s=>s.age>=45&&s.age<=62&&!!CUR.income&&CURID!=='civilservant'&&!(s.flags&&s.flags.laidoff),x:'人資把你叫進小會議室,桌上放著一份你看過別人拿、沒想過自己會拿的文件。「公司組織調整,你的職位取消了。」窗外的天氣好得不像話。',c:[
    {l:'不找了,靠投資養自己',h:'得:全部時間　失:本業收入歸零',d:{mind:-6,fame:-6},set:{laidoff:true,proTrader:true},
     eff:s=>addBurden({kind:'inc',ic:'📉',t:'沒有薪水的日子',mul:0.15,yrs:99}),
     log:'你決定不再投履歷。從此每個月的生活費,都要從市場裡拿出來——沒有底薪的那種拿。',mood:'bad'},
@@ -1703,8 +1703,8 @@ function bankruptGate(){
 function resolveEnding(){
   const nn=net(S),E=composeEnding(S),rankTxt=rankOf(nn,S);
   let statusLine='你走出了 1,000+ 種可能命運中,獨一無二的這一種';
-  if(S.retired){statusLine='🏖️ 你選擇在人生高點功成身退';E.para='🏖️ 你在資本額最風光的時刻急流勇退,漂亮地為股海生涯畫下句點——真正的贏家,懂得何時離場。\n\n'+E.para;E.emoji='🏖️';E.title='功成身退的'+traitOf(S);}
-  else if(S.forcedRetire){statusLine='🏛️ 你在 '+S.age+' 歲屆齡退休,公職生涯畫上句點';E.para='🏛️ 人事命令下來的那天,同事在辦公室給你辦了一場簡單的歡送會。你把用了三十幾年的識別證交回去,走出大門的時候回頭看了一眼。從今以後,月退俸每個月照進帳,而你終於有時間去做那些「等退休再說」的事。\n\n'+E.para;}
+  if(S.forcedRetire){statusLine='🏛️ 你在 '+S.age+' 歲屆齡退休,公職生涯畫上句點';E.para='🏛️ 人事命令下來的那天,同事在辦公室給你辦了一場簡單的歡送會。你把用了三十幾年的識別證交回去,走出大門的時候回頭看了一眼。從今以後,月退俸每個月照進帳,而你終於有時間去做那些「等退休再說」的事。\n\n'+E.para;E.emoji='🏛️';E.title='屆齡退休的'+traitOf(S);}
+  else if(S.retired){statusLine='🏖️ 你選擇在人生高點功成身退';E.para='🏖️ 你在資本額最風光的時刻急流勇退,漂亮地為股海生涯畫下句點——真正的贏家,懂得何時離場。\n\n'+E.para;E.emoji='🏖️';E.title='功成身退的'+traitOf(S);}
   else if(S.century){statusLine='🕰️ 你活到了一百歲,故事在此畫下句點';E.para='🕰️ 你走完了整整一百年的股海人生。多數人連一半都走不到,而你把這場遊戲玩到了最後一刻。\n\n'+E.para;E.emoji='🕰️';}
   else if(S.bankrupt){statusLine='💀 你賠光了一切,人生被迫在此結束';E.para='💀 你把手上的現金與持股全數賠光,遊戲被迫在此結束——但別灰心,人生永遠可以重來。\n\n'+E.para;E.emoji='💸';}
   const RARITY=rarityOf(nn,S);   // {p,txt}
