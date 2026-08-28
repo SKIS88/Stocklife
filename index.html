@@ -726,10 +726,10 @@ const GEN_LIFE=[
      {w:5,d:{cash:B*3.2,fame:6,mind:3},log:'生意做起來了,這筆投資翻了好幾倍。',mood:'good'},
      {w:5,d:{cash:-B*0.6,mind:-6},log:'市場不如預期,投進去的錢大半打了水漂。',mood:'bad'}]},
    {l:'專心本業,不分心',d:{mind:3,fame:-2},log:'你守住本業,少了一次翻本機會,但也少了風險。'}]};},
- (U)=>({ic:'🏥',t:'家人重病',x:'家人病倒,龐大的醫療費壓下來,考驗你的荷包與孝心。',c:[
+ (U)=>({ic:'🏥',t:'家人重病',once:true,x:'家人病倒,龐大的醫療費壓下來,考驗你的荷包與孝心。',c:[
    {l:'不惜代價,全力醫治',d:{cash:-Math.min(U*1.0,2000000),rel:12,mind:-4},log:'你砸下重金全力救治,錢花掉了,親情卻更緊了。',mood:'good'},
    {l:'在能力範圍內盡力',d:{cash:-Math.min(U*0.3,500000),rel:-4,mind:2},log:'你量力而為、問心無愧,但親戚間仍有些微詞。'}]}),
- (U)=>({ic:'🤝',t:'朋友周轉借錢',req:s=>s.cash>=Math.min(U*0.6,1000000),x:'交情不錯的朋友開口借一大筆錢周轉,借了怕收不回,不借傷感情。',c:[
+ (U)=>({ic:'🤝',t:'朋友周轉借錢',once:true,req:s=>s.cash>=Math.min(U*0.6,1000000),x:'交情不錯的朋友開口借一大筆錢周轉,借了怕收不回,不借傷感情。',c:[
    {l:'慷慨借出',d:{cash:-Math.min(U*0.6,1000000),rel:8},log:'你二話不說幫了忙,這份義氣朋友記在心裡。',mood:'good'},
    {l:'婉拒,先顧好自己',d:{rel:-8,mind:2},log:'你守住了現金流,交情卻蒙上一層陰影。'}]}),
  (U)=>({ic:'🎓',t:'砸錢投資自己',once:true,req:s=>s.age<=40,x:'一堂高階課程/證照學費不便宜,但能拓展競爭力與人脈。',c:[
@@ -1111,7 +1111,7 @@ function startGame(c){
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.prop=0;S.mort=0;S.houseYr=null;
   S.century=false;S.forcedRetire=false;S.usedOnce=[];S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
-  S.retireOffered=false;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
+  S.retireOffered=false;S.lastRetireAsk=undefined;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
   S.cash=Math.max(0,Math.round(S.cash+(op.cashU||0)*(c.income||100000)));
@@ -1343,7 +1343,8 @@ function step(){
 function gate(){
   const nn=net(S),thr=RETIRE_AT[CURID]||Infinity;
   if(nn>=thr){
-    if(!S.retireLatch){renderRetire();return true;}     // 到門檻→問要不要退休
+    const cool=(S.lastRetireAsk===undefined)||(S.age-S.lastRetireAsk>=6);
+    if(!S.retireLatch&&cool){S.lastRetireAsk=S.age;renderRetire();return true;}   // 到門檻→問要不要退休(6 年內不重問)
     if(RNG()<0.38){renderMisfortune();return true;}     // 續玩→有機率遇到意外
   }
   return false;
