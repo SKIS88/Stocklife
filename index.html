@@ -778,11 +778,6 @@ const GEN_LIFE=[
  (U)=>({ic:'🎪',t:'同學會的攀比大戰',x:'久違的同學會,有人聊年薪、有人曬對帳單。輪到你時,全桌安靜下來等你開口。',c:[
    {l:'霸氣買單,順便曬一下績效',d:{cash:-Math.min(U*0.3,300000),fame:8,mind:4,rel:-3},log:'你包了全場,老同學敬酒敬個不停。爽是很爽,只是隔天群組裡多了幾個借錢的。',mood:'good'},
    {l:'笑而不語,深藏功與名',d:{mind:5},log:'你只說「還過得去」。散場時,真正懂你的老友拍拍你的肩:「悶聲發財吼。」'}]}),
- (U)=>({ic:'🗄️',t:'阿公留下的老箱子',req:s=>!(s.flags&&s.flags.heirloom),x:'整理老家時,你翻出阿公塵封多年的鐵箱,裡面有一疊泛黃的股票憑證。全家人圍過來,大氣不敢喘。',c:[
-   {l:'顫抖著手拿去查詢',d:{},set:{heirloom:true},roll:[
-     {w:4,d:{stock:U*2.5,mind:10,rel:6},log:'天啊——是放了幾十年、配股配息滾出一大筆的績優股!阿公在天上都在笑。全家族都轟動了。',mood:'good'},
-     {w:6,d:{mind:-3,rel:5},log:'查了才知道,那間公司早就下市,股票成了名副其實的壁紙。全家笑成一團,把它裱框留念——阿公的浪漫,無價。',mood:'bad'}]},
-   {l:'收好留作紀念,不去查',d:{mind:4,rel:3},log:'你把箱子擦乾淨收好。有些東西的價值,不需要市場來定義。'}]}),
  (U)=>{const B=Math.min(U*0.8,1200000);return{ic:'🫧',t:'AI 泡沫的爭論',req:s=>s.stock>=B,x:'財經版吵成一團:一派說 AI 的資本支出撐得住,一派說這就是 2000 年網通股的翻版。你手上正好有一筆押在這條線上。',c:[
    {l:'先減碼一半,落袋為安',d:{stock:-B,cash:B},roll:[
      {w:5,d:{mind:6,fame:2},log:'你把一半換成現金。後來確實回檔了一大段,你慶幸自己手快。',mood:'good'},
@@ -854,7 +849,61 @@ const GEN_LIFE=[
      {w:7,d:{mind:-4,rel:-3},log:'抽籤槓龜,演唱會當晚你們在家看網友的限動。另一半嘴上說沒關係,你默默記下補償計畫。',mood:'bad'}]}]}),
  (U)=>({ic:'⚾',t:'中華隊奪冠之夜',x:'中華隊在國際賽一路打進冠軍戰,全台瘋棒球。奪冠那一刻,整條街都在歡呼。',c:[
    {l:'請全辦公室喝手搖慶祝',d:{cash:-Math.min(U*0.05,30000),rel:8,fame:4},log:'你霸氣訂了幾十杯手搖,辦公室歡聲雷動。Team Taiwan,也是 Team 你。',mood:'good'},
-   {l:'在家跟著轉播吶喊',d:{mind:8},log:'你抱著抱枕看完最後一個出局數,眼眶有點熱。有些感動,不用花錢。',mood:'good'}]})
+   {l:'在家跟著轉播吶喊',d:{mind:8},log:'你抱著抱枕看完最後一個出局數,眼眶有點熱。有些感動,不用花錢。',mood:'good'}]}),
+ /* ===== 人生關卡:一次選擇,往後每年都跟著你 ===== */
+ (U)=>({ic:'\U0001f9d3',t:'誰來照顧爸媽',req:s=>s.age>=46&&!(s.flags&&s.flags.careDone),x:'一通電話打斷了平常的一天:爸爸在浴室跌倒,住院了。醫生說出院後沒辦法再自己生活。兄弟姊妹在群組裡各自為難,最後那句「那你呢?」還是丟到了你身上。',c:[
+   {l:'請專業看護,錢我出',h:'得:專心工作　失:每年一筆固定支出',d:{mind:-4,rel:6},set:{careDone:true},
+    eff:s=>addBurden({kind:'cash',ic:'\U0001f9d1‍⚕️',t:'爸媽的看護費',amt:Math.min(U*0.32,520000),yrs:11,endLog:'\U0001f56f️ 這一年,你不用再繳看護費了。你在銀行看著那筆沒扣掉的錢,坐了很久。'}),
+    log:'你請了看護,把錢當成盡孝的方式。心裡有一塊地方,始終不太踏實。'},
+   {l:'我自己來照顧',h:'得:陪伴與心安　失:本業收入砍到六成',d:{rel:16,mind:-8,fame:-4},set:{careDone:true,caregiver:true},
+    eff:s=>addBurden({kind:'inc',ic:'\U0001f91d',t:'照顧爸媽的日子',mul:0.6,yrs:9,endLog:'\U0001f33f 照顧的日子告一段落。你回到職場,發現世界走得比你快很多。'}),
+    log:'你調整了工作、減少了應酬,把時間還給爸媽。收入掉了一大截,但有些事錯過就沒有了。'},
+   {l:'跟手足談分攤',h:'得:壓力分散　失:可能傷了感情',d:{},set:{careDone:true},roll:[
+     {w:5,d:{rel:10,mind:4},log:'大家各出一份、輪流排班。爸媽被照顧得很好,你們也久違地常常見面了。',mood:'good'},
+     {w:5,d:{rel:-18,mind:-14},log:'錢的事談到最後變成算舊帳。爸媽的看護排好了,家族群組卻安靜了下來。',mood:'bad',
+      eff:s=>addBurden({kind:'cash',ic:'\U0001f9d1‍⚕️',t:'獨自扛下的看護費',amt:Math.min(U*0.25,420000),yrs:9})}]}]}),
+ (U)=>({ic:'\U0001f3da️',t:'老家要過戶',req:s=>s.age>=44&&!(s.flags&&s.flags.oldHome),x:'爸媽把權狀攤在餐桌上:「這間老房子,登記到你名下好不好?」三十年的舊公寓,沒電梯、會漏水,但它是你長大的地方。',c:[
+   {l:'接下來,那是我家',h:'得:一間房產　失:每年稅金與修繕',d:{rel:12,mind:6},set:{oldHome:true},
+    eff:s=>{S.prop=(S.prop||0)+Math.min(U*4,7000000);if(!S.flags.houses)S.flags.houses=0;S.flags.houses++;
+      addBurden({kind:'cash',ic:'\U0001f527',t:'老家的稅金與修繕',amt:Math.min(U*0.1,160000),yrs:99});},
+    log:'你簽了字。房子過到你名下的那天,爸媽笑得很開心,你則開始煩惱屋頂什麼時候要抓漏。',mood:'good'},
+   {l:'賣掉,把錢分一分',h:'得:一筆現金　失:家人心裡的疙瘩',d:{cash:Math.min(U*2.6,4200000),rel:-20,mind:-10},set:{oldHome:true},
+    log:'房子賣了,錢分得很公平。只是每次經過那條巷子,你都會刻意繞路。',mood:'bad'},
+   {l:'先不動,維持現狀',d:{mind:-3},set:{oldHome:true},log:'你說再看看。權狀又被收回抽屜,像這個話題一樣,被折好放著。'}]}),
+ (U)=>({ic:'\U0001f4bc',t:'那封資遣通知',req:s=>s.age>=45&&s.age<=62&&!!CUR.income&&!(s.flags&&s.flags.laidoff),x:'人資把你叫進小會議室,桌上放著一份你看過別人拿、沒想過自己會拿的文件。「公司組織調整,你的職位取消了。」窗外的天氣好得不像話。',c:[
+   {l:'不找了,靠投資養自己',h:'得:全部時間　失:本業收入歸零',d:{mind:-6,fame:-6},set:{laidoff:true,proTrader:true},
+    eff:s=>addBurden({kind:'inc',ic:'\U0001f4c9',t:'沒有薪水的日子',mul:0.15,yrs:99}),
+    log:'你決定不再投履歷。從此每個月的生活費,都要從市場裡拿出來——沒有底薪的那種拿。',mood:'bad'},
+   {l:'先求有,屈就一份低薪',h:'得:穩定　失:收入砍半',d:{mind:2,rel:5},set:{laidoff:true},
+    eff:s=>addBurden({kind:'inc',ic:'\U0001f4bc',t:'重新開始的那份工作',mul:0.55,yrs:99}),
+    log:'你接了一份薪水少一半的工作。第一天報到,發現主管比你小十歲。'},
+   {l:'拿資遣費創業',h:'得:翻身的可能　失:可能什麼都不剩',d:{cash:Math.min(U*0.8,1200000)},set:{laidoff:true},roll:[
+     {w:3,d:{cash:Math.min(U*3.5,6000000),mind:14,fame:12},log:'你把資遣費當成第一桶金。兩年後,你變成那個在會議室另一邊的人。',mood:'good'},
+     {w:7,d:{cash:-Math.min(U*1.6,2600000),mind:-16,rel:-6},set:{laidoff:true},log:'燒完了資遣費,還倒貼了積蓄。你把招牌拆下來那天,沒有告訴任何人。',mood:'bad',
+      eff:s=>addBurden({kind:'inc',ic:'\U0001f4bc',t:'創業收攤之後',mul:0.5,yrs:99})}]}]}),
+ (U)=>({ic:'✍️',t:'一個簽名的請求',req:s=>s.age>=34&&!(s.flags&&s.flags.guarantor),x:'認識二十年的朋友約你吃飯,聊到一半才說出真正的目的:他公司要跟銀行借一筆錢,需要一個保證人。「就是簽個名而已,不會有事的。」',c:[
+   {l:'簽了,朋友一場',h:'得:一份人情　失:幾年後可能引爆',d:{rel:12,mind:4,fame:3},set:{guarantor:true},
+    eff:s=>addFuse({ic:'✍️',t:'當年那個簽名',at:S.year+5,p:0.4,amt:Math.min(U*2.2,3600000),mind:-20,rel:-14,okMind:8,
+      bad:'銀行寄來存證信函,他的公司倒了,債落到你頭上',ok:'他還完了最後一期,特地帶了一瓶酒來謝你'}),
+    log:'你簽了名。他握著你的手說了三次謝謝,你笑著說沒事——但回家的路上,你想了一整路。'},
+   {l:'錢可以借你,名不能簽',h:'得:守住底線　失:一筆借出去的錢',d:{cash:-Math.min(U*0.6,900000),rel:4,mind:3},set:{guarantor:true},
+    log:'你直接給了一筆錢,說這筆算送的、不用還。保證人三個字,你始終沒有簽下去。'},
+   {l:'拒絕,連錢也不借',h:'得:全身而退　失:二十年的交情',d:{rel:-14,mind:-6},set:{guarantor:true},
+    log:'你把話說得很直。他點點頭,飯照吃完,只是那頓之後,你們就沒再約過了。',mood:'bad'}]}),
+ (U)=>({ic:'\U0001f393',t:'孩子想出國',req:s=>s.flags&&s.flags.kids&&!s.flags.abroad&&s.age>=44,x:'孩子把錄取通知放到你面前,眼睛亮得像很久以前的你。學校很好,學費是你一年薪水的兩倍多。他小聲說:「太貴的話,我可以不去。」',c:[
+   {l:'去,錢的事我來想辦法',h:'得:孩子的未來　失:連續五年的重擔',d:{rel:18,mind:6,fame:4},set:{abroad:true},
+    eff:s=>addBurden({kind:'cash',ic:'\U0001f393',t:'孩子的海外學費',amt:Math.min(U*0.75,1300000),yrs:5,endLog:'\U0001f393 孩子畢業了。最後一筆學費繳完那天,你把收據留了下來。'}),
+    log:'你說去吧,家裡撐得住。掛掉電話後,你打開試算表,看了很久很久。',mood:'good'},
+   {l:'一人一半,你自己揹學貸',h:'得:負擔減半　失:孩子的十年',d:{rel:4,mind:-2},set:{abroad:true},
+    eff:s=>addBurden({kind:'cash',ic:'\U0001f393',t:'分攤的海外學費',amt:Math.min(U*0.38,650000),yrs:5}),
+    log:'你們談好各出一半。他很懂事地答應了,你知道那筆學貸會跟著他到三十幾歲。'},
+   {l:'留在國內念就好',d:{rel:-16,mind:-8},set:{abroad:true},log:'你算了很久,還是說不出「好」。他沒有吵，只是把那張通知收進抽屜,再也沒拿出來過。',mood:'bad'}]}),
+ (U)=>({ic:'\U0001f6e1️',t:'業務員的那張表',req:s=>s.age>=38&&!(s.flags&&s.flags.insured),x:'做保險的老同學攤開一張表:重大傷病、長照、失能。「你現在最貴的資產不是股票,是還能賺錢的自己。」保費不便宜,而且要繳很多年。',c:[
+   {l:'簽下去,買一份心安',h:'得:重病時損失減半　失:每年保費',d:{mind:6},set:{insured:true},
+    eff:s=>addBurden({kind:'cash',ic:'\U0001f6e1️',t:'保費',amt:Math.min(U*0.14,220000),yrs:20,endLog:'\U0001f6e1️ 保費繳滿了。這份保障,從今以後不用再付錢。'}),
+    log:'你簽了名。往後每年那筆錢扣下去都有點心疼,但你知道自己買的是什麼。'},
+   {l:'錢拿去投資,報酬更高',h:'得:更多本金　失:出事時全靠自己',d:{mind:2},set:{insured:true},
+    log:'你婉拒了。那筆保費你自己投進市場,心裡想著:真出事再說吧。'}]})
 ];
 /* 一般年份偶爾出現的「投資機會」標題(用『判斷/眼光』而非賭博的語氣) */
 const GEN_BET_TITLES=[
@@ -968,7 +1017,7 @@ function startGame(c){
   S=JSON.parse(JSON.stringify(c.start));
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.prop=0;S.mort=0;S.houseYr=null;
-  S.century=false;S.hot=0;S.hotKey=null;S.hotSurge=false;
+  S.century=false;S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
   S.retireOffered=false;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
@@ -1078,6 +1127,10 @@ function incomeBanner(){
       ?`<div class="incbanner">💰 <b>${li.situ||'這一年'}</b> — 靠${li.label}進帳 <b>${fmt(li.inc)}</b></div>`
       :`<div class="incbanner neg">📉 <b>${li.situ||'景氣低迷'}</b> — 本業虧損 <b>${fmt(-li.inc)}</b></div>`;
   }
+  if(S.lastFuse){S.lastFuse.forEach(f=>{h+=`<div class="incbanner ${f.amt>0?'neg':''}">${f.ic} <b>${f.t}</b> — ${f.txt}${f.amt>0?` <b>−${fmt(f.amt)}</b>`:''}</div>`;});}
+  if(S.lastBurden){S.lastBurden.forEach(b=>{h+= b.mul!==undefined
+    ?`<div class="incbanner neg">${b.ic} <b>${b.t}</b> — 這段日子本業收入只剩 <b>${Math.round(b.mul*100)}%</b></div>`
+    :`<div class="incbanner neg">${b.ic} <b>${b.t}</b> — 這一年又付出 <b>${fmt(b.amt)}</b>${b.short?'(現金不足,已轉為負債)':''}</div>`;});}
   if(S.lastRent){h+=`<div class="incbanner" id="incRent">🏠 <b>包租公</b> — 房客準時匯款,租金收入 <b>+${fmt(S.lastRent)}</b></div>`;}
   if(S.lastStock){const g=S.lastStock.gain,pct=Math.round(S.lastStock.ret*100);
     h+= S.lastStock.crash
@@ -1113,7 +1166,54 @@ function yearlyIncome(){
     else{econ=1.7;situ='升遷加薪,收入大跳';}
     mult=senior*econ;
   }
-  return {inc:Math.round(base*mult),label:CUR.incomeLabel||'工作收入',situ};
+  return {inc:Math.round(base*mult*incomeMul()),label:CUR.incomeLabel||'工作收入',situ};
+}
+/* ===== 人生關卡:一次選擇,之後每年都跟著你 =====
+   burdens 每年扣一筆(或壓低本業收入),fuses 是埋下去、幾年後才引爆的未爆彈 */
+function addBurden(b){if(!S.burdens)S.burdens=[];S.burdens.push(Object.assign({left:b.yrs||99},b));}
+function addFuse(f){if(!S.fuses)S.fuses=[];S.fuses.push(Object.assign({},f));}
+function incomeMul(){let m=1;(S.burdens||[]).forEach(b=>{if(b.kind==='inc'&&b.left>0)m*=b.mul;});return m;}
+function tickBurdens(){
+  S.lastBurden=null;if(!S.burdens||!S.burdens.length)return;
+  const hit=[];
+  S.burdens.forEach(b=>{
+    if(b.left<=0)return;
+    if(b.kind==='cash'){
+      const due=Math.round(b.amt);
+      const pay=Math.min(Math.max(0,S.cash),due);
+      S.cash-=pay;const rem=due-pay;if(rem>0)S.debt=(S.debt||0)+rem;
+      hit.push({ic:b.ic,t:b.t,amt:due,short:rem>0});
+      S.log.push({yr:S.year,txt:`${b.ic} ${b.t} ${fmt(due)}${rem>0?'(現金不足,轉為負債)':''}`});
+    }else if(b.kind==='inc'){
+      hit.push({ic:b.ic,t:b.t,amt:0,mul:b.mul});
+    }
+    b.left--;
+    if(b.left===0&&b.endLog)S.log.push({yr:S.year,txt:b.endLog});
+  });
+  S.burdens=S.burdens.filter(b=>b.left>0);
+  if(hit.length)S.lastBurden=hit;
+}
+function tickFuses(){
+  S.lastFuse=null;if(!S.fuses||!S.fuses.length)return;
+  const keep=[],fired=[];
+  S.fuses.forEach(f=>{
+    if(S.year<f.at){keep.push(f);return;}
+    if(RNG()<f.p){
+      const amt=Math.round(f.amt);
+      const pay=Math.min(Math.max(0,S.cash),amt);S.cash-=pay;const rem=amt-pay;
+      if(rem>0){const fs=Math.min(Math.max(0,S.stock),rem);S.stock-=fs;if(rem-fs>0)S.debt=(S.debt||0)+(rem-fs);}
+      if(f.mind)S.mind=clamp(S.mind+f.mind);
+      if(f.rel)S.rel=clamp(S.rel+f.rel);
+      fired.push({ic:f.ic,t:f.t,txt:f.bad,amt});
+      S.log.push({yr:S.year,txt:`${f.ic} ${f.t} — ${f.bad}(${fmt(amt)})`});
+    }else{
+      if(f.okMind)S.mind=clamp(S.mind+f.okMind);
+      fired.push({ic:f.ic,t:f.t,txt:f.ok,amt:0});
+      S.log.push({yr:S.year,txt:`${f.ic} ${f.t} — ${f.ok}`});
+    }
+  });
+  S.fuses=keep;
+  if(fired.length)S.lastFuse=fired;
 }
 /* ===== 逐年推進引擎:一次只過一年、每年都有內容;里程碑每局順序不同,跑完後無限延伸 ===== */
 function scAge(id){return (S.ages&&S.ages[id]!==undefined)?S.ages[id]:undefined;}
@@ -1148,6 +1248,7 @@ function openNewYear(){
   /* 歲月消磨:心態/關係/名聲每年自然下滑,站得越高越難維持(得靠選擇與事件補回來) */
   const wear=v=>clamp(v-(v>85?3:v>65?2:1));
   S.mind=wear(S.mind);S.rel=wear(S.rel);S.fame=clamp(S.fame-(S.fame>85?2:1));
+  tickFuses();tickBurdens();
   if(CUR.income){const yi=yearlyIncome();S.cash+=yi.inc;if(S.cash<0){S.debt=(S.debt||0)-S.cash;S.cash=0;}
     S.lastIncome={inc:yi.inc,label:yi.label,situ:yi.situ,hadLoss:yi.inc<0};
     S.log.push({yr:S.year,txt: yi.inc>=0?`${S.age} 歲・${yi.situ},進帳 ${fmt(yi.inc)}`:`${S.age} 歲・${yi.situ},虧損 ${fmt(-yi.inc)}`});
@@ -1216,7 +1317,7 @@ function pickDaily(){
   let pool=elig.filter(i=>!avoid.has(i));
   if(!pool.length)pool=elig.length?elig.slice():GEN_LIFE.map((_,i)=>i);
   /* 開局前幾年優先抽「話題事件」:先讓玩家遇到好玩、想截圖的事,正經沉重的留給中後期 */
-  const VIRAL=new Set(['寶可夢卡包的誘惑','盲盒隱藏款之亂','迷因幣的暴富神話','雞排店老闆的明牌','年夜飯上的明牌大會','命理老師的財位','「老師」的來電','AI 泡沫的爭論','那支太真的影片','關稅來的那一天','傳產老同學','阿公留下的老箱子','同學會的攀比大戰','天王演唱會搶票','中華隊奪冠之夜','AI 選股神器','直播間的剁手夜','毛小孩的緣分','燒錢的新嗜好']);
+  const VIRAL=new Set(['寶可夢卡包的誘惑','盲盒隱藏款之亂','迷因幣的暴富神話','雞排店老闆的明牌','年夜飯上的明牌大會','命理老師的財位','「老師」的來電','AI 泡沫的爭論','那支太真的影片','關稅來的那一天','傳產老同學','同學會的攀比大戰','天王演唱會搶票','中華隊奪冠之夜','AI 選股神器','直播間的剁手夜','毛小孩的緣分','燒錢的新嗜好']);
   const early=(S.age-((CUR.start&&CUR.start.age)||S.age))<=4;
   if(early){
     const vp=pool.filter(i=>VIRAL.has(GEN_LIFE[i](U).t));
@@ -1356,9 +1457,11 @@ function renderScene(){
 function chooseOption(ch){
   if(AWAIT)return;
   AWAIT=true;
-  let out={log:ch.log,d:ch.d,set:ch.set,go:ch.go,mood:ch.mood};
-  if(ch.roll){const o=pickWeighted(ch.roll);out={log:o.log,d:o.d,set:o.set,go:(o.go!==undefined?o.go:ch.go),mood:o.mood};if(ch.d)applyDelta(ch.d);}
+  let out={log:ch.log,d:ch.d,set:ch.set,go:ch.go,mood:ch.mood,eff:ch.eff};
+  if(ch.roll){const o=pickWeighted(ch.roll);out={log:o.log,d:o.d,set:o.set,go:(o.go!==undefined?o.go:ch.go),mood:o.mood,eff:(o.eff||ch.eff)};if(ch.d)applyDelta(ch.d);}
   applyDelta(out.d);applySet(ch.set);applySet(out.set);
+  /* 人生關卡:eff 用來埋下長期包袱或未爆彈 */
+  try{if(out.eff)out.eff(S);}catch(e){}
   (ch.f||[]).forEach(f=>S.flags[f]=true);
   S.log.push({yr:S.year,txt:ch.l});
   checkRuin();
