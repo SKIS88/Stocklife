@@ -215,6 +215,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .endbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .endbtns button{padding:13px 18px;border-radius:13px;font-weight:800;font-size:13.5px;max-width:100%}
 .eb-main{background:linear-gradient(90deg,var(--sk-red2),var(--sk-red3));color:#fff;box-shadow:0 8px 20px rgba(227,6,19,.35)}
+#shareBtn{display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.25;padding-top:11px;padding-bottom:11px}
+#shareBtn b{font-size:15.5px;font-weight:800;letter-spacing:.5px}
+#shareBtn small{font-size:12px;font-weight:600;opacity:.92}
+#shareBtn .nb{white-space:nowrap;font-weight:800}
 .eb-share{border:1px solid var(--glassborder);color:var(--ink);background:rgba(255,255,255,.62);white-space:nowrap}
 .eb-share:hover{border-color:var(--gold);color:var(--ink)}
 .eb-alt{border:1px solid var(--glassborder);color:var(--ink2)}
@@ -925,6 +929,7 @@ function startGame(c){
   S=JSON.parse(JSON.stringify(c.start));
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.prop=0;S.mort=0;S.houseYr=null;
+  S.century=false;
   S.retireOffered=false;S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
@@ -968,6 +973,7 @@ function calcOVR(){let t=0;SKILLS.forEach(s=>t+=lvl(s.id));const q=stateQuality(
 /* 人生階段:看資本額佔「財富自由門檻」的比例(散戶→…→股市傳奇) */
 /* 股市角色級距:採市場現實的「絕對金額」定義,不分角色一體適用
    韭菜散戶 <100萬 → 小資操盤手 100萬+ → 中實戶 3,000萬+ → 大戶 1億+ → 超級大戶 3億+ → 股市傳奇 10億+ */
+const AGE_CAP=100;   /* 百歲上限:到這個年紀強制結算 */
 const PHASES=['韭菜散戶','小資操盤手','中實戶','大戶','超級大戶','股市傳奇'];
 const PHASE_AMT=[0,1000000,30000000,100000000,300000000,1000000000];
 function renderPhase(){
@@ -1098,6 +1104,8 @@ function gate(){
 /* 跨到新的一年:年齡剛好 +1、結算收入,然後決定這一年的「大事」;沒有大事就是平凡的一年(幾件日常) */
 function openNewYear(){
   S.age++;S.year++;
+  /* 人生有盡頭:活到 100 歲直接收尾,不讓局面無限延長 */
+  if(S.age>=AGE_CAP){S.century=true;resolveEnding();return;}
   /* 歲月消磨:心態/關係/名聲每年自然下滑,站得越高越難維持(得靠選擇與事件補回來) */
   const wear=v=>clamp(v-(v>85?3:v>65?2:1));
   S.mind=wear(S.mind);S.rel=wear(S.rel);S.fame=clamp(S.fame-(S.fame>85?2:1));
@@ -1524,6 +1532,7 @@ function resolveEnding(){
   const nn=net(S),E=composeEnding(S),rankTxt=rankOf(nn,S);
   let statusLine='你走出了 1,000+ 種可能命運中,獨一無二的這一種';
   if(S.retired){statusLine='🏖️ 你選擇在人生高點功成身退';E.para='🏖️ 你在資本額最風光的時刻急流勇退,漂亮地為股海生涯畫下句點——真正的贏家,懂得何時離場。\n\n'+E.para;E.emoji='🏖️';E.title='功成身退的'+traitOf(S);}
+  else if(S.century){statusLine='🕰️ 你活到了一百歲,故事在此畫下句點';E.para='🕰️ 你走完了整整一百年的股海人生。多數人連一半都走不到,而你把這場遊戲玩到了最後一刻。\n\n'+E.para;E.emoji='🕰️';}
   else if(S.bankrupt){statusLine='💀 你賠光了一切,人生被迫在此結束';E.para='💀 你把手上的現金與持股全數賠光,遊戲被迫在此結束——但別灰心,人生永遠可以重來。\n\n'+E.para;E.emoji='💸';}
   const RARITY=rarityOf(nn,S);   // {p,txt}
   /* 戰帖對戰結果:同角色同種子才比,不然不公平 */
@@ -1536,12 +1545,12 @@ function resolveEnding(){
   document.getElementById('logBox').style.display='none';
   const stage=document.getElementById('stage');
   stage.innerHTML=`<div class="ending">
-    <div class="resultimg"><img id="resultImg" alt="你的結局圖"><div class="rihint">👆 這就是你的人生結算圖——長按可直接儲存,傳到 LINE、IG 跟朋友炫耀(或取暖)</div></div>
+    <div class="resultimg"><img id="resultImg" alt="你的結局圖"><div class="rihint">👆 這是你的人生結算圖。用下面的 <b>發戰帖</b> 分享,圖片和挑戰連結會<b>一起送出</b>,朋友點一下就能走同一段命運。</div></div>
     <div class="endbtns">
-      <button class="eb-main" id="imgBtn">📷 下載結算圖,分享給朋友</button>
+      <button class="eb-main" id="shareBtn"><b>⚔️ 發戰帖給朋友</b><small>看他能不能贏過 <span class="nb">${fmt(nn)}</span></small></button>
     </div>
-    <div class="endbtns" style="margin-top:10px">
-      <button class="eb-share" id="shareBtn">🔗 分享連結,揪人挑戰同一段命運</button>
+    <div class="endbtns" style="margin-top:9px">
+      <button class="eb-alt" id="imgBtn">📷 只下載結算圖</button>
     </div>
     <div class="em" style="margin-top:26px">${E.emoji}</div>
     <div class="ti">${E.title}</div>
@@ -1567,14 +1576,21 @@ function resolveEnding(){
   LAST_END={E,nn,rankTxt,rarity:RARITY,verdict:VERDICT,prop:S.prop||0,houses:(S.flags&&S.flags.houses)||0,mind:Math.round(S.mind),rel:Math.round(S.rel),fame:Math.round(S.fame),age:S.age,ovr:calcOVR(),skills:SKILLS.map(s=>({n:s.n,lv:lvl(s.id)}))};
   try{const cv=drawResultImage();const im=document.getElementById('resultImg');if(im){im.src=cv.toDataURL('image/jpeg',0.85);
     /* 📊 長按 / 右鍵存圖:手機長按圖片會觸發 contextmenu,補上按鈕以外的存圖路徑 */
-    let lp=false;im.addEventListener('contextmenu',()=>{if(lp)return;lp=true;track('image_longpress',{character:CURID,ending:E.title});});
+    let lp=false;const mark=()=>{if(lp)return;lp=true;try{track('image_longpress',{character:CURID,ending:E.title});}catch(e){}};
+    im.addEventListener('contextmenu',mark);
+    /* 手機長按圖片存檔多半不會觸發 contextmenu,改用「按住 500ms 沒移動」當代理指標 */
+    let lt=null,lx=0,ly=0;
+    im.addEventListener('touchstart',e=>{const t=e.touches[0];lx=t.clientX;ly=t.clientY;clearTimeout(lt);lt=setTimeout(mark,500);},{passive:true});
+    im.addEventListener('touchmove',e=>{const t=e.touches[0];if(Math.abs(t.clientX-lx)>12||Math.abs(t.clientY-ly)>12)clearTimeout(lt);},{passive:true});
+    im.addEventListener('touchend',()=>clearTimeout(lt),{passive:true});
+    im.addEventListener('touchcancel',()=>clearTimeout(lt),{passive:true});
   }}catch(e){const w=document.querySelector('.resultimg');if(w)w.style.display='none';}
   /* 📊 完成率、玩到幾歲、結局好壞、結局稱號 */
   track('game_finish',{character:CURID,ending:E.title,outcome:S.bankrupt?'破產':(S.retired?'退休':'終局'),final_age:S.age,net_wan:Math.round(nn/10000)});
   document.getElementById('againBtn').onclick=()=>{track('play_again',{character:CURID});RETRIED=false;startGame(CUR);};
   document.getElementById('otherBtn').onclick=()=>{track('change_character');quitToStart();};
   document.getElementById('imgBtn').onclick=()=>{track('download_image',{character:CURID,ending:E.title});downloadResultImage();};
-  document.getElementById('shareBtn').onclick=()=>{track('share_link',{character:CURID});copyShareLink();};
+  document.getElementById('shareBtn').onclick=()=>{track('share_link',{character:CURID,ending:E.title,net_wan:Math.round(nn/10000)});shareEverything();};
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function quitToStart(){RETRIED=false;CHAL=null;document.getElementById('game').style.display='none';document.getElementById('start').style.display='block';buildStart();window.scrollTo(0,0);}
@@ -1677,7 +1693,7 @@ function drawResultImage(){
   x.textAlign='left';x.fillStyle='rgba(227,6,19,.65)';x.font='800 24px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='6px';x.fillText('股神養成計畫',92,124);x.restore();x.textAlign='center';
   /* 名字 + 年齡身分 */
   x.fillStyle='#2b0d10';x.font='800 46px '+TC;x.fillText(PNAME||CUR.name,cx,nameY);
-  x.fillStyle='rgba(214,61,76,.75)';x.font='500 27px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='3px';x.fillText(`${d.age} 歲 · ${roleOf(CUR)}`,cx,roleY);x.restore();
+  x.fillStyle='rgba(214,61,76,.75)';x.font='500 27px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='3px';x.fillText(`${d.age} 歲 · ${roleOf(CUR)}出身`,cx,roleY);x.restore();
   /* 結局 emoji + 大標題 + 星等 */
   x.font='104px '+EMO;x.fillText(E.emoji,cx,emojiY);
   x.fillStyle='#2b0d10';x.font='900 '+titleFont+'px '+TC;let tly=titleY0;titleLines.forEach(l=>{x.fillText(l,cx,tly);tly+=titleLH;});
@@ -1725,7 +1741,40 @@ function drawResultImage(){
   x.fillStyle='rgba(150,105,110,.6)';x.font='500 21px '+TC;x.save();if('letterSpacing' in x)x.letterSpacing='2px';x.fillText('股神養成計畫 · 命運種子 '+SEED,cx,footY+42);x.restore();
   return cv;
 }
-function downloadResultImage(){try{const cv=drawResultImage();const pn=PNAME||CUR.name;const name='股海人生_'+pn+'_'+LAST_END.E.title+'.jpg';cv.toBlob(blob=>{if(navigator.canShare){try{const file=new File([blob],name,{type:'image/jpeg'});if(navigator.canShare({files:[file]})){navigator.share({files:[file],title:'股海人生',text:pn+'|'+LAST_END.E.title}).catch(()=>saveBlob(blob,name));return;}}catch(e){}}saveBlob(blob,name);},'image/jpeg',0.85);toast('結局圖已產生');}catch(e){toast('產圖失敗:'+e.message);}}
+function shareText(){const n=LAST_END?fmt(LAST_END.nn):'';return `我在股海走完了一生,最後留下 ${n}。同一段命運換你走一次,看你能不能贏過我!`;}
+/* 一鍵分享:手機把「結算圖 + 戰帖連結」一起丟進系統分享面板;桌機則下載圖 + 複製連結 */
+function shareEverything(){
+  const u=shareURL(),txt=shareText();
+  try{
+    const cv=drawResultImage();const pn=PNAME||CUR.name;
+    const name='股海人生_'+pn+'_'+LAST_END.E.title+'.jpg';
+    cv.toBlob(blob=>{
+      /* 使用者自己按取消(AbortError)就什麼都不做,不要硬塞下載給他 */
+      const back=(err)=>{if(err&&err.name==='AbortError')return;saveBlob(blob,name);copyOnly(u,'結算圖已下載,戰帖連結也複製好了 — 一起貼給朋友!');};
+      if(navigator.canShare&&navigator.share){
+        try{
+          const file=new File([blob],name,{type:'image/jpeg'});
+          if(navigator.canShare({files:[file]})){
+            /* 圖片 + 連結一起送(關鍵:一定要帶 url,朋友才點得進來) */
+            navigator.share({files:[file],title:'股神養成計畫',text:txt,url:u})
+              .then(()=>{try{track('share_done',{character:CURID,method:'image_link'});}catch(e){}})
+              .catch(()=>{navigator.share({title:'股神養成計畫',text:txt,url:u})
+                .then(()=>{try{track('share_done',{character:CURID,method:'link_only'});}catch(e){}})
+                .catch(back);});
+            return;}
+        }catch(e){}
+        navigator.share({title:'股神養成計畫',text:txt,url:u})
+          .then(()=>{try{track('share_done',{character:CURID,method:'link_only'});}catch(e){}})
+          .catch(back);
+        return;}
+      back();
+    },'image/jpeg',0.85);
+  }catch(e){copyOnly(u,'戰帖連結已複製,貼給朋友挑戰同一段命運!');}
+}
+function copyOnly(u,msg){const done=()=>toast(msg);
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done).catch(()=>fb(u,done));else fb(u,done);}
+/* 只下載圖(次要動作) */
+function downloadResultImage(){try{const cv=drawResultImage();const pn=PNAME||CUR.name;const name='股海人生_'+pn+'_'+LAST_END.E.title+'.jpg';cv.toBlob(blob=>{saveBlob(blob,name);},'image/jpeg',0.85);toast('結局圖已下載');}catch(e){toast('產圖失敗:'+e.message);}}
 function saveBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 
 /* ---------- 角色資料 ---------- */
