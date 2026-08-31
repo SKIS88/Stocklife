@@ -1840,7 +1840,8 @@ function peakShareURL(){
 function peakShareGo(profit){
   const u=peakShareURL();
   const txt=`我在股海這一把賺了 ${fmt(profit)},手上有 ${fmt(net(S))}。同一段命運換你走一次,看你贏不贏得過我!`;
-  const done=()=>{try{track('share_prompt_peak_done',{character:CURID,age:S.age,net_wan:Math.round(net(S)/10000)});}catch(e){}};
+  let sent=false;
+  const done=()=>{if(sent)return;sent=true;try{track('share_prompt_peak_done',{character:CURID,age:S.age,net_wan:Math.round(net(S)/10000)});}catch(e){}};
   if(navigator.share){
     navigator.share({title:'股神養成計畫',text:txt,url:u}).then(done).catch(e=>{
       if(e&&e.name==='AbortError')return;
@@ -1865,9 +1866,13 @@ function peakGate(profit,after){
       <button class="eb-alt" id="peakNo">繼續我的人生 →</button>
     </div>
   </div>`;
+  /* 防連點:這個閘門只能被按一次,否則會重複送事件、而且會把遊戲往前推好幾步 */
+  let acted=false;
+  const yes=document.getElementById('peakYes'),no=document.getElementById('peakNo');
   const go=()=>{document.getElementById('logBox').style.display='';after();};
-  document.getElementById('peakYes').onclick=()=>{peakShareGo(profit);setTimeout(go,700);};
-  document.getElementById('peakNo').onclick=()=>{try{track('share_prompt_peak_skip',{character:CURID,age:S.age});}catch(e){}go();};
+  const once=fn=>()=>{if(acted)return;acted=true;yes.disabled=true;no.disabled=true;fn();};
+  yes.onclick=once(()=>{peakShareGo(profit);setTimeout(go,700);});
+  no.onclick=once(()=>{try{track('share_prompt_peak_skip',{character:CURID,age:S.age});}catch(e){}go();});
   window.scrollTo({top:0,behavior:'smooth'});
 }
 /* 觸發條件:整局第一次、非破產、身家為正、而且這一把的獲利 ≥ 下注前身家的六成 */
