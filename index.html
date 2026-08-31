@@ -543,7 +543,7 @@ body::after{background:radial-gradient(125% 85% at 50% -5%,transparent 64%,rgba(
   <div id="chal" style="display:none">
     <div class="glass hero chalcard">
       <div class="chal-kicker">🥊 你收到一封戰帖</div>
-      <div class="chal-who"><b id="chalBy"></b> 用這段命運走完了一生</div>
+      <div class="chal-who"><b id="chalBy"></b> <span id="chalVerb">用這段命運走完了一生</span></div>
       <div class="chal-amt mono" id="chalAmt"></div>
       <div class="chal-sub" id="chalSub"></div>
       <div class="chal-rule">你會拿到 <b>完全相同</b> 的命運骰子——同樣的事件、同樣的時機、同樣的股災。<br>差別只有一個:<b>你的選擇</b>。</div>
@@ -1020,7 +1020,7 @@ const GEN_BET_TITLES=[
  {t:'地緣風波的錯殺',x:'一場地緣衝突讓市場恐慌,無辜的好股票也被砍到見骨。你檢查了基本面——它還好好的。'},
  {t:'熱門新股掛牌',x:'一檔萬眾矚目的新股掛牌,首日就演出瘋狂行情。全市場都在追,你決定用多大的部位參與。'}
 ];
-/* 開局狀況:每局隨機一種,微調起始資金與狀態,讓每次開場都不太一樣。cashU = 幾年份的收入 */
+/* 開局狀況:每局隨機一種,微調起始資金與狀態,讓每次開場都不太一樣。cashP = 起始現金的增減比例 */
 /* 開局狀況:一律用「起始現金的百分比」,不能用收入去乘——
    有些角色的年收入比起始現金還高(公務員、白領、科技新貴),乘下去會直接歸零 */
 const OPENINGS=[
@@ -1066,7 +1066,7 @@ let CHAL=null;                       // {by,vs,seed,char} — 從朋友的分享
 function showChallenge(c){
   document.getElementById('start').style.display='none';
   document.getElementById('chal').style.display='block';
-  document.getElementById('chalBy').textContent=CHAL.by;
+  (function(){const cv=document.getElementById('chalVerb');if(cv)cv.textContent=(CHAL&&CHAL.mid)?'走到一半,身家已經來到':'用這段命運走完了一生';})(),document.getElementById('chalBy').textContent=CHAL.by;
   const a=document.getElementById('chalAmt');a.textContent=fmt(CHAL.vs);a.className='chal-amt mono'+(CHAL.vs<0?' neg':'');
   document.getElementById('chalSub').textContent=`${c.emoji} ${roleOf(c)} · 命運種子 ${CHAL.seed}`;
   try{track('challenge_view',{character:c.id,vs_wan:Math.round(CHAL.vs/10000)});}catch(e){}
@@ -1112,7 +1112,7 @@ function startGame(c){
   S=JSON.parse(JSON.stringify(c.start));
   S.flags={};S.log=[];S.scene=c.first;S.sp=0;S.skills={};S.skillProg={};S.diceRolls=0;
   S.prop=0;S.mort=0;S.houseYr=null;
-  S.century=false;S.forcedRetire=false;S.usedOnce=[];S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
+  S.century=false;S.forcedRetire=false;S.peakShown=false;S.usedOnce=[];S.burdens=[];S.fuses=[];S.lastBurden=null;S.lastFuse=null;S.hot=0;S.hotKey=null;S.hotSurge=false;
   S.retireOffered=false;S.lastRetireAsk=undefined;S.recentMisf=[];S.retired=false;S.bankrupt=false;S.pendingScene=null;S.retireLatch=false;S.lastIncome=null;S.resume=null;
   /* === 每局不一樣:開局狀況 + 里程碑順序洗牌 === */
   const op=OPENINGS[Math.floor(RNG()*OPENINGS.length)];
@@ -1670,6 +1670,7 @@ function renderBet(sc){
 function resolveBet(sc,i){
   if(AWAIT)return;
   AWAIT=true;
+  const beforeNet=net(S);
   const t=BET_TIERS[i],stake=betRisk(sc,t),winP=betWinP(t);
   const hotUsed=hotReady(t);
   const win=RNG()<winP;
@@ -1697,7 +1698,10 @@ function resolveBet(sc,i){
   stage.appendChild(div);
   const nb=document.createElement('button');nb.className='nextbtn';
   if(S.bankrupt){nb.textContent='💀 破產結算 →';nb.onclick=()=>bankruptGate();}
-  else{nb.textContent='繼續 →';nb.onclick=()=>{if(sc.gen)stepKeep();else continueTo(sc.go);};}
+  else{nb.textContent='繼續 →';nb.onclick=()=>{
+    const go=()=>{if(sc.gen)stepKeep();else continueTo(sc.go);};
+    if(win&&peakWorthy(profit,beforeNet)){peakGate(profit,go);return;}
+    go();};}
   stage.appendChild(nb);
 }
 
@@ -1825,6 +1829,54 @@ const LOGO_SVG=`<div style="display:flex;flex-direction:column;align-items:cente
 
 /* 破產不直接結算:先給一次「同一副命運再走一次」的機會(第二幕) */
 let RETRIED=false;
+/* ===== 高點分享:在情緒最高的那一刻問一次,而不是等到結算頁 =====
+   對照組是破產閘門(全螢幕、二選一、帶自己的數字),行動率 55.9%;
+   結算頁的分享鍵只有 3.6%。差別在問法、時機、選項數。 */
+function peakShareURL(){
+  const wan=Math.round(net(S)/10000);
+  return location.origin+location.pathname+'?char='+encodeURIComponent(CURID)
+    +'&seed='+encodeURIComponent(SEED)+'&vs='+wan+'&mid=1'+(PNAME?'&by='+encodeURIComponent(PNAME):'');
+}
+function peakShareGo(profit){
+  const u=peakShareURL();
+  const txt=`我在股海這一把賺了 ${fmt(profit)},手上有 ${fmt(net(S))}。同一段命運換你走一次,看你贏不贏得過我!`;
+  const done=()=>{try{track('share_prompt_peak_done',{character:CURID,age:S.age,net_wan:Math.round(net(S)/10000)});}catch(e){}};
+  if(navigator.share){
+    navigator.share({title:'股神養成計畫',text:txt,url:u}).then(done).catch(e=>{
+      if(e&&e.name==='AbortError')return;
+      copyOnly(u,'戰帖連結已複製,貼給朋友挑戰同一段命運!');done();});
+  }else{copyOnly(u,'戰帖連結已複製,貼給朋友挑戰同一段命運!');done();}
+}
+/* 這一把賺很大 → 攔一次(整局只攔一次) */
+function peakGate(profit,after){
+  S.peakShown=true;
+  try{track('share_prompt_peak',{character:CURID,age:S.age,profit_wan:Math.round(profit/10000)});}catch(e){}
+  document.getElementById('logBox').style.display='none';
+  const stage=document.getElementById('stage');
+  stage.innerHTML=`<div class="ending" id="peakGate" style="text-align:center">
+    <div class="em">💥</div>
+    <div class="ti">你這一把賺了 ${fmt(profit)}</div>
+    <div class="combo2">${S.age} 歲 · 身家來到 ${fmt(net(S))}</div>
+    <div class="tx" style="text-align:center">這副命運只有你走過——<b>同樣的事件、同樣的時機、同樣的股災</b>。<br><br>敢不敢把它丟給朋友,看他能不能贏過你現在的數字?</div>
+    <div class="endbtns" style="margin-top:18px">
+      <button class="eb-main" id="peakYes"><b>⚔️ 發戰帖給朋友</b><small>看他能不能贏過 <span class="nb">${fmt(net(S))}</span></small></button>
+    </div>
+    <div class="endbtns" style="margin-top:10px">
+      <button class="eb-alt" id="peakNo">繼續我的人生 →</button>
+    </div>
+  </div>`;
+  const go=()=>{document.getElementById('logBox').style.display='';after();};
+  document.getElementById('peakYes').onclick=()=>{peakShareGo(profit);setTimeout(go,700);};
+  document.getElementById('peakNo').onclick=()=>{try{track('share_prompt_peak_skip',{character:CURID,age:S.age});}catch(e){}go();};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+/* 觸發條件:整局第一次、非破產、身家為正、而且這一把的獲利 ≥ 下注前身家的六成 */
+function peakWorthy(profit,beforeNet){
+  if(S.peakShown||S.bankrupt)return false;
+  if(net(S)<=0||profit<=0)return false;
+  if(profit<Math.max(1000000,beforeNet*0.6))return false;
+  return true;
+}
 function bankruptGate(){
   if(RETRIED){resolveEnding();return;}
   try{track('bankrupt_gate',{character:CURID,age:S.age});}catch(e){}
@@ -2405,7 +2457,7 @@ buildStart();
   if(nm&&!by)document.getElementById('nameInput').value=nm;   // 舊版連結相容
   const c=cid?CHARS.find(x=>x.id===cid):null;
   if(!c)return;
-  if(by&&vs!==null&&vs!==''&&isFinite(+vs)){CHAL={by:by.slice(0,12),vs:Math.round(+vs)*10000,seed:seed||'',char:cid};showChallenge(c);return;}
+  if(by&&vs!==null&&vs!==''&&isFinite(+vs)){CHAL={by:by.slice(0,12),vs:Math.round(+vs)*10000,seed:seed||'',char:cid,mid:p.get('mid')==='1'};showChallenge(c);return;}
   startGame(c);})();
 </script>
 </body>
