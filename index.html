@@ -1871,7 +1871,10 @@ function peakGate(profit,after){
   const yes=document.getElementById('peakYes'),no=document.getElementById('peakNo');
   const go=()=>{document.getElementById('logBox').style.display='';after();};
   const once=fn=>()=>{if(acted)return;acted=true;yes.disabled=true;no.disabled=true;fn();};
-  yes.onclick=once(()=>{peakShareGo(profit);setTimeout(go,700);});
+  yes.onclick=once(()=>{
+    /* 按下去的當下就記一筆:這樣才分得出「不想分享」和「想分享但在分享面板放棄」 */
+    try{track('share_prompt_peak_click',{character:CURID,age:S.age});}catch(e){}
+    peakShareGo(profit);setTimeout(go,700);});
   no.onclick=once(()=>{try{track('share_prompt_peak_skip',{character:CURID,age:S.age});}catch(e){}go();});
   window.scrollTo({top:0,behavior:'smooth'});
 }
